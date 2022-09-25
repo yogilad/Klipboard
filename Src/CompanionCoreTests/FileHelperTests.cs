@@ -35,11 +35,25 @@ namespace CompanionCoreTests
         }
 
         [DataTestMethod]
+        [DataRow("file_06-Jan-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 1, 6)]
+        [DataRow("file_06-feb-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 2, 6)]
+        [DataRow("file_06-MAR-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 3, 6)]
+        [DataRow("file_06-aPr-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 4, 6)]
+        [DataRow("file_06-may-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 5, 6)]
+        [DataRow("file_06-JUN-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 6, 6)]
+        [DataRow("file_06-juL-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 7, 6)]
+        [DataRow("file_06-aug-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 8, 6)]
+        [DataRow("file_06-SEP-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 9, 6)]
+        [DataRow("file_06-OCT-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 10, 6)]
+        [DataRow("file_06-Nov-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 11, 6)]
+        [DataRow("file_06-DEC-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 12, 6)]
         [DataRow("file_19851206_name.csv", ".*_(?<YYYY>[0-9]{4})(?<MM>[0-9]{2})(?<DD>[0-9]{2})_.*", 1985, 12, 6)]
+        [DataRow("file_851206_name.csv", ".*_(?<YY>[0-9]{2})(?<MM>[0-9]{2})(?<DD>[0-9]{2})_.*", 1985, 12, 6)]
+        [DataRow("file_502675200_name.csv", ".*_(?<EPOC>[0-9]+)_.*", 1985, 12, 6)]
         public void GivenFileNameAndMacther_WhenExtractRegexTime_CreationTimeReturns(string filename, string regexStr, int exYear, int exMon, int exDay)
         {
             var regex = new Regex(regexStr);
-            var expectedTime = new DateTime(exYear, exMon, exDay);
+            var expectedTime = new DateTime(exYear, exMon, exDay, 0, 0, 0, DateTimeKind.Utc);
 
             Assert.IsTrue(FileHelper.TryGetFileCreationTimeFromName(filename, regex, out var creationTime));
             Assert.AreEqual(expectedTime, creationTime);

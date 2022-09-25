@@ -164,7 +164,7 @@ namespace CompanionCore
                 try
                 {
                     var epocTime = int.Parse(match.Value);
-                    creationTime = DateTimeOffset.FromUnixTimeSeconds(epocTime).DateTime.ToUniversalTime();
+                    creationTime = DateTimeOffset.FromUnixTimeSeconds(epocTime).DateTime;
                     return true;
                 }
                 catch
@@ -247,7 +247,7 @@ namespace CompanionCore
             // Attempt to create time time itself
             try
             {
-                creationTime = new DateTime(year, month, day).ToUniversalTime();
+                creationTime = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
                 return true;
             }
             catch
