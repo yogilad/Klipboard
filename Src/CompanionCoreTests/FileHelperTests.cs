@@ -1,4 +1,5 @@
 using CompanionCore;
+using System.Text.RegularExpressions;
 
 namespace CompanionCoreTests
 {
@@ -16,7 +17,7 @@ namespace CompanionCoreTests
         [DataRow("/mnt/home/b/c/x.y.json.zip", "json", true)]
         public void GivenValidFileNamesOrPaths_WhenGetFileType_DetectionSucceeds(string fileNameOrPath, string expectedType, bool expectedCompressed)
         {
-            Assert.IsTrue(FileHelper.TryGetFileTypeFromPath(fileNameOrPath, out var type, out var compressed));
+            Assert.IsTrue(FileHelper.TryGetFileExtensionFromPath(fileNameOrPath, out var type, out var compressed));
             Assert.IsTrue(type.Equals(expectedType, StringComparison.OrdinalIgnoreCase));
             Assert.IsTrue(compressed == expectedCompressed);
         }
@@ -30,7 +31,18 @@ namespace CompanionCoreTests
         [DataRow("/mnt/home/b/c/x.zip")]
         public void GivenInvalidFileNamesOrPaths_WhenGetFileType_DetectionFails(string fileNameOrPath)
         {
-            Assert.IsFalse(FileHelper.TryGetFileTypeFromPath(fileNameOrPath, out var type, out var compressed));
+            Assert.IsFalse(FileHelper.TryGetFileExtensionFromPath(fileNameOrPath, out var type, out var compressed));
+        }
+
+        [DataTestMethod]
+        [DataRow("file_19851206_name.csv", ".*_(?<YYYY>[0-9]{4})(?<MM>[0-9]{2})(?<DD>[0-9]{2})_.*", 1985, 12, 6)]
+        public void GivenFileNameAndMacther_WhenExtractRegexTime_CreationTimeReturns(string filename, string regexStr, int exYear, int exMon, int exDay)
+        {
+            var regex = new Regex(regexStr);
+            var expectedTime = new DateTime(exYear, exMon, exDay);
+
+            Assert.IsTrue(FileHelper.TryGetFileCreationTimeFromName(filename, regex, out var creationTime));
+            Assert.AreEqual(expectedTime, creationTime);
         }
     }
 }
