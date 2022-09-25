@@ -1,3 +1,5 @@
+using System.Windows;
+
 namespace KustoCompanionWin
 {
     internal static class Program
