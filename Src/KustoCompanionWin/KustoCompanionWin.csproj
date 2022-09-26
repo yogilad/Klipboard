@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\adx_blue.ico" />
+    <None Remove="Resources\adx_color.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\adx_blue.ico" />
+    <EmbeddedResource Include="Resources\adx_color.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CompanionCore\CompanionCore.csproj" />
     <ProjectReference Include="..\KustoWorker\KustoWorker.csproj" />
   </ItemGroup>
