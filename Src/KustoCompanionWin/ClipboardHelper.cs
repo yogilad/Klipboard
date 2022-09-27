@@ -18,11 +18,14 @@ namespace KustoCompanionWin
 
         public static Content GetClipboardContent()
         {
+            // TODO: Consider supporting extracting html tables from HTML drop content 
+
             if (Clipboard.ContainsData(DataFormats.CommaSeparatedValue))
             {
                 return Content.CSV;
             }
             
+            // Keep this last on the text data list as many types are also text represented (CSV, HTML, etc.)
             if (Clipboard.ContainsText())
             {
                 return Content.Text;

@@ -49,7 +49,8 @@ namespace CompanionCoreTests
         [DataRow("file_06-DEC-85_name.csv", ".*_(?<DD>[0-9]{2})-(?<MON>[A-Za-z]{3})-(?<YY>[0-9]{2})_.*", 1985, 12, 6)]
         [DataRow("file_19851206_name.csv", ".*_(?<YYYY>[0-9]{4})(?<MM>[0-9]{2})(?<DD>[0-9]{2})_.*", 1985, 12, 6)]
         [DataRow("file_851206_name.csv", ".*_(?<YY>[0-9]{2})(?<MM>[0-9]{2})(?<DD>[0-9]{2})_.*", 1985, 12, 6)]
-        [DataRow("file_502675200_name.csv", ".*_(?<EPOC>[0-9]+)_.*", 1985, 12, 6)]
+        [DataRow("file_502675222_name.csv", ".*_(?<EPOC_SEC>[0-9]+)_.*", 1985, 12, 6)]
+        [DataRow("file_502675200123_name.csv", ".*_(?<EPOC_MSEC>[0-9]+)_.*", 1985, 12, 6)]
         public void GivenFileNameAndMacther_WhenExtractRegexTime_CreationTimeReturns(string filename, string regexStr, int exYear, int exMon, int exDay)
         {
             var regex = new Regex(regexStr);

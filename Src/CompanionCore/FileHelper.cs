@@ -159,12 +159,30 @@ namespace CompanionCore
             creationTime = null;
 
             // Check EPOC Time Group
-            if (groups.TryGetValue("EPOC", out var match))
+            if (groups.TryGetValue("EPOC_SEC", out var match))
             {
                 try
                 {
-                    var epocTime = int.Parse(match.Value);
-                    creationTime = DateTimeOffset.FromUnixTimeSeconds(epocTime).DateTime;
+                    var epocTime = long.Parse(match.Value);
+                    var tempTime = DateTimeOffset.FromUnixTimeSeconds(epocTime).DateTime;
+                    
+                    creationTime = creationTime = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, 0, 0, 0, DateTimeKind.Utc);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            if (groups.TryGetValue("EPOC_MSEC", out match))
+            {
+                try
+                {
+                    var epocTime = long.Parse(match.Value);
+                    var tempTime = DateTimeOffset.FromUnixTimeMilliseconds(epocTime).DateTime;
+
+                    creationTime = creationTime = new DateTime(tempTime.Year, tempTime.Month, tempTime.Day, 0, 0, 0, DateTimeKind.Utc);
                     return true;
                 }
                 catch
