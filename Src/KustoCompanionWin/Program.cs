@@ -1,4 +1,5 @@
 using System.Windows;
+using CompanionCore;
 
 namespace KustoCompanionWin
 {
@@ -14,11 +15,12 @@ namespace KustoCompanionWin
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            //var appConfig = CompanionCore.AppConfig.ReadAppConfig("");
+            var appConfig = AppConfigFile.ReadTest().ConfigureAwait(false).GetAwaiter().GetResult();
             //var kustoWorker = new KustoWorker.ServiceManager(appConfig);
 
             using var notifIcon = new NotificationIcon();
             Application.Run(new Form1());
+            AppConfigFile.Write(appConfig).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }

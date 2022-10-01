@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using static KustoCompanionWin.ClipboardHelper;
 
@@ -26,11 +27,13 @@ namespace KustoCompanionWin
             // Init the menu items
             m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
             m_contextMenuStrip.Items.Add("Paste not initialized", null, Paste_OnClick);
+            m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
 
             // Handle the DoubleClick event to activate the form.
             m_notifyIcon.Click += new EventHandler(NotifyIcon_OnClick);
+            m_notifyIcon.Text = "Klipboard";
 
             // Dispaly the notification icon
             m_notifyIcon.Visible = true;
@@ -82,7 +85,18 @@ namespace KustoCompanionWin
 
         private void Paste_OnClick(object? Sender, EventArgs e)
         {
-            var x = e;
+            var y = ClipboardHelper.GetDataAsIstream();
+            var x = ClipboardHelper.GetDataAsString();
+            var z = e;
+        }
+
+        private void Help_OnClick(object? Sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/yogilad/KustoCompanion/blob/main/README.md",
+                UseShellExecute = true
+            });
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)

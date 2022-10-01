@@ -1,38 +1,91 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CompanionCore
 {
-    /// <summary>
-    /// Application Configuration 
-    /// </summary>
+    #region App Config
     public class AppConfig
     {
-        // List of known Kusto services
-        public List<String> KustoConnectionStrings;
+        public HashSet<String> KustoConnectionStrings { set; get; }
 
-        private AppConfig()
+        internal AppConfig()
         {
-            KustoConnectionStrings = new List<String>();
+            KustoConnectionStrings = new HashSet<String>();
+        }
+    }
+    #endregion
 
-            // My test cluster (until config can be read / written)
+    #region App Config File
+    public class AppConfigFile
+    {
+        [JsonIgnore]
+        public static readonly string s_configDir;
+        
+        [JsonIgnore]
+        public static readonly string s_configPath;
+        // List of known Kusto services
+
+        static AppConfigFile()
+        {
+            s_configDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Klipboard");
+            s_configPath = Path.Combine(s_configDir, "config.json");
         }
 
-        public static AppConfig TestAppConfig(string? appConfigFilePath = null)
+        public static async Task<AppConfig> ReadTest()
         {
-            var config = new AppConfig();
+            var config = await Read();
 
             config.KustoConnectionStrings.Add("https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/");
             return config;
         }
 
-        public static AppConfig ReadAppConfig(string? appConfigFilePath)
+        public static async Task<AppConfig> Read()
         {
-            throw new NotImplementedException();
+            if (!File.Exists(s_configPath))
+            {
+                return new AppConfig();
+            }
+
+            try
+            {
+                var jsonData = await File.ReadAllTextAsync(s_configPath);
+                var appConfig = JsonSerializer.Deserialize<AppConfig>(jsonData);
+
+                if (appConfig == null)
+                {
+                    Debug.WriteLine("File does not contain proper config:");
+                    Debug.WriteLine(jsonData); 
+                    appConfig = new AppConfig();
+                }
+
+                return appConfig;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to read config data: {ex.Message}");
+                return new AppConfig();
+            }
         }
 
-        public static bool WriteAppConfig(string appConfigJsonPath)
+        public static async Task<bool> Write(AppConfig appConfig)
         {
-            return false;
+            var options = new JsonSerializerOptions() { WriteIndented = true };
+            var jsonData = JsonSerializer.Serialize<AppConfig>(appConfig, options);
+
+            try
+            {
+                Directory.CreateDirectory(s_configDir);
+                await File.WriteAllTextAsync(s_configPath, jsonData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to write config data: {ex.Message}");
+                return false;
+            }
         }
     }
+    #endregion
 }

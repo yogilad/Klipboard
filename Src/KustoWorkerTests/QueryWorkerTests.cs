@@ -12,7 +12,7 @@ namespace KustoWorkerTests
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            var appConfig = AppConfig.TestAppConfig();
+            var appConfig = AppConfigFile.TestAppConfig();
             var serviceManager = new ServiceManager(appConfig);
 
             s_queryWorker = new QueryWorker(serviceManager.GetAllServices().First());
