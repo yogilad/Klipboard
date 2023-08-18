@@ -1,8 +1,9 @@
-﻿using CompanionCore;
+﻿using System.Diagnostics;
 using Kusto.Data;
-using System.Diagnostics;
 
-namespace KustoWorker
+using Klipboard.Utils;
+
+namespace Klipboard.Workers
 {
     public class ServiceManager
     {

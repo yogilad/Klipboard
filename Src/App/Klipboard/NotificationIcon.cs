@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
-using static KustoCompanionWin.ClipboardHelper;
 
-namespace KustoCompanionWin
+namespace Klipboard
 {
     public class NotificationIcon : IDisposable
     {
@@ -56,17 +55,17 @@ namespace KustoCompanionWin
 
             switch (content)
             {
-                case Content.CSV:
+                case ClipboardHelper.Content.CSV:
                     menuItem.Enabled = true;
                     menuItem.Text= "Paste Table to Kusto";
                     break;
 
-                case Content.Text:
+                case ClipboardHelper.Content.Text:
                     menuItem.Enabled = true;
                     menuItem.Text = "Paste Text to Kusto";
                     break;
 
-                case Content.DropFiles:
+                case ClipboardHelper.Content.DropFiles:
                     menuItem.Enabled = true;
                     menuItem.Text = "Paste Files to Kusto";
                     break;

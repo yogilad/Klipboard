@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CompanionCore
+namespace Klipboard.Utils
 {
     #region App Config
     public class AppConfig
@@ -33,7 +33,7 @@ namespace CompanionCore
             s_configPath = Path.Combine(s_configDir, "config.json");
         }
 
-        public static async Task<AppConfig> ReadTest()
+        public static async Task<AppConfig> ReadStub()
         {
             var config = await Read();
 

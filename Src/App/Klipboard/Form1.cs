@@ -1,4 +1,4 @@
-namespace KustoCompanionWin
+namespace Klipboard
 {
     public partial class Form1 : Form
     {

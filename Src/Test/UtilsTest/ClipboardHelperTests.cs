@@ -1,6 +1,6 @@
-﻿using CompanionCore;
+﻿using Klipboard.Utils;
 
-namespace CompanionCoreTests
+namespace UtilsTest
 {
     [TestClass]
     public class ClipboardHelperTests

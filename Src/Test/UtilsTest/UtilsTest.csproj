@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CompanionCore\CompanionCore.csproj" />
+    <ProjectReference Include="..\..\App\Utils\Utils.csproj" />
   </ItemGroup>
 
 </Project>

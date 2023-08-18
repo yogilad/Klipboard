@@ -1,7 +1,7 @@
-using CompanionCore;
+using Klipboard.Utils;
 using System.Text.RegularExpressions;
 
-namespace CompanionCoreTests
+namespace UtilsTest
 {
     [TestClass]
     public class FileHelperTests

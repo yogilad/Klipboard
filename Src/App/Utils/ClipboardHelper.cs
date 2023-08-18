@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.ComponentModel.DataAnnotations;
 
-namespace CompanionCore
+namespace Klipboard.Utils
 {
     public static class ClipboardHelper
     {

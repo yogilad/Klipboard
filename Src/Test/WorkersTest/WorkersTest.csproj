@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CompanionCore\CompanionCore.csproj" />
-    <ProjectReference Include="..\KustoWorker\KustoWorker.csproj" />
+    <ProjectReference Include="..\..\App\Utils\Utils.csproj" />
+    <ProjectReference Include="..\..\App\Workers\Workers.csproj" />
   </ItemGroup>
 
 </Project>

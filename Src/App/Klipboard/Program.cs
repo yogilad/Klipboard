@@ -1,7 +1,7 @@
 using System.Windows;
-using CompanionCore;
+using Klipboard.Utils;
 
-namespace KustoCompanionWin
+namespace Klipboard
 {
     internal static class Program
     {
@@ -15,7 +15,7 @@ namespace KustoCompanionWin
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var appConfig = AppConfigFile.ReadTest().ConfigureAwait(false).GetAwaiter().GetResult();
+            var appConfig = AppConfigFile.ReadStub().ConfigureAwait(false).GetAwaiter().GetResult();
             //var kustoWorker = new KustoWorker.ServiceManager(appConfig);
 
             using var notifIcon = new NotificationIcon();

@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KustoCompanionWin
+namespace Klipboard
 {
     public static class ClipboardHelper
     {

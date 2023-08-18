@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace KustoCompanionWin
+namespace Klipboard
 {
     class ResourceLoader
     {
@@ -15,7 +15,7 @@ namespace KustoCompanionWin
             m_adxBlueIcon = new Icon(LoadResourceAsStream("adx_blue.ico", "Resources"));
         }
 
-        private static Stream LoadResourceAsStream(string resourceName, string folder = null, string name_space = nameof(KustoCompanionWin))
+        private static Stream LoadResourceAsStream(string resourceName, string folder = null, string name_space = nameof(Klipboard))
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             string resourcePath = $"{name_space}.{folder}.{resourceName}";

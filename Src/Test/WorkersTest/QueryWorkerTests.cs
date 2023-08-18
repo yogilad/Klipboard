@@ -1,8 +1,9 @@
 using System.Diagnostics;
-using CompanionCore;
-using KustoWorker;
+using Klipboard.Utils;
+using Klipboard.Workers;
+using Kusto.Cloud.Platform.Utils;
 
-namespace KustoWorkerTests
+namespace WorkersTest
 {
     [TestClass]
     public class QueryWorkerTests
@@ -12,7 +13,7 @@ namespace KustoWorkerTests
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            var appConfig = AppConfigFile.TestAppConfig();
+            var appConfig = AppConfigFile.ReadStub().ConfigureAwait(false).ResultEx();
             var serviceManager = new ServiceManager(appConfig);
 
             s_queryWorker = new QueryWorker(serviceManager.GetAllServices().First());
