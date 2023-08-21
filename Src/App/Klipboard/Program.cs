@@ -19,7 +19,7 @@ namespace Klipboard
             //var kustoWorker = new KustoWorker.ServiceManager(appConfig);
 
             using var notifIcon = new NotificationIcon();
-            Application.Run(new Form1());
+            Application.Run();
             AppConfigFile.Write(appConfig).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
