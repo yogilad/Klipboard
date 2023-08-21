@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Kusto.Cloud.Platform.Utils;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,50 +41,70 @@ namespace Klipboard
             return Content.None;
         }
 
-        public static object? GetDataAsString(int linelimit = -1)
+        public static bool TryGetDataAsString(out string? data)
         {
             var content = GetClipboardContent();
 
             switch (content)
             {
                 case Content.CSV:
-                    var csv = Clipboard.GetData(DataFormats.CommaSeparatedValue);
-                    return csv;
-
                 case Content.Text:
-                    var text = Clipboard.GetText();
-                    return text;
-
-                case Content.DropFiles:
-                    var files = Clipboard.GetFileDropList();
-                    return files;
+                    data = Clipboard.GetText();
+                    break;
 
                 default:
-                    return null;
+                    data = null;
+                    break;
             }
+
+            return data != null;
         }
 
-        public static object? GetDataAsIstream()
+        public static bool TryGetDataAsMemoryStream(out MemoryStream? stream)
         {
             var content = GetClipboardContent();
 
             switch (content)
             {
                 case Content.CSV:
-                    var csv = Clipboard.GetData(DataFormats.CommaSeparatedValue);
-                    return csv;
+                    stream = Clipboard.GetData(DataFormats.CommaSeparatedValue) as MemoryStream;
+                    break;
 
                 case Content.Text:
-                    var text = Clipboard.GetText();
-                    return text;
-
-                case Content.DropFiles:
-                    var files = Clipboard.GetFileDropList();
-                    return files;
+                    var data = Clipboard.GetText();
+                    stream = new MemoryStream(Encoding.UTF8.GetBytes(data));
+                    break;
 
                 default:
-                    return null;
+                    stream = null;
+                    break;
             }
+
+            return stream != null;
+        }
+
+        public static bool TryGetFileDropList(out List<string>? fileList)
+        {
+            fileList = null;
+
+            if (GetClipboardContent() == Content.DropFiles)
+            {
+                var files = Clipboard.GetFileDropList();
+
+                if (files != null)
+                {
+                    fileList = new List<string>();
+                    foreach (var file in files)
+                    {
+                        if (file != null)
+                        {
+                            fileList.Add(file);
+                        }
+                    }
+                }
+            }
+
+            return fileList.SafeFastAny();
         }
     }
 }

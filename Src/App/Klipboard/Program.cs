@@ -15,10 +15,10 @@ namespace Klipboard
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var appConfig = AppConfigFile.ReadStub().ConfigureAwait(false).GetAwaiter().GetResult();
+            var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).GetAwaiter().GetResult();
             //var kustoWorker = new KustoWorker.ServiceManager(appConfig);
 
-            using var notifIcon = new NotificationIcon();
+            using var notifIcon = new NotificationIcon(appConfig);
             Application.Run();
             AppConfigFile.Write(appConfig).ConfigureAwait(false).GetAwaiter().GetResult();
         }

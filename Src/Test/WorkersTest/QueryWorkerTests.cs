@@ -13,7 +13,7 @@ namespace WorkersTest
         [ClassInitialize]
         public static void ClassInit(TestContext context)
         {
-            var appConfig = AppConfigFile.ReadStub().ConfigureAwait(false).ResultEx();
+            var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).ResultEx();
             var serviceManager = new ServiceManager(appConfig);
 
             s_queryWorker = new QueryWorker(serviceManager.GetAllServices().First());

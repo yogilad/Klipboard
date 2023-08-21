@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Klipboard.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -11,7 +12,7 @@ namespace Klipboard
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
 
-        public NotificationIcon()
+        public NotificationIcon(AppConfig config)
         {
             m_components = new System.ComponentModel.Container();
 
@@ -24,8 +25,12 @@ namespace Klipboard
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
 
             // Init the menu items
-            m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
-            m_contextMenuStrip.Items.Add("Paste not initialized", null, Paste_OnClick);
+            if (config.DevMode)
+            {
+                m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
+                m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, Paste_OnClick);
+            }
+             
             m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
@@ -57,17 +62,17 @@ namespace Klipboard
             {
                 case ClipboardHelper.Content.CSV:
                     menuItem.Enabled = true;
-                    menuItem.Text= "Paste Table to Kusto";
+                    menuItem.Text= "Paste Table to Desktop";
                     break;
 
                 case ClipboardHelper.Content.Text:
                     menuItem.Enabled = true;
-                    menuItem.Text = "Paste Text to Kusto";
+                    menuItem.Text = "Paste Text to Desktop";
                     break;
 
                 case ClipboardHelper.Content.DropFiles:
                     menuItem.Enabled = true;
-                    menuItem.Text = "Paste Files to Kusto";
+                    menuItem.Text = "Paste Files to Desktop";
                     break;
 
                 default:
@@ -84,9 +89,25 @@ namespace Klipboard
 
         private void Paste_OnClick(object? Sender, EventArgs e)
         {
-            var y = ClipboardHelper.GetDataAsIstream();
-            var x = ClipboardHelper.GetDataAsString();
-            var z = e;
+            if (ClipboardHelper.TryGetDataAsMemoryStream(out var stream))
+            {
+                using (stream)
+                {
+                    var path = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Desktop\\ClipboardData.bin");
+                    using var fstream = new FileStream(path, FileMode.OpenOrCreate);
+                    
+                    stream.Seek(0, SeekOrigin.Begin);
+                    stream.CopyTo(fstream);
+                    fstream.Close();
+                }
+            }
+
+            if (ClipboardHelper.TryGetDataAsString(out var data))
+            {
+                var path = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Desktop\\ClipboardData.txt");
+
+                File.WriteAllLines(path, new string[] { data });
+            }
         }
 
         private void Help_OnClick(object? Sender, EventArgs e)
