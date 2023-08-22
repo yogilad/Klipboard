@@ -60,7 +60,7 @@ namespace Klipboard
             return data != null;
         }
 
-        public static bool TryGetDataAsMemoryStream(out MemoryStream? stream)
+        public static bool TryGetDataAsMemoryStream(out Stream? stream)
         {
             var content = GetClipboardContent();
 

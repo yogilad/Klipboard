@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\App\Utils\Utils.csproj" />
+    <ProjectReference Include="..\..\TestUtils\TestUtils.csproj" />
   </ItemGroup>
 
 </Project>

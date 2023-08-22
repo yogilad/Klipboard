@@ -1,0 +1,225 @@
+﻿using System.Text;
+
+namespace TestUtils
+{
+    #region KustoType
+    public enum KustoType
+    {
+        Bool_Type,
+        Datetime_Type,
+        Dynamic_Type,
+        Guid_Type,
+        Int_Type,
+        Long_Type,
+        Real_Type,
+        String_Type,
+        Timespan_Type,
+        Decimal_Type
+    }
+
+    public static class ExtendedKustoType
+    {
+        private static readonly string[] s_typeNames = new string[10]
+        {
+            "bool",
+            "datetime",
+            "dynamic",
+            "guid",
+            "int",
+            "long",
+            "real",
+            "string",
+            "timespan",
+            "decimal"
+        };
+
+        public static string AsString(this KustoType type)
+        {
+            return s_typeNames[(int)type];
+        }
+    }
+    #endregion
+
+    #region ColumnData
+    public class ColumnData
+    {
+        public String Name { get; }
+        public KustoType Type { get; }
+
+        private static Random s_rand = new Random();
+
+        private static readonly string[] s_dynamics = new string[5]
+        {
+            "",
+            "{}",
+            "[]",
+            "{\"name\":\"x\", \"num\":1}",
+            "{\"obj\":{\"b\":true}}",
+        };
+
+        private static readonly string[] s_strings = new string[5]
+        {
+            "Hello World",
+            "",
+            "  ",
+            "OMG this is awesome!",
+            "ROFL",
+        };
+
+        private static readonly string[] s_timespans = new string[5]
+        {
+            "2s",
+            "5m",
+            "1h",
+            "3d",
+            "0d",
+        };
+
+        public ColumnData(string name, KustoType type)
+        {
+            Name = name;
+            Type = type;
+        }
+
+        public string GenerateValue()
+        {
+            switch(Type) 
+            {
+                case KustoType.Bool_Type:
+                    var b = s_rand.Next(2);
+                    return b == 0 ? "false" : "true";
+
+
+        case KustoType.Datetime_Type:
+                    var year = s_rand.Next(50) + 1970;
+                    var mon = s_rand.Next(12) + 1;
+                    var day = s_rand.Next(28) + 1;
+                    var hour = s_rand.Next(24);
+                    var min = s_rand.Next(60);
+                    return $"{year}-{mon}-{day} {hour}:{min}";
+
+                case KustoType.Dynamic_Type:
+                    var dyn = s_rand.Next(5);
+                    return s_dynamics[dyn];
+
+                case KustoType.Guid_Type:
+                    return Guid.NewGuid().ToString();
+
+                case KustoType.Int_Type:
+                    var i = s_rand.Next(10000);
+                    return i.ToString();
+
+                case KustoType.Long_Type:
+                    var l = s_rand.Next(100000000);
+                    return l.ToString();
+
+                case KustoType.Real_Type:
+                    var r = (float) s_rand.Next(100000) / 1000;
+                    return r.ToString();
+
+                case KustoType.String_Type:
+                    var str = s_rand.Next(5);
+                    return s_strings[str];
+
+                case KustoType.Timespan_Type:
+                    var ts = s_rand.Next(5);
+                    return s_timespans[ts];
+
+                case KustoType.Decimal_Type:
+                    var dec = (double) s_rand.Next(10000000) / 10000;
+                    return dec.ToString();
+
+                default:
+                    return string.Empty;
+            }
+        }
+
+        public string GenerateNullValue()
+        {
+            return $"{Type.AsString()}(null)";
+        }
+    }
+    #endregion
+
+    #region TableGenerator
+    public class TableGenerator
+    {
+        private List<ColumnData> m_columns = new List<ColumnData> ();
+        
+        public TableGenerator() : this(autoGenerate: false) { }
+        
+        public TableGenerator(bool autoGenerate)
+        {
+            if (autoGenerate) 
+            {
+                AddColumn("Bool Column", KustoType.Bool_Type);
+                AddColumn("DateTime Column", KustoType.Datetime_Type);
+                AddColumn("Dynamic Column", KustoType.Dynamic_Type);
+                AddColumn("Guid Column", KustoType.Guid_Type);
+                AddColumn("Int Column", KustoType.Int_Type);
+                AddColumn("Long Column", KustoType.Long_Type);
+                AddColumn("Real Column", KustoType.Real_Type);
+                AddColumn("String Column", KustoType.String_Type);
+                AddColumn("TimeSpan Column", KustoType.Timespan_Type);
+                AddColumn("Decimal Column", KustoType.Decimal_Type);
+            }
+        }
+
+        public void AddColumn(string name, KustoType type)
+        {
+            m_columns.Add(new ColumnData(name, type));
+        }
+
+        public string GenerateTableString(int lines, bool addHeader, bool addNullRows, bool addEmptyRows)
+        {
+            return GenerateData(lines, addHeader, addNullRows, addEmptyRows, '\t');
+        }
+
+        public Stream GenerateTableStream(int lines, bool addHeader, bool addNullRows, bool addEmptyRows)
+        {
+            var data = GenerateData(lines, addHeader, addNullRows, addEmptyRows, ',');
+            return new MemoryStream(Encoding.UTF8.GetBytes(data));
+        }
+
+        public string GenerateTableScheme()
+        {
+            var listOfColumns = string.Join(",", m_columns.Select(c => $"['{c.Name}']:{c.Type.AsString()}"));
+            return $"({listOfColumns})";
+        }
+
+        private string GenerateData(int lines, bool addHeader, bool addNullRows, bool addEmptyRows, char seperator)
+        {
+            var builder = new StringBuilder();
+            
+            if (addHeader)
+            {
+                builder.Append(string.Join(seperator, m_columns.Select(c => c.Name)));
+                builder.Append(Environment.NewLine);
+            }
+            
+            if (addEmptyRows)
+            {
+                lines--;
+                builder.Append(string.Join(seperator, m_columns.Select(c => "")));
+                builder.Append(Environment.NewLine);
+            }
+
+            if (addNullRows)
+            {
+                lines--;
+                builder.Append(string.Join(seperator, m_columns.Select(c => c.GenerateNullValue())));
+                builder.Append(Environment.NewLine);
+            }
+
+            while(lines > 0)
+            {
+                lines--;
+                builder.Append(string.Join(seperator, m_columns.Select(c => c.GenerateValue())));
+                builder.Append(Environment.NewLine);
+            }
+
+            return builder.ToString();
+        }
+    }
+    #endregion
+}
