@@ -14,7 +14,7 @@ namespace UtilsTest
         [TestMethod]
         public void GenerateStrings()
         {
-            var tg = new TableGenerator(autoGenerate: true);
+            var tg = new TableGenerator(autoGenerateScheme: true);
             var scheme = tg.GenerateTableScheme();
             var t1 = tg.GenerateTableString(10, addHeader: true, addNullRows: true, addEmptyRows: true);
             var t2 = tg.GenerateTableString(3, addHeader: false, addNullRows: false, addEmptyRows: false);
@@ -27,7 +27,7 @@ namespace UtilsTest
         [TestMethod]
         public void GenerateStreams()
         {
-            var tg = new TableGenerator(autoGenerate: true);
+            var tg = new TableGenerator(autoGenerateScheme: true);
             var scheme = tg.GenerateTableScheme();
             var t1 = new StreamReader(tg.GenerateTableStream(10, addHeader: true, addNullRows: true, addEmptyRows: true)).ReadToEnd();
             var t2 = new StreamReader(tg.GenerateTableStream(3, addHeader: false, addNullRows: false, addEmptyRows: false)).ReadToEnd();

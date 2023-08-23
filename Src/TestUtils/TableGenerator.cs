@@ -146,22 +146,24 @@ namespace TestUtils
     {
         private List<ColumnData> m_columns = new List<ColumnData> ();
         
-        public TableGenerator() : this(autoGenerate: false) { }
-        
-        public TableGenerator(bool autoGenerate)
+        public TableGenerator(bool autoGenerateScheme = false, bool addExtraColumns = false)
         {
-            if (autoGenerate) 
+            if (autoGenerateScheme)
             {
                 AddColumn("Bool Column", KustoType.Bool_Type);
                 AddColumn("DateTime Column", KustoType.Datetime_Type);
                 AddColumn("Dynamic Column", KustoType.Dynamic_Type);
                 AddColumn("Guid Column", KustoType.Guid_Type);
-                AddColumn("Int Column", KustoType.Int_Type);
                 AddColumn("Long Column", KustoType.Long_Type);
                 AddColumn("Real Column", KustoType.Real_Type);
                 AddColumn("String Column", KustoType.String_Type);
                 AddColumn("TimeSpan Column", KustoType.Timespan_Type);
-                AddColumn("Decimal Column", KustoType.Decimal_Type);
+
+                if (addExtraColumns)
+                {
+                    AddColumn("Int Column", KustoType.Int_Type);
+                    AddColumn("Decimal Column", KustoType.Decimal_Type);
+                }
             }
         }
 
@@ -170,20 +172,49 @@ namespace TestUtils
             m_columns.Add(new ColumnData(name, type));
         }
 
-        public string GenerateTableString(int lines, bool addHeader, bool addNullRows, bool addEmptyRows)
+        public string GenerateTableString(int lines = 10, bool addHeader = true, bool addNullRows = false, bool addEmptyRows = false)
         {
             return GenerateData(lines, addHeader, addNullRows, addEmptyRows, '\t');
         }
 
-        public Stream GenerateTableStream(int lines, bool addHeader, bool addNullRows, bool addEmptyRows)
+        public MemoryStream GenerateTableStream(int lines = 10, bool addHeader = false, bool addNullRows = false, bool addEmptyRows = false)
         {
             var data = GenerateData(lines, addHeader, addNullRows, addEmptyRows, ',');
             return new MemoryStream(Encoding.UTF8.GetBytes(data));
         }
 
-        public string GenerateTableScheme()
+        public string GenerateTableScheme(bool firstRowIsHeader = true)
         {
-            var listOfColumns = string.Join(",", m_columns.Select(c => $"['{c.Name}']:{c.Type.AsString()}"));
+            string listOfColumns;
+
+            if (firstRowIsHeader)
+            {
+                listOfColumns = string.Join(",", m_columns.Select(c => $"['{c.Name}']:{c.Type.AsString()}"));
+            }
+            else
+            {
+                var first = true;
+                var i = 0;
+                var builder = new StringBuilder();
+
+                foreach (var col in m_columns)
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        builder.Append(",");
+                    }
+
+                    builder.Append($"['Column_{i}']:{col.Type.AsString()}");
+                    i++;
+                }
+
+                listOfColumns = builder.ToString();
+            }
+
             return $"({listOfColumns})";
         }
 
