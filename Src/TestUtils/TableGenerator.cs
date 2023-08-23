@@ -50,9 +50,9 @@ namespace TestUtils
 
         private static readonly string[] s_dynamics = new string[5]
         {
-            "",
-            "{}",
             "[]",
+            "{}",
+            "[1 , 2]",
             "{\"name\":\"x\", \"num\":1}",
             "{\"obj\":{\"b\":true}}",
         };
@@ -81,7 +81,7 @@ namespace TestUtils
             Type = type;
         }
 
-        public string GenerateValue()
+        public string GenerateValue(bool escapeCommas = false)
         {
             switch(Type) 
             {
@@ -100,7 +100,15 @@ namespace TestUtils
 
                 case KustoType.Dynamic_Type:
                     var dyn = s_rand.Next(5);
-                    return s_dynamics[dyn];
+                    var synStr = s_dynamics[dyn];
+
+                    if (escapeCommas && synStr.Contains(','))
+                    {
+                        synStr = synStr.Replace("\"", "\"\"");
+                        synStr = $"\"{synStr}\"";
+                    }
+
+                    return synStr;
 
                 case KustoType.Guid_Type:
                     return Guid.NewGuid().ToString();
@@ -221,7 +229,8 @@ namespace TestUtils
         private string GenerateData(int lines, bool addHeader, bool addNullRows, bool addEmptyRows, char seperator)
         {
             var builder = new StringBuilder();
-            
+            var escapeCommas = seperator == ',';
+
             if (addHeader)
             {
                 builder.Append(string.Join(seperator, m_columns.Select(c => c.Name)));
@@ -242,10 +251,10 @@ namespace TestUtils
                 builder.Append(Environment.NewLine);
             }
 
-            while(lines > 0)
+            while (lines > 0)
             {
                 lines--;
-                builder.Append(string.Join(seperator, m_columns.Select(c => c.GenerateValue())));
+                builder.Append(string.Join(seperator, m_columns.Select(c => c.GenerateValue(escapeCommas))));
                 builder.Append(Environment.NewLine);
             }
 

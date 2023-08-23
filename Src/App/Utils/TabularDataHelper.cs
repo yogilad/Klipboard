@@ -42,16 +42,20 @@ namespace Klipboard.Utils
             }
         }
 
-        private static readonly Regex m_timespanRegex = new Regex("(^[0-9]+[smhd])+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex m_timespanRegex = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private List<ColumnFinding>  m_matchers = new List<ColumnFinding>()
+        private List<ColumnFinding> m_matchers = new List<ColumnFinding>()
             {
                 new ColumnFinding("bool", s => bool.TryParse(s, out _)),
                 new ColumnFinding("long", s => long.TryParse(s, out _)),
                 new ColumnFinding("real", s => double.TryParse(s, out _)),
                 new ColumnFinding("datetime", s => DateTime.TryParse(s, out _)),
                 new ColumnFinding("timespan", s => m_timespanRegex.IsMatch(s)),
-                new ColumnFinding("dynamic", s => s.StartsWith("{") && s.EndsWith("}") || s.StartsWith("[") && s.EndsWith("]")),
+                new ColumnFinding("dynamic", s =>
+                {
+                    s = s.Trim('"');
+                    return s.StartsWith("{") && s.EndsWith("}") || s.StartsWith("[") && s.EndsWith("]");
+                }),
                 new ColumnFinding("guid", s => Guid.TryParse(s, out _)),
             };
 
