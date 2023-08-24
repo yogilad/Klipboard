@@ -47,7 +47,7 @@ namespace Klipboard.Utils
 
         private static readonly Regex m_timespanRegex1 = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex m_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
+        
         private List<ColumnFinding> m_matchers = new List<ColumnFinding>()
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
@@ -96,16 +96,64 @@ namespace Klipboard.Utils
             return TryAnalyzeTabularData(stream, delimiter, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryAnalyzeTabularData(MemoryStream inputStream, string delimiter, out TableScheme scheme, out bool firstRowIsHeader)
+        public static bool TryAnalyzeTabularData(Stream inputStream, string delimiter, out TableScheme scheme, out bool firstRowIsHeader)
         {
             var parser = new TextFieldParser(inputStream)
             {
                 Delimiters = new string[] { delimiter },
                 HasFieldsEnclosedInQuotes = true,
-                
             };
 
             return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
+        }
+
+        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, out string inlineQuery)
+        {
+            inlineQuery = string.Empty;
+
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
+            if (!TryAnalyzeTabularData(stream, delimiter, out var tableScheme, out var firstRowIsHeader))
+            {
+                return false;
+            }
+
+            stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
+            var builder = new StringBuilder();
+            var parser = new TextFieldParser(stream)
+            {
+                Delimiters = new string[] { delimiter },
+                HasFieldsEnclosedInQuotes = true,
+            };
+
+            builder.Append("let Klipboard = ");
+            builder.AppendLine(tableScheme.ToString());
+            builder.AppendLine("[");
+
+            if (firstRowIsHeader)
+            {
+                parser.ReadLine();
+            }
+
+            while(true)
+            {
+                var line = parser.ReadFields();
+                if (line == null || line.Length == 0)
+                {
+                    break;
+                }
+
+                foreach(var field in line)
+                {
+                    builder.Append(field);
+                    builder.Append(",");
+                }
+
+                builder.AppendLine("");
+            }
+
+            builder.AppendLine("]");
+            inlineQuery = builder.ToString();
+            return true;
         }
 
         private static bool TryAnalyzeTabularData(TextFieldParser parser, out TableScheme scheme, out bool firstRowIsHeader)

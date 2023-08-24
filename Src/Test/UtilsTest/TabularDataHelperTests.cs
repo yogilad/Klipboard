@@ -71,6 +71,18 @@ namespace UtilsTest
             Assert.AreEqual(tableScheme, scheme.ToString());
         }
 
+        [TestMethod]
+        public void ConvertTsvStringToInlineQuery()
+        {
+            var generator = new TableGenerator(autoGenerateScheme: true);
+            var tableScheme = generator.GenerateTableScheme();
+            var tableData = generator.GenerateTableString(lines: 10, addHeader: true, addNullRows: true, addEmptyRows: true);
+            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", out string inlineQuery);
+
+            Assert.IsTrue(res);
+            Assert.IsNotNull(inlineQuery);
+        }
+
         #region Consider if this is needed
         public static readonly string s_testData =
 @"col 1	Col 2	Col 3
