@@ -48,7 +48,7 @@ namespace TestUtils
 
         private static Random s_rand = new Random();
 
-        private static readonly string[] s_dynamics = new string[5]
+        private static readonly List<string> s_dynamics = new List<string>()
         {
             "[]",
             "{}",
@@ -57,7 +57,7 @@ namespace TestUtils
             "{\"obj\":{\"b\":true}}",
         };
 
-        private static readonly string[] s_strings = new string[5]
+        private static readonly List<string> s_strings = new List<string>()
         {
             "Hello World",
             "",
@@ -66,13 +66,21 @@ namespace TestUtils
             "ROFL",
         };
 
-        private static readonly string[] s_timespans = new string[5]
+        private static readonly List<string> s_timespans = new List<string>()
         {
             "2s",
             "5m",
             "1h",
             "3d",
             "0d",
+            "1.13:00",
+            "14.13:00",
+            "1.13:00:00",
+            "14.13:00:00",
+            "14.13:12:11.3",
+            "13:12",
+            "13:12:11",
+            "13:12:11.3",
         };
 
         public ColumnData(string name, KustoType type)
@@ -99,7 +107,7 @@ namespace TestUtils
                     return $"{year}-{mon}-{day} {hour}:{min}";
 
                 case KustoType.Dynamic_Type:
-                    var dyn = s_rand.Next(5);
+                    var dyn = s_rand.Next(s_dynamics.Count);
                     var synStr = s_dynamics[dyn];
 
                     if (escapeCommas && synStr.Contains(','))
@@ -126,11 +134,11 @@ namespace TestUtils
                     return r.ToString();
 
                 case KustoType.String_Type:
-                    var str = s_rand.Next(5);
+                    var str = s_rand.Next(s_strings.Count);
                     return s_strings[str];
 
                 case KustoType.Timespan_Type:
-                    var ts = s_rand.Next(5);
+                    var ts = s_rand.Next(s_timespans.Count);
                     return s_timespans[ts];
 
                 case KustoType.Decimal_Type:

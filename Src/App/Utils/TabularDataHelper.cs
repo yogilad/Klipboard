@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace Klipboard.Utils
 {
+    #region Table Scheme 
     public class TableScheme
     {
         public List<(string ColumnName, string ColumnType)> Columns { get; private set; } = new List<(string, string)>();
@@ -26,7 +27,9 @@ namespace Klipboard.Utils
             return composedScheme;
         }
     }
+    #endregion
 
+    #region Column Findings
     internal class ColumnFindings
     {
         internal class ColumnFinding
@@ -42,15 +45,17 @@ namespace Klipboard.Utils
             }
         }
 
-        private static readonly Regex m_timespanRegex = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex m_timespanRegex1 = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex m_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private List<ColumnFinding> m_matchers = new List<ColumnFinding>()
             {
+                // Order is important - if a value is equally matched by multiple entries the first one wins
                 new ColumnFinding("bool", s => bool.TryParse(s, out _)),
                 new ColumnFinding("long", s => long.TryParse(s, out _)),
                 new ColumnFinding("real", s => double.TryParse(s, out _)),
+                new ColumnFinding("timespan", s => m_timespanRegex1.IsMatch(s) || m_timespanRegex2.IsMatch(s)),
                 new ColumnFinding("datetime", s => DateTime.TryParse(s, out _)),
-                new ColumnFinding("timespan", s => m_timespanRegex.IsMatch(s)),
                 new ColumnFinding("dynamic", s =>
                 {
                     s = s.Trim('"');
@@ -79,7 +84,9 @@ namespace Klipboard.Utils
             }
         }
     }
+    #endregion
 
+    #region Tabular Data Helper
     public static class TabularDataHelper
     {
         public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableScheme scheme, out bool firstRowIsHeader)
@@ -259,4 +266,5 @@ namespace Klipboard.Utils
         }
         #endregion
     }
+    #endregion
 }
