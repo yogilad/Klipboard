@@ -76,7 +76,7 @@ namespace UtilsTest
         {
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
-            var tableData = generator.GenerateTableString(lines: 10, addHeader: true, addNullRows: true, addEmptyRows: true);
+            var tableData = generator.GenerateTableString(lines: 100, addHeader: true, addNullRows: false, addEmptyRows: false);
             var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", out string inlineQuery);
 
             Assert.IsTrue(res);

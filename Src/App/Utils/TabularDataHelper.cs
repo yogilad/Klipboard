@@ -15,14 +15,14 @@ using System.Text.RegularExpressions;
 
 namespace Klipboard.Utils
 {
-    #region Table Scheme 
+    #region Table Scheme Config
     public class TableScheme
     {
-        public List<(string ColumnName, string ColumnType)> Columns { get; private set; } = new List<(string, string)>();
+        public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
         public override string ToString()
         {
-            var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.ColumnName}']:{c.ColumnType}"))})";
+            var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
             
             return composedScheme;
         }
@@ -34,50 +34,46 @@ namespace Klipboard.Utils
     {
         internal class ColumnFinding
         {
-            public string KustoType { get; }
+            public KqlTypeDefinition KqlTypeDef { get; }
             public int Count;
-            public Func<string, bool> IsMatch;
 
-            public ColumnFinding(string kustoType, Func<string, bool> isMatch)
+            public ColumnFinding(KqlTypeDefinition kqlType)
             {
-                KustoType = kustoType;
-                IsMatch = isMatch;
+                KqlTypeDef = kqlType;
             }
         }
 
         private static readonly Regex m_timespanRegex1 = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex m_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        
+        private static readonly KqlTypeDefinition s_stringDefinition = KqlTypeHelper.GetTypeDedfinition(KqlDataType.StringType);
+
         private List<ColumnFinding> m_matchers = new List<ColumnFinding>()
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
-                new ColumnFinding("bool", s => bool.TryParse(s, out _)),
-                new ColumnFinding("long", s => long.TryParse(s, out _)),
-                new ColumnFinding("real", s => double.TryParse(s, out _)),
-                new ColumnFinding("timespan", s => m_timespanRegex1.IsMatch(s) || m_timespanRegex2.IsMatch(s)),
-                new ColumnFinding("datetime", s => DateTime.TryParse(s, out _)),
-                new ColumnFinding("dynamic", s =>
-                {
-                    s = s.Trim('"');
-                    return s.StartsWith("{") && s.EndsWith("}") || s.StartsWith("[") && s.EndsWith("]");
-                }),
-                new ColumnFinding("guid", s => Guid.TryParse(s, out _)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.BoolType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.LongType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.RealType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DateTimeType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DynamicType)),
+                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.GuidType)),
+                // We do not check strings since everything is essentialy a string 
             };
 
         public bool HasFindings => m_matchers.Sum(x => x.Count) > 0;
         
-        public string GetBestMatchColumnType()
+        public KqlTypeDefinition GetBestMatchColumnType()
         {
             var max = m_matchers.MaxBy(x => x.Count);
 
-            return max.Count == 0 ? "string" : max.KustoType;
+            return max.Count == 0 ?  s_stringDefinition : max.KqlTypeDef;
         }
 
         public void AnalyzeField(string field)
         {
             for(int i = 0; i < m_matchers.Count; i++)
             {
-                if (m_matchers[i].IsMatch(field))
+                if (m_matchers[i].KqlTypeDef.IsMatch(field))
                 {
                     m_matchers[i].Count++;
                 }
@@ -89,6 +85,7 @@ namespace Klipboard.Utils
     #region Tabular Data Helper
     public static class TabularDataHelper
     {
+        #region Public APIs
         public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableScheme scheme, out bool firstRowIsHeader)
         {
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
@@ -125,7 +122,7 @@ namespace Klipboard.Utils
                 HasFieldsEnclosedInQuotes = true,
             };
 
-            builder.Append("let Klipboard = ");
+            builder.Append("let Klipboard = datatable");
             builder.AppendLine(tableScheme.ToString());
             builder.AppendLine("[");
 
@@ -142,20 +139,24 @@ namespace Klipboard.Utils
                     break;
                 }
 
-                foreach(var field in line)
+                for (int i = 0; i < line.Length; i++)
                 {
-                    builder.Append(field);
+                    var parsedField = tableScheme.Columns[i].Type.InlineSerializeData(line[i]);
+                    builder.Append(parsedField);
                     builder.Append(",");
                 }
 
                 builder.AppendLine("");
             }
 
-            builder.AppendLine("]");
+            builder.AppendLine("];");
+            builder.AppendLine("Klipboard");
             inlineQuery = builder.ToString();
             return true;
         }
+        #endregion
 
+        #region Private APIs
         private static bool TryAnalyzeTabularData(TextFieldParser parser, out TableScheme scheme, out bool firstRowIsHeader)
         {
             scheme = new TableScheme();
@@ -230,6 +231,7 @@ namespace Klipboard.Utils
             }
             return true;
         }
+        #endregion
 
         #region old APIs who may not be necessary
         public static bool TryDetectTabularTextFormat(string data, out char seperator)
