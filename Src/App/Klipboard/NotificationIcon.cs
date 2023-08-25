@@ -12,11 +12,11 @@ namespace Klipboard
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
 
-        private readonly int m_inlineQueryButtonId;
-        private readonly int m_pasteToFileButtonId;
-        private readonly int m_settingsButtonId;
-        private readonly int m_helpButtonId;
-        private readonly int m_exitButtonId;
+        private class ToolTipTag
+        {
+            public bool EnableFollowsClipboardContent;
+            public bool NameFollowsClipboardContent;
+        }
 
         public NotificationIcon(AppConfig config)
         {
@@ -30,23 +30,60 @@ namespace Klipboard
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
 
-            m_inlineQueryButtonId = m_contextMenuStrip.Items.Count;
-            m_contextMenuStrip.Items.Add("Paste Table to Inline Query", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items.Add("MyFreeCluster Quick Actions", m_notifyIcon.Icon.ToBitmap());
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Click to Change Default Cluster";
 
-            m_helpButtonId = m_contextMenuStrip.Items.Count;
+            m_contextMenuStrip.Items.Add("Paste Data to Inline Query", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Invoke a datatable query on one small file or 20KB of clipboard tabular data";
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
+            {
+                EnableFollowsClipboardContent = true,
+                NameFollowsClipboardContent = true,
+            };
+
+            m_contextMenuStrip.Items.Add("Paste Data to External Data Query", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or one file to a blob and invoke a an external data query on it";
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
+            {
+                EnableFollowsClipboardContent = true,
+                NameFollowsClipboardContent = true,
+            };
+            
+            m_contextMenuStrip.Items.Add("Paste Data to Temp Table", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or files to a temporary table and invoke a query on it";
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
+            {
+                EnableFollowsClipboardContent = true,
+                NameFollowsClipboardContent = true,
+            };
+
+            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
+            m_contextMenuStrip.Items.Add("Paste Data to Table", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or up to 100 files to a table";
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
+            {
+                EnableFollowsClipboardContent = true,
+                NameFollowsClipboardContent = true,
+            };
+
+            m_contextMenuStrip.Items.Add("Queue Data to Table", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Queue clipboard tabular data or any number of files to a table";
+            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
+            {
+                EnableFollowsClipboardContent = true,
+                NameFollowsClipboardContent = true,
+            };
+
+            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
+            m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
             m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
-
-            m_exitButtonId = m_contextMenuStrip.Items.Count;
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
             // Init the menu items
             if (config.DevMode)
             {
+                m_contextMenuStrip.Items.Add(new ToolStripSeparator());
                 m_contextMenuStrip.Items.Add("Debug Items");
-                m_settingsButtonId = m_contextMenuStrip.Items.Count;
-                m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
-
-                m_pasteToFileButtonId = m_contextMenuStrip.Items.Count;
                 m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, Paste_OnClick);
             }
 
@@ -71,23 +108,49 @@ namespace Klipboard
         private void NotifyIcon_OnClick(object? Sender, EventArgs e)
         {
             var content = ClipboardHelper.GetClipboardContent();
-            var menuItem = m_contextMenuStrip.Items[m_inlineQueryButtonId];
+            string textToFind = content == ClipboardHelper.Content.CSV ? "Files" : "Data";
+            string textToSet = content == ClipboardHelper.Content.CSV ? "Data" : "Files";
 
-            switch (content)
+            for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
             {
-                case ClipboardHelper.Content.CSV:
-                    menuItem.Enabled = true;
-                    menuItem.Text= "Paste Table to Inline Query";
-                    break;
+                var menuItem = m_contextMenuStrip.Items[i];
+                var menuTag = menuItem.Tag as ToolTipTag;
+                if (menuTag == null)
+                {
+                    continue;
+                }
 
-                case ClipboardHelper.Content.DropFiles:
-                    menuItem.Enabled = false;
-                    menuItem.Text = "Paste Files to Inline Query";
-                    break;
+                if (menuTag.EnableFollowsClipboardContent)
+                {
+                    switch (content)
+                    {
+                        // TODO - How to handle arbitrary text clipboard content???
+                        case ClipboardHelper.Content.CSV:
+                        case ClipboardHelper.Content.DropFiles:
+                            menuItem.Enabled = true;
+                            break;
 
-                default:
-                    menuItem.Enabled = false ;
-                    break;
+                        default:
+                            menuItem.Enabled = false;
+                            break;
+                    }
+                }
+
+                if (menuTag.NameFollowsClipboardContent)
+                {
+                    switch (content)
+                    {
+                        case ClipboardHelper.Content.CSV:
+                        case ClipboardHelper.Content.DropFiles:
+                            menuItem.Text = menuItem.Text.Replace(textToFind, textToSet);
+                            break;
+
+                        default:
+                            menuItem.Enabled = false;
+                            break;
+                    }
+                }
+
             }
         }
 
