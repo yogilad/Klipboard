@@ -12,6 +12,12 @@ namespace Klipboard
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
 
+        private readonly int m_inlineQueryButtonId;
+        private readonly int m_pasteToFileButtonId;
+        private readonly int m_settingsButtonId;
+        private readonly int m_helpButtonId;
+        private readonly int m_exitButtonId;
+
         public NotificationIcon(AppConfig config)
         {
             m_components = new System.ComponentModel.Container();
@@ -24,16 +30,25 @@ namespace Klipboard
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
 
+            m_inlineQueryButtonId = m_contextMenuStrip.Items.Count;
+            m_contextMenuStrip.Items.Add("Paste Table to Inline Query", null, InlineQuery_OnClick);
+
+            m_helpButtonId = m_contextMenuStrip.Items.Count;
+            m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
+
+            m_exitButtonId = m_contextMenuStrip.Items.Count;
+            m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
+
             // Init the menu items
             if (config.DevMode)
             {
+                m_contextMenuStrip.Items.Add("Debug Items");
+                m_settingsButtonId = m_contextMenuStrip.Items.Count;
                 m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
+
+                m_pasteToFileButtonId = m_contextMenuStrip.Items.Count;
                 m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, Paste_OnClick);
             }
-             
-            m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
-            m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
-
 
             // Handle the DoubleClick event to activate the form.
             m_notifyIcon.Click += new EventHandler(NotifyIcon_OnClick);
@@ -56,28 +71,22 @@ namespace Klipboard
         private void NotifyIcon_OnClick(object? Sender, EventArgs e)
         {
             var content = ClipboardHelper.GetClipboardContent();
-            var menuItem = m_contextMenuStrip.Items[1];
+            var menuItem = m_contextMenuStrip.Items[m_inlineQueryButtonId];
 
             switch (content)
             {
                 case ClipboardHelper.Content.CSV:
                     menuItem.Enabled = true;
-                    menuItem.Text= "Paste Table to Desktop";
-                    break;
-
-                case ClipboardHelper.Content.Text:
-                    menuItem.Enabled = true;
-                    menuItem.Text = "Paste Text to Desktop";
+                    menuItem.Text= "Paste Table to Inline Query";
                     break;
 
                 case ClipboardHelper.Content.DropFiles:
-                    menuItem.Enabled = true;
-                    menuItem.Text = "Paste Files to Desktop";
+                    menuItem.Enabled = false;
+                    menuItem.Text = "Paste Files to Inline Query";
                     break;
 
                 default:
                     menuItem.Enabled = false ;
-                    menuItem.Text = "No Content to Paste";
                     break;
             }
         }
@@ -108,6 +117,49 @@ namespace Klipboard
 
                 File.WriteAllLines(path, new string[] { data });
             }
+        }
+
+        private void InlineQuery_OnClick(object? Sender, EventArgs e)
+        {
+            var content = ClipboardHelper.GetClipboardContent();
+            string? queryLink;
+
+            switch (content)
+            {
+                case ClipboardHelper.Content.CSV:
+                    if (!ClipboardHelper.TryGetDataAsString(out var data))
+                    {
+                        return;
+                    }
+
+                    if (data == null || data.Length > 20480)
+                    {
+                        return;
+                    }
+
+                    var success = TabularDataHelper.TryConvertTableToInlineQueryLink(
+                        "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net",
+                        "MyDatabase",
+                        data,
+                        "\t",
+                        out queryLink);
+
+                    if (!success || queryLink == null || queryLink.Length > 10240)
+                    {
+                        return;
+                    }
+
+                    break;
+
+                default:
+                    return;
+            }
+
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = queryLink,
+                UseShellExecute = true
+            });
         }
 
         private void Help_OnClick(object? Sender, EventArgs e)
