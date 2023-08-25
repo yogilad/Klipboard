@@ -83,6 +83,22 @@ namespace UtilsTest
             Assert.IsNotNull(inlineQuery);
         }
 
+        [TestMethod]
+        public void ConvertTsvStringToInlineQueryLink()
+        {
+            var generator = new TableGenerator(autoGenerateScheme: true);
+            var tableScheme = generator.GenerateTableScheme();
+            var tableData = generator.GenerateTableString(lines: 200, addHeader: true, addNullRows: false, addEmptyRows: false);
+            var res = TabularDataHelper.TryConvertTableToInlineQueryLink("https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net", "MyDatabase",tableData, "\t", out string? inlineQueryLink);
+
+            Assert.IsTrue(res);
+            Assert.IsNotNull(inlineQueryLink);
+
+            var inputLength = tableData.Length;
+            var outputLength = inlineQueryLink.Length;
+            Assert.IsTrue(inputLength > outputLength);
+        }
+
         #region Consider if this is needed
         public static readonly string s_testData =
 @"col 1	Col 2	Col 3

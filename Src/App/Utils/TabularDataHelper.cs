@@ -12,6 +12,8 @@ using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using System.IO.Compression;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Klipboard.Utils
 {
@@ -88,7 +90,7 @@ namespace Klipboard.Utils
         #region Public APIs
         public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableScheme scheme, out bool firstRowIsHeader)
         {
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
 
             return TryAnalyzeTabularData(stream, delimiter, out scheme, out firstRowIsHeader);
         }
@@ -108,15 +110,16 @@ namespace Klipboard.Utils
         {
             inlineQuery = string.Empty;
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
-            if (!TryAnalyzeTabularData(stream, delimiter, out var tableScheme, out var firstRowIsHeader))
+            using var stream1 = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
+            
+            if (!TryAnalyzeTabularData(stream1, delimiter, out var tableScheme, out var firstRowIsHeader))
             {
                 return false;
             }
 
-            stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
+            using var stream2 = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
             var builder = new StringBuilder();
-            var parser = new TextFieldParser(stream)
+            var parser = new TextFieldParser(stream2)
             {
                 Delimiters = new string[] { delimiter },
                 HasFieldsEnclosedInQuotes = true,
@@ -153,6 +156,54 @@ namespace Klipboard.Utils
             builder.AppendLine("Klipboard");
             inlineQuery = builder.ToString();
             return true;
+        }
+
+        public static bool TryConvertTableToInlineQueryLink(string taregtClusterUri, string targetDb, string tableData, string delimiter, out string? inlineQueryLink)
+        {
+            string outputbase64Query;
+
+            inlineQueryLink = null;
+            if (!TryConvertTableToInlineQuery(tableData, delimiter, out var inlineQuery))
+            {
+                return false;
+            }
+
+
+            using (var outputStream = new MemoryStream())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
+
+                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+
+                var gzipBytes = outputStream.ToArray();
+                outputbase64Query = Convert.ToBase64String(gzipBytes);
+            }
+
+            if (!Uri.TryCreate(taregtClusterUri, UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+
+            if (!Uri.TryCreate(uri, $"/{ targetDb}?query=", out uri))
+            {
+                return false;
+            }
+
+            inlineQueryLink = uri.ToString() + outputbase64Query;
+            return true;
+        }
+
+        private static bool TryJoinUri(Uri? left, string right, out Uri? result)
+        {
+            if (left == null)
+            {
+                return Uri.TryCreate(right, UriKind.Absolute, out result);
+            }
+
+            return Uri.TryCreate(left, right, out result);
         }
         #endregion
 
