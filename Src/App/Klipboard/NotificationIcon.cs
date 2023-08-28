@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
+using Workers;
 
 namespace Klipboard
 {
@@ -11,6 +12,7 @@ namespace Klipboard
         private System.ComponentModel.IContainer m_components;
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
+        private IClipboardHelper m_clipboardHelper;
 
         private class ToolTipTag
         {
@@ -18,8 +20,9 @@ namespace Klipboard
             public bool NameFollowsClipboardContent;
         }
 
-        public NotificationIcon(AppConfig config)
+        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, List<IWorker> workers)
         {
+            m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
 
             // Create the NotifyIcon.
@@ -49,7 +52,7 @@ namespace Klipboard
                 NameFollowsClipboardContent = true,
             };
             
-            m_contextMenuStrip.Items.Add("Paste Data to Temp Table", null, InlineQuery_OnClick);
+            m_contextMenuStrip.Items.Add("Paste Data to Temporay Table", null, InlineQuery_OnClick);
             m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or files to a temporary table and invoke a query on it";
             m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
             {
@@ -83,7 +86,7 @@ namespace Klipboard
             if (config.DevMode)
             {
                 m_contextMenuStrip.Items.Add(new ToolStripSeparator());
-                m_contextMenuStrip.Items.Add("Debug Items");
+                m_contextMenuStrip.Items.Add("*** Debug Items ***");
                 m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, Paste_OnClick);
             }
 
@@ -107,9 +110,9 @@ namespace Klipboard
 
         private void NotifyIcon_OnClick(object? Sender, EventArgs e)
         {
-            var content = ClipboardHelper.GetClipboardContent();
-            string textToFind = content == ClipboardHelper.Content.CSV ? "Files" : "Data";
-            string textToSet = content == ClipboardHelper.Content.CSV ? "Data" : "Files";
+            var content = m_clipboardHelper.GetClipboardContent();
+            string textToFind = content == ClipboardContent.CSV ? "Files" : "Data";
+            string textToSet = content == ClipboardContent.CSV ? "Data" : "Files";
 
             for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
             {
@@ -125,8 +128,8 @@ namespace Klipboard
                     switch (content)
                     {
                         // TODO - How to handle arbitrary text clipboard content???
-                        case ClipboardHelper.Content.CSV:
-                        case ClipboardHelper.Content.DropFiles:
+                        case ClipboardContent.CSV:
+                        case ClipboardContent.Files:
                             menuItem.Enabled = true;
                             break;
 
@@ -140,8 +143,8 @@ namespace Klipboard
                 {
                     switch (content)
                     {
-                        case ClipboardHelper.Content.CSV:
-                        case ClipboardHelper.Content.DropFiles:
+                        case ClipboardContent.CSV:
+                        case ClipboardContent.Files:
                             menuItem.Text = menuItem.Text.Replace(textToFind, textToSet);
                             break;
 
@@ -161,7 +164,7 @@ namespace Klipboard
 
         private void Paste_OnClick(object? Sender, EventArgs e)
         {
-            if (ClipboardHelper.TryGetDataAsMemoryStream(out var stream))
+            if (m_clipboardHelper.TryGetDataAsMemoryStream(out var stream))
             {
                 using (stream)
                 {
@@ -174,7 +177,7 @@ namespace Klipboard
                 }
             }
 
-            if (ClipboardHelper.TryGetDataAsString(out var data))
+            if (m_clipboardHelper.TryGetDataAsString(out var data))
             {
                 var path = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Desktop\\ClipboardData.txt");
 
@@ -184,13 +187,13 @@ namespace Klipboard
 
         private void InlineQuery_OnClick(object? Sender, EventArgs e)
         {
-            var content = ClipboardHelper.GetClipboardContent();
+            var content = m_clipboardHelper.GetClipboardContent();
             string? queryLink;
 
             switch (content)
             {
-                case ClipboardHelper.Content.CSV:
-                    if (!ClipboardHelper.TryGetDataAsString(out var data))
+                case ClipboardContent.CSV:
+                    if (!m_clipboardHelper.TryGetDataAsString(out var data))
                     {
                         return;
                     }
