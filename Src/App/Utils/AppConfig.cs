@@ -8,6 +8,9 @@ namespace Klipboard.Utils
     #region App Config
     public class AppConfig
     {
+        // Debug Config
+        public bool DevMode;
+        // Kusto Configuration
         public HashSet<String> KustoConnectionStrings { set; get; }
 
         internal AppConfig()
@@ -20,12 +23,8 @@ namespace Klipboard.Utils
     #region App Config File
     public class AppConfigFile
     {
-        [JsonIgnore]
         public static readonly string s_configDir;
-        
-        [JsonIgnore]
         public static readonly string s_configPath;
-        // List of known Kusto services
 
         static AppConfigFile()
         {
@@ -33,11 +32,13 @@ namespace Klipboard.Utils
             s_configPath = Path.Combine(s_configDir, "config.json");
         }
 
-        public static async Task<AppConfig> ReadStub()
+        public static async Task<AppConfig> CreateDebugConfig()
         {
             var config = await Read();
 
+            config.DevMode = true;
             config.KustoConnectionStrings.Add("https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/");
+
             return config;
         }
 

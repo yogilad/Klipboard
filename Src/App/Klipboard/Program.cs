@@ -1,5 +1,6 @@
 using System.Windows;
 using Klipboard.Utils;
+using Workers;
 
 namespace Klipboard
 {
@@ -15,11 +16,12 @@ namespace Klipboard
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var appConfig = AppConfigFile.ReadStub().ConfigureAwait(false).GetAwaiter().GetResult();
-            //var kustoWorker = new KustoWorker.ServiceManager(appConfig);
+            var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).GetAwaiter().GetResult();
+            var clipboardHelper = new ClipboardHelper();
+            var workerItems = new List<IWorker>();
 
-            using var notifIcon = new NotificationIcon();
-            Application.Run(new Form1());
+            using var notifIcon = new NotificationIcon(appConfig, clipboardHelper, workerItems);
+            Application.Run();
             AppConfigFile.Write(appConfig).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
