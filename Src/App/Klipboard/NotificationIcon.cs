@@ -80,6 +80,7 @@ namespace Klipboard
             m_contextMenuStrip.Items.Add(new ToolStripSeparator());
             m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
             m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
+            m_contextMenuStrip.Items.Add("Share", null, Share_OnClick);
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
             // Init the menu items
@@ -233,6 +234,15 @@ namespace Klipboard
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
                 FileName = "https://github.com/yogilad/KustoCompanion/blob/main/README.md",
+                UseShellExecute = true
+            }) ;
+        }
+
+        private void Share_OnClick(object? Sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = "mailto:yochai@gmail.com?subject=topic&body=some text",
                 UseShellExecute = true
             });
         }
