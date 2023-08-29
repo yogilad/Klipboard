@@ -233,16 +233,19 @@ namespace Klipboard
         {
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/yogilad/KustoCompanion/blob/main/README.md",
+                FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
                 UseShellExecute = true
             }) ;
         }
 
         private void Share_OnClick(object? Sender, EventArgs e)
         {
+            var subject = "Have You Tried Klipboard for Kusto?";
+            var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
+
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                FileName = "mailto:yochai@gmail.com?subject=topic&body=some text",
+                FileName = $"mailto:?subject={subject}&body={body}",
                 UseShellExecute = true
             });
         }
