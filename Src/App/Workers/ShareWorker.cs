@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Klipboard.Workers
 {
-    public class HelpWorker : WorkerBase
+    public class ShareWorker : WorkerBase
     {
         private WorkerCategory m_category;
         private object? m_icon;
@@ -17,7 +17,7 @@ namespace Klipboard.Workers
         public override WorkerCategory Category => m_category;
         public override object? Icon => m_icon;
 
-        public HelpWorker(WorkerCategory category, object? icon)
+        public ShareWorker(WorkerCategory category, object? icon)
         {
             m_category = category;
             m_icon = icon;
@@ -25,7 +25,7 @@ namespace Klipboard.Workers
 
         public override string GetText(ClipboardContent content)
         {
-            return "Help";
+            return "Share Klipboard";
         }
 
         public override string GetToolTipText(ClipboardContent content)
@@ -45,9 +45,12 @@ namespace Klipboard.Workers
 
         public override Task RunAsync(IClipboardHelper clipboardHelper, SendNotification sendNotification)
         {
+            var subject = "Have You Tried Klipboard for Kusto?";
+            var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
+
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
+                FileName = $"mailto:?subject={subject}&body={body}",
                 UseShellExecute = true
             });
 

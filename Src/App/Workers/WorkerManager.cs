@@ -16,6 +16,8 @@ namespace Klipboard.Workers
             // Management 
             var workers = new List<WorkerBase>();
 
+            workers.Add(new OptionsWorker(WorkerCategory.Management, null));
+            workers.Add(new ShareWorker(WorkerCategory.Management, null));
             workers.Add(new HelpWorker(WorkerCategory.Management, null));
             return workers;
         }

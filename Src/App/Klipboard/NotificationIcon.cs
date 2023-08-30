@@ -11,6 +11,7 @@ namespace Klipboard
     public class NotificationIcon : IDisposable
     {
         private System.ComponentModel.IContainer m_components;
+        private Icon m_appLogo;
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
         private IClipboardHelper m_clipboardHelper;
@@ -28,17 +29,27 @@ namespace Klipboard
 
             // Create the NotifyIcon.
             m_notifyIcon = new NotifyIcon(this.m_components);
-            m_notifyIcon.Icon = ResourceLoader.GetIcon();
+            m_appLogo = ResourceLoader.GetIcon();
+            m_notifyIcon.Icon = m_appLogo;
 
             // Set the context menu
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
 
+            WorkerCategory? lastWorkerCategory = null;
+
             foreach(var worker in workers)
             {
+                if (lastWorkerCategory.HasValue && lastWorkerCategory != worker.Category)
+                {
+                    m_contextMenuStrip.Items.Add(new ToolStripSeparator());
+                }
+
                 m_contextMenuStrip.Items.Add(worker.GetText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(), Worker_OnClick);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = worker.GetToolTipText(ClipboardContent.None);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = worker;
+            
+                lastWorkerCategory = worker.Category;
             }
 
             m_contextMenuStrip.Items.Add("MyFreeCluster Quick Actions", m_notifyIcon.Icon.ToBitmap());
@@ -85,10 +96,6 @@ namespace Klipboard
                 NameFollowsClipboardContent = true,
             };
 
-            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
-            m_contextMenuStrip.Items.Add("Settings", null, Settings_OnClick);
-            m_contextMenuStrip.Items.Add("Help", null, Help_OnClick);
-            m_contextMenuStrip.Items.Add("Share", null, Share_OnClick);
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
             // Init the menu items
@@ -96,7 +103,7 @@ namespace Klipboard
             {
                 m_contextMenuStrip.Items.Add(new ToolStripSeparator());
                 m_contextMenuStrip.Items.Add("*** Debug Items ***");
-                m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, Paste_OnClick);
+                m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, DebugPasteToDesktop_OnClick);
             }
 
             // Handle the DoubleClick event to activate the form.
@@ -105,6 +112,7 @@ namespace Klipboard
 
             // Dispaly the notification icon
             m_notifyIcon.Visible = true;
+            m_notifyIcon.ShowBalloonTip(3, "WE'RE ON!", "OMG OMG OMG ", ToolTipIcon.None);
         }
 
         public void Dispose() => Dispose(true);
@@ -136,12 +144,7 @@ namespace Klipboard
             }
         }
 
-        private void Settings_OnClick(object? Sender, EventArgs e)
-        {
-            var x = e;
-        }
-
-        private void Paste_OnClick(object? Sender, EventArgs e)
+        private void DebugPasteToDesktop_OnClick(object? Sender, EventArgs e)
         {
             if (m_clipboardHelper.TryGetDataAsMemoryStream(out var stream))
             {
@@ -207,33 +210,12 @@ namespace Klipboard
             });
         }
 
-        private void Help_OnClick(object? Sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
-                UseShellExecute = true
-            }) ;
-        }
-
-        private void Share_OnClick(object? Sender, EventArgs e)
-        {
-            var subject = "Have You Tried Klipboard for Kusto?";
-            var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
-
-            System.Diagnostics.Process.Start(new ProcessStartInfo
-            {
-                FileName = $"mailto:?subject={subject}&body={body}",
-                UseShellExecute = true
-            });
-        }
-
         private void Worker_OnClick(object? Sender, EventArgs e)
         {
             var menuItem = Sender as ToolStripMenuItem;
-            var worker = menuItem.Tag as WorkerBase;
+            var worker = menuItem?.Tag as WorkerBase;
 
-            worker?.RunAsync(m_clipboardHelper);
+            worker?.RunAsync(m_clipboardHelper, (title, message) => m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None));
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)
