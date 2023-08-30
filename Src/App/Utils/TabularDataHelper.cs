@@ -173,7 +173,7 @@ namespace Klipboard.Utils
             {
                 byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
 
-                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
                 {
                     gZipStream.Write(inputBytes, 0, inputBytes.Length);
                 }

@@ -12,11 +12,12 @@ namespace Klipboard.Workers
 {
     public class InlineQueryWorker : WorkerBase
     {
+        // TODO Get Defaults from AppConfig at runtime
         private string m_currentCluster = "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
         private string m_currentDatabase = "MyDatabase";
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
-        : base(category, icon, ClipboardContent.CSV)
+        : base(category, icon, ClipboardContent.CSV) // Todo Support Text and File Data
         {
         }
 
