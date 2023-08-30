@@ -1,19 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Klipboard.Utils;
+﻿using Klipboard.Utils;
 
 namespace Klipboard.Workers
 {
+    public enum WorkerCategory
+    {
+        QuickActions,
+        Actions,
+        Management,
+        Debug
+    }
     public static class WorkerManager
     {
-        public static IEnumerable<IWorker> CreateAppWorkers(AppConfig config)
+        public static IEnumerable<WorkerBase> CreateAppWorkers(AppConfig config, Dictionary<WorkerCategory, object> icons)
         {
-            var workers = new List<IWorker>();
+            // Management 
+            var workers = new List<WorkerBase>();
 
+            workers.Add(new HelpWorker(WorkerCategory.Management, null));
             return workers;
         }
 

@@ -16,9 +16,15 @@ namespace Klipboard
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
+            //
+            var icons = new Dictionary<WorkerCategory, object>()
+            { 
+                {WorkerCategory.QuickActions, ResourceLoader.GetIcon() } 
+            };
+
             var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).GetAwaiter().GetResult();
             var clipboardHelper = new ClipboardHelper();
-            var workers = WorkerManager.CreateAppWorkers(appConfig);
+            var workers = WorkerManager.CreateAppWorkers(appConfig, icons);
 
             using var notifIcon = new NotificationIcon(appConfig, clipboardHelper, workers);
             Application.Run();

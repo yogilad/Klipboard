@@ -21,7 +21,7 @@ namespace Klipboard
             public bool NameFollowsClipboardContent;
         }
 
-        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, IEnumerable<IWorker> workers)
+        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, IEnumerable<WorkerBase> workers)
         {
             m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
@@ -33,6 +33,13 @@ namespace Klipboard
             // Set the context menu
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
+
+            foreach(var worker in workers)
+            {
+                m_contextMenuStrip.Items.Add(worker.GetText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(), Worker_OnClick);
+                m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = worker.GetToolTipText(ClipboardContent.None);
+                m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = worker;
+            }
 
             m_contextMenuStrip.Items.Add("MyFreeCluster Quick Actions", m_notifyIcon.Icon.ToBitmap());
             m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Click to Change Default Cluster";
@@ -113,49 +120,19 @@ namespace Klipboard
         private void NotifyIcon_OnClick(object? Sender, EventArgs e)
         {
             var content = m_clipboardHelper.GetClipboardContent();
-            string textToFind = content == ClipboardContent.CSV ? "Files" : "Data";
-            string textToSet = content == ClipboardContent.CSV ? "Data" : "Files";
 
             for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
             {
                 var menuItem = m_contextMenuStrip.Items[i];
-                var menuTag = menuItem.Tag as ToolTipTag;
-                if (menuTag == null)
+                var worker = menuItem.Tag as WorkerBase;
+                if (worker == null)
                 {
                     continue;
                 }
 
-                if (menuTag.EnableFollowsClipboardContent)
-                {
-                    switch (content)
-                    {
-                        // TODO - How to handle arbitrary text clipboard content???
-                        case ClipboardContent.CSV:
-                        case ClipboardContent.Files:
-                            menuItem.Enabled = true;
-                            break;
-
-                        default:
-                            menuItem.Enabled = false;
-                            break;
-                    }
-                }
-
-                if (menuTag.NameFollowsClipboardContent)
-                {
-                    switch (content)
-                    {
-                        case ClipboardContent.CSV:
-                        case ClipboardContent.Files:
-                            menuItem.Text = menuItem.Text.Replace(textToFind, textToSet);
-                            break;
-
-                        default:
-                            menuItem.Enabled = false;
-                            break;
-                    }
-                }
-
+                menuItem.Visible = worker.IsVisible(content);
+                menuItem.Enabled = worker.IsEnabled(content);
+                menuItem.Text = worker.GetText(content);
             }
         }
 
@@ -249,6 +226,14 @@ namespace Klipboard
                 FileName = $"mailto:?subject={subject}&body={body}",
                 UseShellExecute = true
             });
+        }
+
+        private void Worker_OnClick(object? Sender, EventArgs e)
+        {
+            var menuItem = Sender as ToolStripMenuItem;
+            var worker = menuItem.Tag as WorkerBase;
+
+            worker?.RunAsync(m_clipboardHelper);
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)
