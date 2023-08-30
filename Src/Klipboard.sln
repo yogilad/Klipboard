@@ -13,15 +13,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard", "App\Klipboard\
 		{AF4D59E9-B9D0-465B-B213-5EA8173CB730} = {AF4D59E9-B9D0-465B-B213-5EA8173CB730}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils", "App\Utils\Utils.csproj", "{AF4D59E9-B9D0-465B-B213-5EA8173CB730}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard.Utils", "App\Utils\Klipboard.Utils.csproj", "{AF4D59E9-B9D0-465B-B213-5EA8173CB730}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workers", "App\Workers\Workers.csproj", "{A65F9F4F-9661-4AB1-BBA2-F1494A180A8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard.Workers", "App\Workers\Klipboard.Workers.csproj", "{A65F9F4F-9661-4AB1-BBA2-F1494A180A8C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtilsTest", "Test\UtilsTest\UtilsTest.csproj", "{EA714C17-088B-4E51-A3B5-0243587C935C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard.Utils.Test", "Test\UtilsTest\Klipboard.Utils.Test.csproj", "{EA714C17-088B-4E51-A3B5-0243587C935C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkersTest", "Test\WorkersTest\WorkersTest.csproj", "{8C95BC68-1A07-4D54-B883-556A36668CFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard.Workers.Test", "Test\WorkersTest\Klipboard.Workers.Test.csproj", "{8C95BC68-1A07-4D54-B883-556A36668CFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils", "TestUtils\TestUtils.csproj", "{0430DCBE-516C-49A6-BD53-98E1B1D6A963}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Utils", "TestUtils\Test.Utils.csproj", "{0430DCBE-516C-49A6-BD53-98E1B1D6A963}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

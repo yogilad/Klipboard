@@ -1,6 +1,6 @@
 ﻿using Klipboard.Utils;
 
-namespace Workers
+namespace Klipboard.Workers
 {
     public interface IWorker
     {

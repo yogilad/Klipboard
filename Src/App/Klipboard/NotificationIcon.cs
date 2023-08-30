@@ -1,9 +1,10 @@
-﻿using Klipboard.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
-using Workers;
+
+using Klipboard.Utils;
+using Klipboard.Workers;
 
 namespace Klipboard
 {
@@ -20,7 +21,7 @@ namespace Klipboard
             public bool NameFollowsClipboardContent;
         }
 
-        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, List<IWorker> workers)
+        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, IEnumerable<IWorker> workers)
         {
             m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
