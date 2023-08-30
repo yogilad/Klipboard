@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Klipboard.Workers
 {
-    public class OptionsWorker : WorkerBase
+    public class DirectIngestWorker : WorkerBase
     {
         private WorkerCategory m_category;
         private object? m_icon;
@@ -17,7 +17,7 @@ namespace Klipboard.Workers
         public override WorkerCategory Category => m_category;
         public override object? Icon => m_icon;
 
-        public OptionsWorker(WorkerCategory category, object? icon)
+        public DirectIngestWorker(WorkerCategory category, object? icon)
         {
             m_category = category;
             m_icon = icon;
@@ -25,7 +25,7 @@ namespace Klipboard.Workers
 
         public override string GetText(ClipboardContent content)
         {
-            return "Options";
+            return this.GetType().ToString();
         }
 
         public override string GetToolTipText(ClipboardContent content)

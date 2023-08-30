@@ -17,9 +17,9 @@ namespace Klipboard
             ApplicationConfiguration.Initialize();
 
             //
-            var icons = new Dictionary<WorkerCategory, object>()
+            var icons = new Dictionary<string, object>()
             { 
-                {WorkerCategory.QuickActions, ResourceLoader.GetIcon() } 
+                { "QuickActions", ResourceLoader.GetIcon() } 
             };
 
             var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).GetAwaiter().GetResult();
