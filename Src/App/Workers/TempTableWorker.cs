@@ -11,43 +11,19 @@ namespace Klipboard.Workers
 {
     public class TempTableWorker : WorkerBase
     {
-        private WorkerCategory m_category;
-        private object? m_icon;
-
-        public override WorkerCategory Category => m_category;
-        public override object? Icon => m_icon;
-
         public TempTableWorker(WorkerCategory category, object? icon)
+            : base(category, icon, ClipboardContent.None)
         {
-            m_category = category;
-            m_icon = icon;
         }
 
-        public override string GetText(ClipboardContent content)
+        public override string GetMenuText(ClipboardContent content)
         {
-            return this.GetType().ToString();
+            return "Paste Data to Temporay Table";
         }
 
         public override string GetToolTipText(ClipboardContent content)
         {
-            return string.Empty;
-        }
-
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override Task RunAsync(IClipboardHelper clipboardHelper, SendNotification sendNotification)
-        {
-            sendNotification("Not Implemented!", this.GetType().ToString());
-
-            return Task.CompletedTask;
+            return "Upload clipboard tabular data or up to 100 files to a temporary table and invoke a query on it";
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,21 +12,18 @@ namespace Klipboard.Workers
 {
     public class InlineQueryWorker : WorkerBase
     {
-        private WorkerCategory m_category;
-        private object? m_icon;
-
-        public override WorkerCategory Category => m_category;
-        public override object? Icon => m_icon;
+        private string m_currentCluster = "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
+        private string m_currentDatabase = "MyDatabase";
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
+        : base(category, icon, ClipboardContent.CSV)
         {
-            m_category = category;
-            m_icon = icon;
         }
 
-        public override string GetText(ClipboardContent content)
+        public override string GetMenuText(ClipboardContent content)
         {
-            var contentStr = content == ClipboardContent.None ? "Data" : content.ToString();
+            var contentToConsider = content & SupportedContent;
+            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
             return $"Paste {contentStr} to Inline Query";
         }
 
@@ -36,7 +34,7 @@ namespace Klipboard.Workers
 
         public override bool IsEnabled(ClipboardContent content)
         {
-            return content != ClipboardContent.None;
+            return (content & SupportedContent) != ClipboardContent.None;
         }
 
         public override bool IsVisible(ClipboardContent content)
@@ -44,48 +42,36 @@ namespace Klipboard.Workers
             return true;
         }
 
-        public override Task RunAsync(IClipboardHelper clipboardHelper, SendNotification sendNotification)
+        public override Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            return Task.Run(() => RunInlineQuery(clipboardHelper, sendNotification));
+            return Task.Run(() => HandleCsvData(csvData, sendNotification));
         }
 
-        private void RunInlineQuery(IClipboardHelper clipboardHelper, SendNotification sendNotification)
+        private void HandleCsvData(string csvData, SendNotification sendNotification)
         {
-            var content = clipboardHelper.GetClipboardContent();
-            string? queryLink;
-
-            switch (content)
+            if (csvData.Length > 20480)
             {
-                case ClipboardContent.CSV:
-                    if (!clipboardHelper.TryGetDataAsString(out var data))
-                    {
-                        sendNotification("Inline Query", "Failed to get data from Clipboard!");
-                        return; 
-                    }
+                sendNotification("Inline Query", "Inline query is limited to 20KB of source data.");
+                return;
+            }
 
-                    if (data == null || data.Length > 20480)
-                    {
-                        sendNotification("Inline Query", "Inline query is limited to 20KB of source data.");
-                    }
+            var success = TabularDataHelper.TryConvertTableToInlineQueryLink(
+                m_currentCluster,
+                m_currentDatabase,
+                csvData,
+                "\t",
+                out var queryLink);
 
-                    var success = TabularDataHelper.TryConvertTableToInlineQueryLink(
-                        "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net",
-                        "MyDatabase",
-                        data,
-                        "\t",
-                        out queryLink);
-
-                    if (!success || queryLink == null || queryLink.Length > 10240)
-                    {
-                        sendNotification("Inline Query", "Resulting query link excceds 10KB.");
-                        return;
-                    }
-
-                    break;
-
-                default:
-                    sendNotification("Inline Query", $"Data Type '{content}' is not supported.");
-                    return;
+            if (!success || queryLink == null || queryLink.Length > 10240)
+            {
+                sendNotification("Inline Query", "Failed to create query link.");
+                return;
+            }
+            
+            if (queryLink.Length > 10240)
+            {
+                sendNotification("Inline Query", "Resulting query link excceds 10KB.");
+                return;
             }
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
@@ -94,6 +80,5 @@ namespace Klipboard.Workers
                 UseShellExecute = true
             });
         }
-
     }
 }

@@ -1,53 +1,25 @@
 ﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Klipboard.Workers
 {
     public class ExternalDataQueryWorker : WorkerBase
     {
-        private WorkerCategory m_category;
-        private object? m_icon;
-
-        public override WorkerCategory Category => m_category;
-        public override object? Icon => m_icon;
-
         public ExternalDataQueryWorker(WorkerCategory category, object? icon)
+            : base(category, icon, ClipboardContent.None)
         {
-            m_category = category;
-            m_icon = icon;
         }
 
-        public override string GetText(ClipboardContent content)
+        public override string GetMenuText(ClipboardContent content)
         {
-            return this.GetType().ToString();
+            var contentToConsider = content & SupportedContent;
+            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
+            return $"Paste {contentStr} to External Data Query";
         }
 
         public override string GetToolTipText(ClipboardContent content)
         {
-            return string.Empty;
-        }
-
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override Task RunAsync(IClipboardHelper clipboardHelper, SendNotification sendNotification)
-        {
-            sendNotification("Not Implemented!", this.GetType().ToString());
-
-            return Task.CompletedTask;
+            return "Upload clipboard tabular data or a single file to a blob and invoke a an external data query on it";
         }
     }
 }

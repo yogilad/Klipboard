@@ -11,19 +11,12 @@ namespace Klipboard.Workers
 {
     public class ShareWorker : WorkerBase
     {
-        private WorkerCategory m_category;
-        private object? m_icon;
-
-        public override WorkerCategory Category => m_category;
-        public override object? Icon => m_icon;
-
         public ShareWorker(WorkerCategory category, object? icon)
+            : base(category, icon, ClipboardContent.None)
         {
-            m_category = category;
-            m_icon = icon;
         }
 
-        public override string GetText(ClipboardContent content)
+        public override string GetMenuText(ClipboardContent content)
         {
             return "Share Klipboard";
         }
@@ -38,12 +31,7 @@ namespace Klipboard.Workers
             return true;
         }
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override Task RunAsync(IClipboardHelper clipboardHelper, SendNotification sendNotification)
+        public override Task HandleAsync(SendNotification sendNotification)
         {
             var subject = "Have You Tried Klipboard for Kusto?";
             var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";

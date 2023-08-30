@@ -16,12 +16,6 @@ namespace Klipboard
         private ContextMenuStrip m_contextMenuStrip;
         private IClipboardHelper m_clipboardHelper;
 
-        private class ToolTipTag
-        {
-            public bool EnableFollowsClipboardContent;
-            public bool NameFollowsClipboardContent;
-        }
-
         public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, IEnumerable<WorkerBase> workers)
         {
             m_clipboardHelper = clipboardHelper;
@@ -45,45 +39,12 @@ namespace Klipboard
                     m_contextMenuStrip.Items.Add(new ToolStripSeparator());
                 }
 
-                m_contextMenuStrip.Items.Add(worker.GetText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(), Worker_OnClick);
+                m_contextMenuStrip.Items.Add(worker.GetMenuText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(), Worker_OnClick);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = worker.GetToolTipText(ClipboardContent.None);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = worker;
             
                 lastWorkerCategory = worker.Category;
             }
-
-            m_contextMenuStrip.Items.Add("Paste Data to External Data Query", null, null);
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or one file to a blob and invoke a an external data query on it";
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
-            {
-                EnableFollowsClipboardContent = true,
-                NameFollowsClipboardContent = true,
-            };
-            
-            m_contextMenuStrip.Items.Add("Paste Data to Temporay Table", null, null);
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or files to a temporary table and invoke a query on it";
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
-            {
-                EnableFollowsClipboardContent = true,
-                NameFollowsClipboardContent = true,
-            };
-
-            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
-            m_contextMenuStrip.Items.Add("Paste Data to Table", null, null);
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Upload clipboard tabular data or up to 100 files to a table";
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
-            {
-                EnableFollowsClipboardContent = true,
-                NameFollowsClipboardContent = true,
-            };
-
-            m_contextMenuStrip.Items.Add("Queue Data to Table", null, null);
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = "Queue clipboard tabular data or any number of files to a table";
-            m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = new ToolTipTag()
-            {
-                EnableFollowsClipboardContent = true,
-                NameFollowsClipboardContent = true,
-            };
 
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
@@ -128,7 +89,8 @@ namespace Klipboard
 
                 menuItem.Visible = worker.IsVisible(content);
                 menuItem.Enabled = worker.IsEnabled(content);
-                menuItem.Text = worker.GetText(content);
+                menuItem.Text = worker.GetMenuText(content);
+                menuItem.ToolTipText = worker.GetToolTipText(content);
             }
         }
 
@@ -160,12 +122,62 @@ namespace Klipboard
             var menuItem = Sender as ToolStripMenuItem;
             var worker = menuItem?.Tag as WorkerBase;
 
-            worker?.RunAsync(m_clipboardHelper, (title, message) => m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None));
+            if (worker == null)
+            {
+                return;
+            }
+
+            var content = m_clipboardHelper.GetClipboardContent();
+            var contentToHandle = content & worker.SupportedContent;
+
+            switch(contentToHandle)
+            {
+                case ClipboardContent.None:
+                    worker.HandleAsync(SendNotification);
+                    break;
+
+                case ClipboardContent.CSV:
+                    if (!m_clipboardHelper.TryGetDataAsString(out var csvData) || string.IsNullOrWhiteSpace(csvData))
+                    {
+                        SendNotification("Error!", "Failed to get CSV Data from clipboard");
+                        return;
+                    }
+
+                    Task.Run(() => worker.HandleCsvAsync(csvData, SendNotification));
+                    break;
+
+                case ClipboardContent.Text:
+                    if (!m_clipboardHelper.TryGetDataAsString(out var textData) || string.IsNullOrWhiteSpace(textData))
+                    {
+                        SendNotification("Error!", "Failed to get Text Data from clipboard");
+                        return;
+                    }
+
+                    Task.Run(() => worker.HandleTextAsync(textData, SendNotification));
+                    break;
+
+                case ClipboardContent.Files:
+                    if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) || 
+                            filesAndFolders == null || 
+                            filesAndFolders.Count == 0)
+                    {
+                        SendNotification("Error!", "Failed to get Files Data from clipboard");
+                        return;
+                    }
+
+                    Task.Run(() => worker.HandleFilesAsync(filesAndFolders, SendNotification));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)
         {
             Application.Exit();
         }
+
+        private void SendNotification(string title, string message) => m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None);
     }
 }
