@@ -1,6 +1,7 @@
 ﻿namespace Klipboard.Utils
 {
-    public enum ClipboardContent
+    [Flags]
+    public enum  ClipboardContent
     {
         None,
         CSV,

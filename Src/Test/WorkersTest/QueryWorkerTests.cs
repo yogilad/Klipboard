@@ -3,7 +3,7 @@ using Klipboard.Utils;
 using Klipboard.Workers;
 using Kusto.Cloud.Platform.Utils;
 
-namespace WorkersTest
+namespace Klipboard.Workers.Test
 {
     [TestClass]
     public class QueryWorkerTests

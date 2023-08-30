@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace TestUtils
+namespace Test.Utils
 {
     #region KustoType
     public enum KustoType

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -94,6 +95,11 @@ namespace Klipboard.Utils
 
         private static string SerializeDatetime(string field)
         {
+            if (DateTime.TryParse(field, out var dt))
+            {
+                return $"datetime({dt.Year}-{dt.Month}-{dt.Day} {dt.Hour}:{dt.Minute}:{dt.Second}.{dt.Millisecond})";
+            }
+
             return $"datetime({field})";
         }
 

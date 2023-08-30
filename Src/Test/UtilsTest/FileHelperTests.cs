@@ -1,7 +1,7 @@
 using Klipboard.Utils;
 using System.Text.RegularExpressions;
 
-namespace UtilsTest
+namespace Klipboard.Utils.Test
 {
     [TestClass]
     public class FileHelperTests

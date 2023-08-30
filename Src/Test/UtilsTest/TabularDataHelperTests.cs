@@ -1,7 +1,7 @@
 ﻿using Klipboard.Utils;
-using TestUtils;
+using Test.Utils;
 
-namespace UtilsTest
+namespace Klipboard.Utils.Test
 {
     [TestClass]
     public class TabularDataHelperTests

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using TestUtils;
+using Test.Utils;
 
-namespace UtilsTest
+namespace Klipboard.Utils.Test
 {
     [TestClass]
     public class TableGeneratorTests
