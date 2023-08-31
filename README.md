@@ -1,8 +1,8 @@
 # Klipboard - A Kusto Clipboard Companion 
-Kusto Companion is a Windows Utility aiming for a simpler and intuitive data import experiece in windows
+Klipboard is a Windows Utility aiming for a simpler and intuitive data import experiece in windows
 
 Planned capabilities
-* Ingestion of clipboard text  
-* Ingestion of clipboard files and folders
-* New or exisiting tables 
-* Multiple Service support 
+* Support clipboard tables, text, files and folders
+* Quick actions such as Inline query of small data items or files, Single item external data queries and uploading data to temp tables 
+* Direct ingestion of limited amounts of data to existing or new tables 
+* Queued ingestion of data to existing or new tables 
