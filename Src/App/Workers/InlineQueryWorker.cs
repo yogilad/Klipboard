@@ -1,12 +1,7 @@
-﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+
+using Klipboard.Utils;
+
 
 namespace Klipboard.Workers
 {
@@ -15,6 +10,7 @@ namespace Klipboard.Workers
         // TODO Get Defaults from AppConfig at runtime
         private string m_currentCluster = "kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
         private string m_currentDatabase = "MyDatabase";
+        private bool m_invokeDesktopQuery = false;
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
         : base(category, icon, ClipboardContent.CSV) // Todo Support Text and File Data
@@ -73,7 +69,15 @@ namespace Klipboard.Workers
                 return;
             }
 
-            var queryLink = $"https://dataexplorer.azure.com/clusters/{m_currentCluster}/databases/{m_currentDatabase}?query={query}";
+            string queryLink;
+            if (m_invokeDesktopQuery)
+            {
+                queryLink = $"https://{m_currentCluster}/{m_currentDatabase}?query={query}&web=0";
+            }
+            else
+            {
+                queryLink = $"https://dataexplorer.azure.com/clusters/{m_currentCluster}/databases/{m_currentDatabase}?query={query}";
+            }
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
