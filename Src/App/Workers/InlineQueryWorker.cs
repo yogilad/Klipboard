@@ -19,7 +19,7 @@ namespace Klipboard.Workers
         private const int c_maxAllowedDataLength = c_maxAllowedDataLengthKb * 1024;
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
-        : base(category, icon, ClipboardContent.CSV) // Todo Support Text and File Data
+        : base(category, icon, ClipboardContent.CSV | ClipboardContent.Text) // Todo Support Text and File Data
         {
         }
 
@@ -47,10 +47,21 @@ namespace Klipboard.Workers
 
         public override Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            return Task.Run(() => HandleCsvData(csvData, sendNotification));
+            return Task.Run(() => HandleCsvData(csvData, '\t', sendNotification));
         }
 
-        private void HandleCsvData(string csvData, SendNotification sendNotification)
+        public override Task HandleTextAsync(string textData, SendNotification sendNotification)
+        {
+            char? separator;
+
+            TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+            
+            // a failed detection could simply mean a single column
+            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
+
+        }
+
+        private void HandleCsvData(string csvData, char separator, SendNotification sendNotification)
         {
             if (m_forceLimits && csvData.Length > c_maxAllowedDataLength)
             {
@@ -60,7 +71,7 @@ namespace Klipboard.Workers
 
             var success = TabularDataHelper.TryConvertTableToInlineQueryGzipBase64(
                 csvData,
-                "\t",
+                separator.ToString(),
                 out var query);
 
             if (!success || query == null)

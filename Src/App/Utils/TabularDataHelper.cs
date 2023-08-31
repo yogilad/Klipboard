@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using System.IO.Compression;
 
 using Microsoft.VisualBasic.FileIO;
+using System.Diagnostics;
+using System.Transactions;
 
 namespace Klipboard.Utils
 {
@@ -77,6 +79,61 @@ namespace Klipboard.Utils
     public static class TabularDataHelper
     {
         #region Public APIs
+        public static bool TryDetectTabularTextFormatV2(string data, out char? separator)
+        {
+            // TODO implement separator detection
+            separator = null;
+
+            if (data[0] == '"')
+            {
+                var lastCharWasQuote = false;
+                for(int i = 1; i < data.Length; i++)
+                {
+                    if (data[i] == '"')
+                    {
+                        i++;
+                        if (i == data.Length)
+                        {
+                            return false;
+                        }
+
+                        if (data[i] != '"')
+                        {
+                            separator = data[i];
+                            return true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var stop = false;
+
+                foreach(char c in data)
+                {
+                    switch(c)
+                    {
+                        case '\n':
+                            stop = true;
+                            break;
+
+                        case '\t':
+                        case ',':
+                            separator = c;
+                            stop = true;
+                            break;
+                    }
+
+                    if (stop)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return separator != null;
+        }
+
         public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableScheme scheme, out bool firstRowIsHeader)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
@@ -260,7 +317,7 @@ namespace Klipboard.Utils
         #endregion
 
         #region old APIs who may not be necessary
-        public static bool TryDetectTabularTextFormat(string data, out char seperator)
+        public static bool TryDetectTabularTextFormatV1(string data, out char seperator)
         {
             seperator = '\0';
             if (string.IsNullOrWhiteSpace(data))
