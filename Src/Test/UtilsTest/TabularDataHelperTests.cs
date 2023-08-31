@@ -77,7 +77,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 100, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", out string inlineQuery);
+            var res = TabularDataHelper.TryConvertTableToInlineQueryText(tableData, "\t", out string inlineQuery);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQuery);
@@ -89,7 +89,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 200, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQueryLink("https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net", "MyDatabase",tableData, "\t", out string? inlineQueryLink);
+            var res = TabularDataHelper.TryConvertTableToInlineQueryGzipBase64(tableData, "\t", out string? inlineQueryLink);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQueryLink);
@@ -111,7 +111,7 @@ x	y	z
         [TestMethod]
         public void GivenValidTsv_WhenDetectFormat_ResultIsTab()
         {
-            Assert.IsTrue(TabularDataHelper.TryDetectTabularTextFormat(s_testData, out var separator));
+            Assert.IsTrue(TabularDataHelper.TryDetectTabularTextFormatV1(s_testData, out var separator));
             Assert.AreEqual('\t', separator);
         }
 
@@ -120,16 +120,64 @@ x	y	z
         {
             var data = s_testData.Replace("z", "z\t");
 
-            Assert.IsFalse(TabularDataHelper.TryDetectTabularTextFormat(data, out var separator));
+            Assert.IsFalse(TabularDataHelper.TryDetectTabularTextFormatV1(data, out var separator));
         }
 
         [TestMethod]
         public void GivenValidCsv_WhenDetectFormat_ResultIsComa()
         {
             var data = s_testData.Replace('\t', ',');
-            Assert.IsTrue(TabularDataHelper.TryDetectTabularTextFormat(data, out var separator));
+            Assert.IsTrue(TabularDataHelper.TryDetectTabularTextFormatV1(data, out var separator));
             Assert.AreEqual(',', separator);
         }
+
+
+        [TestMethod]
+        [DataRow("Escape   ,end")]
+        [DataRow("\",\",end")]
+        [DataRow("\"\"\",\"\"\",end")]
+        [DataRow("\",\"\",\",end")]
+        [DataRow("\"\"\"\",end")]
+        [DataRow("\"xx \"\" xx \"\" x\",end")]
+        [DataRow("\"x\ty\",end")]
+        [DataRow("\",\",end")]
+        [DataRow("\"\tp\t\",end")]
+        [DataRow("\"\"\"\",end")]
+        [DataRow("\"\"\"11\"\"111\"\"\"\"2\"\"\",end")]
+        public void GivenValidCsv_WhenDetectSeparator_ThenResultAsExpected(string row)
+        {
+            var test1 = row;
+            var test2 = row + "\nxxx";
+            var test3 = row.Replace(",end", "\tend");
+            var test4 = test3 + "\nxxx";
+            var test5 = row.Replace(",end", "");
+
+            var res = TabularDataHelper.TryDetectTabularTextFormatV2(test1, out var separator);
+            Assert.IsTrue(res);
+            Assert.IsTrue(separator == ',');
+
+            res = TabularDataHelper.TryDetectTabularTextFormatV2(test2, out separator);
+            Assert.IsTrue(res);
+            Assert.IsTrue(separator == ',');
+
+            res = TabularDataHelper.TryDetectTabularTextFormatV2(test3, out separator);
+            Assert.IsTrue(res);
+            Assert.IsTrue(separator == '\t');
+
+            res = TabularDataHelper.TryDetectTabularTextFormatV2(test4, out separator);
+            Assert.IsTrue(res);
+            Assert.IsTrue(separator == '\t');
+
+            res = TabularDataHelper.TryDetectTabularTextFormatV2(test5, out separator);
+            Assert.AreEqual(res, false);
+            Assert.IsTrue(separator == null);
+        }
+
+        
+
+
+
+
         #endregion
     }
 }

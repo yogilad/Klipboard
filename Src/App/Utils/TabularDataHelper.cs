@@ -1,19 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Windows;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System.ComponentModel.DataAnnotations;
-
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.FileIO;
-using System.ComponentModel;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
-using System.Reflection.Metadata.Ecma335;
+
+using Microsoft.VisualBasic.FileIO;
+using System.Diagnostics;
+using System.Transactions;
 
 namespace Klipboard.Utils
 {
@@ -88,6 +79,61 @@ namespace Klipboard.Utils
     public static class TabularDataHelper
     {
         #region Public APIs
+        public static bool TryDetectTabularTextFormatV2(string data, out char? separator)
+        {
+            // TODO implement separator detection
+            separator = null;
+
+            if (data[0] == '"')
+            {
+                var lastCharWasQuote = false;
+                for(int i = 1; i < data.Length; i++)
+                {
+                    if (data[i] == '"')
+                    {
+                        i++;
+                        if (i == data.Length)
+                        {
+                            return false;
+                        }
+
+                        if (data[i] != '"')
+                        {
+                            separator = data[i];
+                            return true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var stop = false;
+
+                foreach(char c in data)
+                {
+                    switch(c)
+                    {
+                        case '\n':
+                            stop = true;
+                            break;
+
+                        case '\t':
+                        case ',':
+                            separator = c;
+                            stop = true;
+                            break;
+                    }
+
+                    if (stop)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return separator != null;
+        }
+
         public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableScheme scheme, out bool firstRowIsHeader)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
@@ -106,7 +152,31 @@ namespace Klipboard.Utils
             return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, out string inlineQuery)
+        public static bool TryConvertTableToInlineQueryGzipBase64(string tableData, string delimiter, out string? inlineQuery)
+        {
+            if (!TryConvertTableToInlineQueryText(tableData, delimiter, out inlineQuery))
+            {
+                inlineQuery = null;
+                return false;
+            }
+
+            using (var outputStream = new MemoryStream())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
+
+                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+
+                var gzipBytes = outputStream.ToArray();
+                inlineQuery = Convert.ToBase64String(gzipBytes);
+            }
+
+            return true;
+        }
+
+        public static bool TryConvertTableToInlineQueryText(string tableData, string delimiter, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
@@ -155,44 +225,6 @@ namespace Klipboard.Utils
             builder.AppendLine("];");
             builder.AppendLine("Klipboard");
             inlineQuery = builder.ToString();
-            return true;
-        }
-
-        public static bool TryConvertTableToInlineQueryLink(string taregtClusterUri, string targetDb, string tableData, string delimiter, out string? inlineQueryLink)
-        {
-            string outputbase64Query;
-
-            inlineQueryLink = null;
-            if (!TryConvertTableToInlineQuery(tableData, delimiter, out var inlineQuery))
-            {
-                return false;
-            }
-
-
-            using (var outputStream = new MemoryStream())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
-
-                using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
-                {
-                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
-                }
-
-                var gzipBytes = outputStream.ToArray();
-                outputbase64Query = Convert.ToBase64String(gzipBytes);
-            }
-
-            if (!Uri.TryCreate(taregtClusterUri, UriKind.Absolute, out var uri))
-            {
-                return false;
-            }
-
-            if (!Uri.TryCreate(uri, $"/{ targetDb}?query=", out uri))
-            {
-                return false;
-            }
-
-            inlineQueryLink = uri.ToString() + outputbase64Query;
             return true;
         }
 
@@ -285,7 +317,7 @@ namespace Klipboard.Utils
         #endregion
 
         #region old APIs who may not be necessary
-        public static bool TryDetectTabularTextFormat(string data, out char seperator)
+        public static bool TryDetectTabularTextFormatV1(string data, out char seperator)
         {
             seperator = '\0';
             if (string.IsNullOrWhiteSpace(data))

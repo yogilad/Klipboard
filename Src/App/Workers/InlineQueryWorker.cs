@@ -1,22 +1,25 @@
-﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+
+using Klipboard.Utils;
+
 
 namespace Klipboard.Workers
 {
     public class InlineQueryWorker : WorkerBase
     {
-        private string m_currentCluster = "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
+        // TODO Get Defaults from AppConfig at runtime
+        private string m_currentCluster = "kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
         private string m_currentDatabase = "MyDatabase";
+        private bool m_invokeDesktopQuery = false;
+        private bool m_forceLimits = true;
+
+        private const int c_max_allowedQueryLengthKB = 12;
+        private const int c_max_allowedQueryLength = c_max_allowedQueryLengthKB * 1024;
+        private const int c_maxAllowedDataLengthKb = c_max_allowedQueryLengthKB * 10;
+        private const int c_maxAllowedDataLength = c_maxAllowedDataLengthKb * 1024;
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
-        : base(category, icon, ClipboardContent.CSV)
+        : base(category, icon, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files) // Todo Support Text and File Data
         {
         }
 
@@ -44,34 +47,105 @@ namespace Klipboard.Workers
 
         public override Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            return Task.Run(() => HandleCsvData(csvData, sendNotification));
+            return Task.Run(() => HandleCsvData(csvData, '\t', sendNotification));
         }
 
-        private void HandleCsvData(string csvData, SendNotification sendNotification)
+        public override Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
-            if (csvData.Length > 20480)
+            char? separator;
+
+            TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+            
+            // a failed detection could simply mean a single column
+            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
+
+        }
+
+        public override Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
+        {
+            if (files.Count > 1) 
             {
-                sendNotification("Inline Query", "Inline query is limited to 20KB of source data.");
+                sendNotification("Inline Query", "Inline query only supports a single file.");
+            }
+
+            var file = files[0];
+            var fileInfo = new FileInfo(file);
+
+            if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                sendNotification("Inline Query", "Inline query does not support directories.");
+                return Task.CompletedTask;
+            }
+
+            if (!fileInfo.Exists) 
+            {
+                sendNotification("Inline Query", $"File '{file}' does not exist.");
+                return Task.CompletedTask;
+            }
+
+            if (fileInfo.Length > c_maxAllowedDataLength)
+            {
+                sendNotification("Inline Query", $"File size exceeds max limit of {c_maxAllowedDataLengthKb}KB for inline query ");
+                return Task.CompletedTask;
+            }
+
+            string textData = File.ReadAllText(file);
+            char? separator;
+
+            if (fileInfo.Extension.Equals("csv", StringComparison.OrdinalIgnoreCase))
+            {
+                separator = ',';
+            }
+            else if (fileInfo.Extension.Equals("tsv", StringComparison.OrdinalIgnoreCase))
+            {
+                separator = '\t';
+            }
+            else
+            {
+                TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+            }
+
+            // a failed detection could simply mean a single column
+            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
+        }
+
+        private void HandleCsvData(string csvData, char separator, SendNotification sendNotification)
+        {
+            if (m_forceLimits && csvData.Length > c_maxAllowedDataLength)
+            {
+                sendNotification("Inline Query", $"Source data size {(int) (csvData.Length / 1024)} is greater then inline query limited of {c_maxAllowedDataLengthKb}KB.");
                 return;
             }
 
-            var success = TabularDataHelper.TryConvertTableToInlineQueryLink(
-                m_currentCluster,
-                m_currentDatabase,
+            var success = TabularDataHelper.TryConvertTableToInlineQueryGzipBase64(
                 csvData,
-                "\t",
-                out var queryLink);
+                separator.ToString(),
+                out var query);
 
-            if (!success || queryLink == null || queryLink.Length > 10240)
+            if (!success || query == null)
             {
                 sendNotification("Inline Query", "Failed to create query link.");
                 return;
             }
-            
-            if (queryLink.Length > 10240)
+
+#if DEBUG
+            sendNotification("Debug", $"Input Length={csvData.Length}, Output Legth={query.Length}");
+#endif
+
+            if (m_forceLimits && query.Length > c_max_allowedQueryLength)
             {
-                sendNotification("Inline Query", "Resulting query link excceds 10KB.");
+                sendNotification("Inline Query", $"Resulting query link excceds {c_max_allowedQueryLengthKB}KB.");
                 return;
+            }
+
+            string queryLink;
+            if (m_invokeDesktopQuery)
+            {
+                queryLink = $"https://{m_currentCluster}/{m_currentDatabase}?query={query}&web=0";
+            }
+            else
+            {
+                queryLink = $"https://dataexplorer.azure.com/clusters/{m_currentCluster}/databases/{m_currentDatabase}?query={query}";
             }
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
