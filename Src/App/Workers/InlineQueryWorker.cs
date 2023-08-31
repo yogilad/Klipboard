@@ -11,6 +11,12 @@ namespace Klipboard.Workers
         private string m_currentCluster = "kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
         private string m_currentDatabase = "MyDatabase";
         private bool m_invokeDesktopQuery = false;
+        private bool m_forceLimits = true;
+
+        private const int c_max_allowedQueryLengthKB = 12;
+        private const int c_max_allowedQueryLength = c_max_allowedQueryLengthKB * 1024;
+        private const int c_maxAllowedDataLengthKb = c_max_allowedQueryLengthKB * 10;
+        private const int c_maxAllowedDataLength = c_maxAllowedDataLengthKb * 1024;
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
         : base(category, icon, ClipboardContent.CSV) // Todo Support Text and File Data
@@ -46,9 +52,9 @@ namespace Klipboard.Workers
 
         private void HandleCsvData(string csvData, SendNotification sendNotification)
         {
-            if (csvData.Length > 20480)
+            if (m_forceLimits && csvData.Length > c_maxAllowedDataLength)
             {
-                sendNotification("Inline Query", "Inline query is limited to 20KB of source data.");
+                sendNotification("Inline Query", $"Source data size {(int) (csvData.Length / 1024)} is greater then inline query limited of {c_maxAllowedDataLengthKb}KB.");
                 return;
             }
 
@@ -62,10 +68,14 @@ namespace Klipboard.Workers
                 sendNotification("Inline Query", "Failed to create query link.");
                 return;
             }
-            
-            if (query.Length > 10240)
+
+#if DEBUG
+            sendNotification("Debug", $"Input Length={csvData.Length}, Output Legth={query.Length}");
+#endif
+
+            if (m_forceLimits && query.Length > c_max_allowedQueryLength)
             {
-                sendNotification("Inline Query", "Resulting query link excceds 10KB.");
+                sendNotification("Inline Query", $"Resulting query link excceds {c_max_allowedQueryLengthKB}KB.");
                 return;
             }
 

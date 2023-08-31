@@ -61,8 +61,8 @@ namespace Klipboard.Utils
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { KqlDataType.BoolType,    s => s},
-                { KqlDataType.LongType,    s => s},
-                { KqlDataType.RealType,    s => s},
+                { KqlDataType.LongType,    s => SerializeLong(s)},
+                { KqlDataType.RealType,    s => SerializeReal(s)},
                 { KqlDataType.TimeSpanType,s => SerializeTimeSpan(s)},
                 { KqlDataType.DateTimeType,s => SerializeDatetime(s)},
                 { KqlDataType.DynamicType, s => SerializeDynamic(s)},
@@ -131,6 +131,38 @@ namespace Klipboard.Utils
         private static string SerializeGuid(string field)
         {
             return $"\"{field}\"";
+        }
+
+        private static string SerializeReal(string field)
+        {
+            if(!field.Contains(","))
+            {
+                return field;
+            }
+
+            if (double.TryParse(field, out var r))
+            {
+                // Hoping this will not fail in wierd locales
+                return r.ToString();
+            }
+
+            return field;
+        }
+
+        private static string SerializeLong(string field)
+        {
+            if (!field.Contains(","))
+            {
+                return field;
+            }
+
+            if (long.TryParse(field, out var l))
+            {
+                // Hoping this will not fail in wierd locales
+                return l.ToString();
+            }
+
+            return field;
         }
     }
 }

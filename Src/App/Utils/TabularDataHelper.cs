@@ -1,19 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Windows;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using System.ComponentModel.DataAnnotations;
-
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.FileIO;
-using System.ComponentModel;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
-using System.Reflection.Metadata.Ecma335;
+
+using Microsoft.VisualBasic.FileIO;
 
 namespace Klipboard.Utils
 {
