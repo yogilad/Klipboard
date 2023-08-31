@@ -106,7 +106,31 @@ namespace Klipboard.Utils
             return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, out string inlineQuery)
+        public static bool TryConvertTableToInlineQueryGzipBase64(string tableData, string delimiter, out string? inlineQuery)
+        {
+            if (!TryConvertTableToInlineQueryText(tableData, delimiter, out inlineQuery))
+            {
+                inlineQuery = null;
+                return false;
+            }
+
+            using (var outputStream = new MemoryStream())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
+
+                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+
+                var gzipBytes = outputStream.ToArray();
+                inlineQuery = Convert.ToBase64String(gzipBytes);
+            }
+
+            return true;
+        }
+
+        public static bool TryConvertTableToInlineQueryText(string tableData, string delimiter, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
@@ -155,44 +179,6 @@ namespace Klipboard.Utils
             builder.AppendLine("];");
             builder.AppendLine("Klipboard");
             inlineQuery = builder.ToString();
-            return true;
-        }
-
-        public static bool TryConvertTableToInlineQueryLink(string taregtClusterUri, string targetDb, string tableData, string delimiter, out string? inlineQueryLink)
-        {
-            string outputbase64Query;
-
-            inlineQueryLink = null;
-            if (!TryConvertTableToInlineQuery(tableData, delimiter, out var inlineQuery))
-            {
-                return false;
-            }
-
-
-            using (var outputStream = new MemoryStream())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
-
-                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
-                {
-                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
-                }
-
-                var gzipBytes = outputStream.ToArray();
-                outputbase64Query = Convert.ToBase64String(gzipBytes);
-            }
-
-            if (!Uri.TryCreate(taregtClusterUri, UriKind.Absolute, out var uri))
-            {
-                return false;
-            }
-
-            if (!Uri.TryCreate(uri, $"/{ targetDb}?query=", out uri))
-            {
-                return false;
-            }
-
-            inlineQueryLink = uri.ToString() + outputbase64Query;
             return true;
         }
 

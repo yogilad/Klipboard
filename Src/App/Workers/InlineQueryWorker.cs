@@ -13,7 +13,7 @@ namespace Klipboard.Workers
     public class InlineQueryWorker : WorkerBase
     {
         // TODO Get Defaults from AppConfig at runtime
-        private string m_currentCluster = "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
+        private string m_currentCluster = "kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
         private string m_currentDatabase = "MyDatabase";
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
@@ -56,24 +56,24 @@ namespace Klipboard.Workers
                 return;
             }
 
-            var success = TabularDataHelper.TryConvertTableToInlineQueryLink(
-                m_currentCluster,
-                m_currentDatabase,
+            var success = TabularDataHelper.TryConvertTableToInlineQueryGzipBase64(
                 csvData,
                 "\t",
-                out var queryLink);
+                out var query);
 
-            if (!success || queryLink == null || queryLink.Length > 10240)
+            if (!success || query == null)
             {
                 sendNotification("Inline Query", "Failed to create query link.");
                 return;
             }
             
-            if (queryLink.Length > 10240)
+            if (query.Length > 10240)
             {
                 sendNotification("Inline Query", "Resulting query link excceds 10KB.");
                 return;
             }
+
+            var queryLink = $"https://dataexplorer.azure.com/clusters/{m_currentCluster}/databases/{m_currentDatabase}?query={query}";
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
