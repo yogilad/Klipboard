@@ -19,7 +19,7 @@ namespace Klipboard.Workers
         private const int c_maxAllowedDataLength = c_maxAllowedDataLengthKb * 1024;
 
         public InlineQueryWorker(WorkerCategory category, object? icon)
-        : base(category, icon, ClipboardContent.CSV | ClipboardContent.Text) // Todo Support Text and File Data
+        : base(category, icon, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files) // Todo Support Text and File Data
         {
         }
 
@@ -59,6 +59,54 @@ namespace Klipboard.Workers
             // a failed detection could simply mean a single column
             return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
 
+        }
+
+        public override Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
+        {
+            if (files.Count > 1) 
+            {
+                sendNotification("Inline Query", "Inline query only supports a single file.");
+            }
+
+            var file = files[0];
+            var fileInfo = new FileInfo(file);
+
+            if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                sendNotification("Inline Query", "Inline query does not support directories.");
+                return Task.CompletedTask;
+            }
+
+            if (!fileInfo.Exists) 
+            {
+                sendNotification("Inline Query", $"File '{file}' does not exist.");
+                return Task.CompletedTask;
+            }
+
+            if (fileInfo.Length > c_maxAllowedDataLength)
+            {
+                sendNotification("Inline Query", $"File size exceeds max limit of {c_maxAllowedDataLengthKb}KB for inline query ");
+                return Task.CompletedTask;
+            }
+
+            string textData = File.ReadAllText(file);
+            char? separator;
+
+            if (fileInfo.Extension.Equals("csv", StringComparison.OrdinalIgnoreCase))
+            {
+                separator = ',';
+            }
+            else if (fileInfo.Extension.Equals("tsv", StringComparison.OrdinalIgnoreCase))
+            {
+                separator = '\t';
+            }
+            else
+            {
+                TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+            }
+
+            // a failed detection could simply mean a single column
+            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
         }
 
         private void HandleCsvData(string csvData, char separator, SendNotification sendNotification)
