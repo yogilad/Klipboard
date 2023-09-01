@@ -59,7 +59,7 @@ namespace Klipboard.Utils
         {
             var max = m_matchers.MaxBy(x => x.Count);
 
-            return max.Count == 0 ?  s_stringDefinition : max.KqlTypeDef;
+            return (max == null || max.Count == 0) ?  s_stringDefinition : max.KqlTypeDef;
         }
 
         public void AnalyzeField(string field)
@@ -86,7 +86,6 @@ namespace Klipboard.Utils
 
             if (data[0] == '"')
             {
-                var lastCharWasQuote = false;
                 for(int i = 1; i < data.Length; i++)
                 {
                     if (data[i] == '"')
@@ -216,6 +215,12 @@ namespace Klipboard.Utils
             while(!streamReader.EndOfStream)
             {
                 var line = streamReader.ReadLine();
+
+                if (line == null)
+                {
+                    continue;
+                }
+
                 var escapedLine = KqlTypeHelper.SerializeString(line);
 
                 queryBuilder.Append(escapedLine);
