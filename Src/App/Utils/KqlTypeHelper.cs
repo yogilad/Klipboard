@@ -72,7 +72,7 @@ namespace Klipboard.Utils
 
         public static KqlTypeDefinition GetTypeDedfinition(KqlDataType type) => s_types[type];
 
-        private static bool IsMatchTimeSpan(string s)
+        public static bool IsMatchTimeSpan(string s)
         {
             return s_timespanRegex1.IsMatch(s) || s_timespanRegex2.IsMatch(s);
         }
@@ -87,13 +87,13 @@ namespace Klipboard.Utils
             return s_inlineSerializersInternal[typeDef.Type](field);
         }
 
-        private static bool IsMatchDynamic(string s)
+        public static bool IsMatchDynamic(string s)
         {
             s = s.Trim('"');
             return s.StartsWith("{") && s.EndsWith("}") || s.StartsWith("[") && s.EndsWith("]");
         }
 
-        private static string SerializeDatetime(string field)
+        public static string SerializeDatetime(string field)
         {
             if (DateTime.TryParse(field, out var dt))
             {
@@ -103,7 +103,7 @@ namespace Klipboard.Utils
             return $"datetime({field})";
         }
 
-        private static string SerializeTimeSpan(string field)
+        public static string SerializeTimeSpan(string field)
         {
             if (s_timespanRegex2.IsMatch(field))
             {
@@ -113,7 +113,7 @@ namespace Klipboard.Utils
             return field;
         }
 
-        private static string SerializeDynamic(string field)
+        public static string SerializeDynamic(string field)
         {
             if (field.StartsWith("\"") && field.EndsWith("\"")) 
             {
@@ -123,17 +123,20 @@ namespace Klipboard.Utils
             return $"\"{field.Replace("\"", "\\\"")}\"";
         }
 
-        private static string SerializeString(string field)
+        public static string SerializeString(string field)
         {
-            return $"\"{field.Replace("\"", "\\\"")}\"";
+            field = field.Replace("\\", "\\\\");
+            field = field.Replace("\"", "\\\"");
+
+            return $"\"{field}\"";
         }
 
-        private static string SerializeGuid(string field)
+        public static string SerializeGuid(string field)
         {
             return $"\"{field}\"";
         }
 
-        private static string SerializeReal(string field)
+        public static string SerializeReal(string field)
         {
             if(!field.Contains(","))
             {
@@ -149,7 +152,7 @@ namespace Klipboard.Utils
             return field;
         }
 
-        private static string SerializeLong(string field)
+        public static string SerializeLong(string field)
         {
             if (!field.Contains(","))
             {

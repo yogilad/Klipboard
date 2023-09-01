@@ -18,9 +18,11 @@ namespace Klipboard.Workers
             // Quick Actions 
             icons.TryGetValue("QuickActions", out var quickActionIcon);
             workers.Add(new QuickActionsWorker(WorkerCategory.QuickActions, quickActionIcon));
-            workers.Add(new InlineQueryWorker(WorkerCategory.QuickActions, null));
+            workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, null));
+            workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, null));
             workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, null));
             workers.Add(new TempTableWorker(WorkerCategory.QuickActions, null));
+            workers.Add(new InspectDataWorker(WorkerCategory.QuickActions, null));
 
             // Actions 
             workers.Add(new DirectIngestWorker(WorkerCategory.Actions, null));
