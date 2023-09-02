@@ -21,11 +21,15 @@ namespace Klipboard.Workers
             return "Display a preview of Clipboard Data"; ;
         }
 
+        public override bool IsVisible(ClipboardContent content)
+        {
+            return AppConstants.DevMode;
+        }
+
         public override bool IsEnabled(ClipboardContent content)
         {
             return content != ClipboardContent.None;
         }
-
 
         public abstract Task ShowContent(string clipboardContent);
 
