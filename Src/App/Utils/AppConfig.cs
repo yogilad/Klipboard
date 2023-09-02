@@ -41,6 +41,9 @@ namespace Klipboard.Utils
 
         // Auto start application when windows starts 
         public bool StartAutomatically = false;
+
+        // Create free text queries with a default parse command
+        public string DefaultUnstructuredDataParseCommand = string.Empty;
         #endregion
 
         #region Construction
