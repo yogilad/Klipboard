@@ -2,6 +2,14 @@
 
 namespace Klipboard.Workers
 {
+    public enum WorkerCategory
+    {
+        QuickActions,
+        Actions,
+        Management,
+        Debug
+    }
+
     public abstract class WorkerBase
     {
         public delegate void SendNotification(string title, string message);
