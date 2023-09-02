@@ -5,18 +5,51 @@ using System.Text.Json.Serialization;
 
 namespace Klipboard.Utils
 {
+    #region App Constats
+    public static class AppConstants
+    {
+        // Debug Config
+#if DEBUG
+        public static readonly bool DevMode = true;
+        public static readonly bool EnforceInlineQuerySizeLimits = true;
+#else
+        public bool DevMode = false;
+        public static bool EnforceInlineQuerySizeLimits = true;
+#endif
+
+        // Program Constants
+        public static readonly int MaxAllowedQueryLengthKB = 12;
+        public static readonly int MaxAllowedQueryLength = MaxAllowedQueryLengthKB * 1024;
+        public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 10;
+        public static readonly int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
+
+    }
+    #endregion
+
     #region App Config
     public class AppConfig
     {
-        // Debug Config
-        public bool DevMode;
+        #region Connection Configuration
         // Kusto Configuration
-        public HashSet<String> KustoConnectionStrings { set; get; }
+        public HashSet<String> KustoConnectionStrings;
+        public String DefaultClusterConnectionString;
+        public String DefaultClusterDatabaseName;
+        #endregion
 
+        #region Behavior Configuration
+        // if set to true invokes queries in Kusto Explorer, otherwise invokes queries in Kusto Web Explorer
+        public bool InvokeQueryInDesktopApp = false;
+
+        // Auto start application when windows starts 
+        public bool StartAutomatically = false;
+        #endregion
+
+        #region Construction
         internal AppConfig()
         {
             KustoConnectionStrings = new HashSet<String>();
         }
+        #endregion 
     }
     #endregion
 
@@ -32,14 +65,18 @@ namespace Klipboard.Utils
             s_configPath = Path.Combine(s_configDir, "config.json");
         }
 
-        public static async Task<AppConfig> CreateDebugConfig()
+        public static Task<AppConfig> CreateDebugConfig()
         {
-            var config = await Read();
+            var config = new AppConfig();
+            var myCluster = Environment.GetEnvironmentVariable("KUSTO_ENGINE") ?? "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/";
+            var myDb = Environment.GetEnvironmentVariable("KUSTO_DATABASE") ?? "MyDatabase";
 
-            config.DevMode = true;
-            config.KustoConnectionStrings.Add("https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/");
+            myCluster = myCluster.Trim().TrimEnd('/');
+            config.DefaultClusterConnectionString = myCluster;
+            config.DefaultClusterDatabaseName = myDb;
+            config.KustoConnectionStrings.Add(myCluster);
 
-            return config;
+            return Task.FromResult(config);
         }
 
         public static async Task<AppConfig> Read()

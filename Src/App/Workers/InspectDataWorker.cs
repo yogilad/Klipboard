@@ -9,21 +9,21 @@ using System.Threading.Tasks;
 
 namespace Klipboard.Workers
 {
-    public class QueueIngestWorker : WorkerBase
+    public class InspectDataWorker : WorkerBase
     {
-        public QueueIngestWorker(WorkerCategory category, AppConfig config, object? icon = null)
+        public InspectDataWorker(WorkerCategory category, AppConfig config, object? icon = null)
             : base(category, ClipboardContent.None, config, icon)
         {
         }
 
         public override string GetMenuText(ClipboardContent content)
         {
-            return "Queue Data to Table";
+            return $"Inspect Clipboard Content ({content})";
         }
 
         public override string GetToolTipText(ClipboardContent content)
         {
-            return "Queue clipboard tabular data or any number of files to a table"; ;
+            return "Display a preview of Clipboard Data"; ;
         }
     }
 }

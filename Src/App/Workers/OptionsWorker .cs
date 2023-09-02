@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class OptionsWorker : WorkerBase
     {
-        public OptionsWorker(WorkerCategory category, object? icon)
-            : base(category, icon, ClipboardContent.None)
+        public OptionsWorker(WorkerCategory category, AppConfig config, object? icon = null)
+            : base(category, ClipboardContent.None, config, icon)
         {
         }
 

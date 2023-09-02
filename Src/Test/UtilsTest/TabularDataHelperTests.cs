@@ -77,7 +77,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 100, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQueryText(tableData, "\t", out string inlineQuery);
+            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", out string inlineQuery);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQuery);
@@ -89,7 +89,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 200, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQueryGzipBase64(tableData, "\t", out string? inlineQueryLink);
+            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", out string? inlineQueryLink);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQueryLink);

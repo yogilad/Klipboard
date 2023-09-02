@@ -59,7 +59,7 @@ namespace Klipboard.Utils
         {
             var max = m_matchers.MaxBy(x => x.Count);
 
-            return max.Count == 0 ?  s_stringDefinition : max.KqlTypeDef;
+            return (max == null || max.Count == 0) ?  s_stringDefinition : max.KqlTypeDef;
         }
 
         public void AnalyzeField(string field)
@@ -86,7 +86,6 @@ namespace Klipboard.Utils
 
             if (data[0] == '"')
             {
-                var lastCharWasQuote = false;
                 for(int i = 1; i < data.Length; i++)
                 {
                     if (data[i] == '"')
@@ -152,31 +151,7 @@ namespace Klipboard.Utils
             return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQueryGzipBase64(string tableData, string delimiter, out string? inlineQuery)
-        {
-            if (!TryConvertTableToInlineQueryText(tableData, delimiter, out inlineQuery))
-            {
-                inlineQuery = null;
-                return false;
-            }
-
-            using (var outputStream = new MemoryStream())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(inlineQuery);
-
-                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
-                {
-                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
-                }
-
-                var gzipBytes = outputStream.ToArray();
-                inlineQuery = Convert.ToBase64String(gzipBytes);
-            }
-
-            return true;
-        }
-
-        public static bool TryConvertTableToInlineQueryText(string tableData, string delimiter, out string inlineQuery)
+        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
@@ -228,15 +203,54 @@ namespace Klipboard.Utils
             return true;
         }
 
-        private static bool TryJoinUri(Uri? left, string right, out Uri? result)
+        public static bool TryConvertFreeTextToInlineQuery(string freeText, out string inlineQuery)
         {
-            if (left == null)
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(freeText));
+            var streamReader = new StreamReader(stream);
+            var queryBuilder = new StringBuilder();
+
+            queryBuilder.AppendLine("let Klipboard = datatable(['Line']:string)");
+            queryBuilder.AppendLine("[");
+
+            while(!streamReader.EndOfStream)
             {
-                return Uri.TryCreate(right, UriKind.Absolute, out result);
+                var line = streamReader.ReadLine();
+
+                if (line == null)
+                {
+                    continue;
+                }
+
+                var escapedLine = KqlTypeHelper.SerializeString(line);
+
+                queryBuilder.Append(escapedLine);
+                queryBuilder.AppendLine(",");
             }
 
-            return Uri.TryCreate(left, right, out result);
+            queryBuilder.AppendLine("];");
+            queryBuilder.AppendLine("Klipboard");
+            inlineQuery = queryBuilder.ToString();
+            return true;
         }
+
+        public static string GzipBase64(string inputString)
+        {
+            using (var outputStream = new MemoryStream())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(inputString);
+
+                using (var gZipStream = new GZipStream(outputStream, CompressionLevel.SmallestSize))
+                {
+                    gZipStream.Write(inputBytes, 0, inputBytes.Length);
+                }
+
+                var gzipBytes = outputStream.ToArray();
+                var outputString = Convert.ToBase64String(gzipBytes);
+                
+                return outputString;
+            }
+        }
+
         #endregion
 
         #region Private APIs
