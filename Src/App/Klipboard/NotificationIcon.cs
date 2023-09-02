@@ -48,8 +48,8 @@ namespace Klipboard
 
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
-            // Init the menu items
-            if (config.DevMode)
+            // Init debug menu items
+            if (AppConstants.DevMode)
             {
                 m_contextMenuStrip.Items.Add(new ToolStripSeparator());
                 m_contextMenuStrip.Items.Add("*** Debug Items ***");

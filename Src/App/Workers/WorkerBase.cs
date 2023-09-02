@@ -9,16 +9,18 @@ namespace Klipboard.Workers
         protected readonly ClipboardContent m_supportedContent;
         protected readonly WorkerCategory m_category;
         protected readonly object? m_icon;
+        protected readonly AppConfig m_appConfig;
 
         public ClipboardContent SupportedContent => m_supportedContent;
         public WorkerCategory Category => m_category;
         public object? Icon => m_icon;
 
-        protected WorkerBase(WorkerCategory category, object? icon, ClipboardContent supportedContent)
+        protected WorkerBase(WorkerCategory category, ClipboardContent supportedContent, AppConfig config, object? icon = null)
         {
             m_supportedContent = supportedContent;
             m_category = category;
             m_icon = icon;
+            m_appConfig = config;
         }
 
         public virtual bool IsVisible(ClipboardContent content)

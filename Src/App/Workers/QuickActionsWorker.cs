@@ -11,8 +11,8 @@ namespace Klipboard.Workers
 {
     public class QuickActionsWorker : WorkerBase
     {
-        public QuickActionsWorker(WorkerCategory category, object? icon)
-            : base(category, icon, ClipboardContent.None)
+        public QuickActionsWorker(WorkerCategory category, AppConfig config, object? icon = null)
+            : base(category, ClipboardContent.None, config, icon)
         {
         }
 

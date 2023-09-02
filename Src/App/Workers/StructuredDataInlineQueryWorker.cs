@@ -7,20 +7,11 @@ namespace Klipboard.Workers
 {
     public class StructuredDataInlineQueryWorker : WorkerBase
     {
-        // TODO Get Defaults from AppConfig at runtime
-        private string m_currentCluster = "kvcd8ed305830f049bbac1.northeurope.kusto.windows.net";
-        private string m_currentDatabase = "MyDatabase";
-        private bool m_invokeDesktopQuery = false;
-        private bool m_forceLimits = true;
+        // Static members
+        private static string NotifcationTitle => "Inline Query";
 
-        private const int c_max_allowedQueryLengthKB = 12;
-        private const int c_max_allowedQueryLength = c_max_allowedQueryLengthKB * 1024;
-        private const int c_maxAllowedDataLengthKb = c_max_allowedQueryLengthKB * 10;
-        private const int c_maxAllowedDataLength = c_maxAllowedDataLengthKb * 1024;
-        private static string NotifcationTitle => "Structured Data Inline Query";
-
-        public StructuredDataInlineQueryWorker(WorkerCategory category, object? icon)
-        : base(category, icon, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files) // Todo Support Text and File Data
+        public StructuredDataInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
+        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon) // Todo Support Text and File Data
         {
         }
 
@@ -28,12 +19,12 @@ namespace Klipboard.Workers
         {
             var contentToConsider = content & SupportedContent;
             var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
-            return $"Paste Structured {contentStr} to Inline Query";
+            return $"Paste {contentStr} to Inline Query";
         }
 
         public override string GetToolTipText(ClipboardContent content)
         {
-            return $"Invoke a datatable query on one small file or {c_maxAllowedDataLength}KB of clipboard data structured as a table";
+            return $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLength}KB of clipboard data structured as a table";
         }
 
         public override bool IsEnabled(ClipboardContent content)
@@ -83,9 +74,9 @@ namespace Klipboard.Workers
                 return Task.CompletedTask;
             }
 
-            if (fileInfo.Length > c_maxAllowedDataLength)
+            if (fileInfo.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"File size exceeds max limit of {c_maxAllowedDataLengthKb}KB for inline query ");
+                sendNotification(NotifcationTitle, $"File size exceeds max limit of {AppConstants.MaxAllowedDataLengthKb}KB for inline query ");
                 return Task.CompletedTask;
             }
 
@@ -111,9 +102,9 @@ namespace Klipboard.Workers
 
         private void HandleCsvData(string csvData, char separator, SendNotification sendNotification)
         {
-            if (m_forceLimits && csvData.Length > c_maxAllowedDataLength)
+            if (AppConstants.EnforceInlineQuerySizeLimits && csvData.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)} is greater then inline query limited of {c_maxAllowedDataLengthKb}KB.");
+                sendNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)} is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
                 return;
             }
 
@@ -124,37 +115,15 @@ namespace Klipboard.Workers
 
             if (!success || query == null)
             {
-                sendNotification(NotifcationTitle, "Failed to create query link.");
+                sendNotification(NotifcationTitle, "Failed to create query text.");
                 return;
             }
 
-            query = TabularDataHelper.GzipBase64(query);
-
-#if DEBUG
-            sendNotification("Debug", $"Input Length={csvData.Length}, Output Legth={query.Length}");
-#endif
-
-            if (m_forceLimits && query.Length > c_max_allowedQueryLength)
+            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
             {
-                sendNotification(NotifcationTitle, $"Resulting query link excceds {c_max_allowedQueryLengthKB}KB.");
+                sendNotification(NotifcationTitle, error);
                 return;
             }
-
-            string queryLink;
-            if (m_invokeDesktopQuery)
-            {
-                queryLink = $"https://{m_currentCluster}/{m_currentDatabase}?query={query}&web=0";
-            }
-            else
-            {
-                queryLink = $"https://dataexplorer.azure.com/clusters/{m_currentCluster}/databases/{m_currentDatabase}?query={query}";
-            }
-
-            System.Diagnostics.Process.Start(new ProcessStartInfo
-            {
-                FileName = queryLink,
-                UseShellExecute = true
-            });
         }
     }
 }

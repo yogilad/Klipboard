@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class ExternalDataQueryWorker : WorkerBase
     {
-        public ExternalDataQueryWorker(WorkerCategory category, object? icon)
-            : base(category, icon, ClipboardContent.None)
+        public ExternalDataQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
+            : base(category, ClipboardContent.None, config, icon)
         {
         }
 

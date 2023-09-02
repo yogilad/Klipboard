@@ -11,8 +11,8 @@ namespace Klipboard.Workers
 {
     public class InspectDataWorker : WorkerBase
     {
-        public InspectDataWorker(WorkerCategory category, object? icon)
-            : base(category, icon, ClipboardContent.None)
+        public InspectDataWorker(WorkerCategory category, AppConfig config, object? icon = null)
+            : base(category, ClipboardContent.None, config, icon)
         {
         }
 
