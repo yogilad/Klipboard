@@ -22,7 +22,6 @@ namespace Klipboard.Utils
         public static readonly int MaxAllowedQueryLength = MaxAllowedQueryLengthKB * 1024;
         public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 10;
         public static readonly int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
-
     }
     #endregion
 
@@ -31,9 +30,9 @@ namespace Klipboard.Utils
     {
         #region Connection Configuration
         // Kusto Configuration
-        public HashSet<String> KustoConnectionStrings;
-        public String DefaultClusterConnectionString;
-        public String DefaultClusterDatabaseName;
+        public HashSet<String> KustoConnectionStrings = new HashSet<String>();
+        public String DefaultClusterConnectionString = string.Empty;
+        public String DefaultClusterDatabaseName = string.Empty;
         #endregion
 
         #region Behavior Configuration
@@ -42,12 +41,14 @@ namespace Klipboard.Utils
 
         // Auto start application when windows starts 
         public bool StartAutomatically = false;
+
+        // Create free text queries with a default parse command
+        public string PrepandFreeTextQueriesWithKQL = string.Empty;
         #endregion
 
         #region Construction
         internal AppConfig()
         {
-            KustoConnectionStrings = new HashSet<String>();
         }
         #endregion 
     }
@@ -70,11 +71,13 @@ namespace Klipboard.Utils
             var config = new AppConfig();
             var myCluster = Environment.GetEnvironmentVariable("KUSTO_ENGINE") ?? "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/";
             var myDb = Environment.GetEnvironmentVariable("KUSTO_DATABASE") ?? "MyDatabase";
+            var freeTextKQL = Environment.GetEnvironmentVariable("FREE_TEXT_KQL") ?? "| parse-where Line with Timestamp:datetime \"-04:00 \" Level:string \"(\" SomeNumber:int \") \" ProcessName:string \" (\" ProcesId:int \",\" ThreadId:int \"|\" Task:string \") ClientIP(\" IP:string \") SessionId(\" SessionId:int \") \" File:string \"(\" LineNumber:int \") \" EventText:string\r\n| project-away Line\r\n| extend Level = trim_end(\"[ \\\\t]+\", Level)\r\n| extend Level = iff(Level == \"NOTICE\", \"VERBOSE\", Level)\r\n";
 
             myCluster = myCluster.Trim().TrimEnd('/');
             config.DefaultClusterConnectionString = myCluster;
             config.DefaultClusterDatabaseName = myDb;
             config.KustoConnectionStrings.Add(myCluster);
+            config.PrepandFreeTextQueriesWithKQL = freeTextKQL;
 
             return Task.FromResult(config);
         }

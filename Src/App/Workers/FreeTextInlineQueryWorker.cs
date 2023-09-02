@@ -85,12 +85,16 @@ namespace Klipboard.Workers
         {
             if (AppConstants.EnforceInlineQuerySizeLimits && freeText.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"Source data size {(int) (freeText.Length / 1024)} is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
+                sendNotification(NotifcationTitle, $"Source data size {(int) (freeText.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
                 return;
             }
 
+            var kqlSuffix = string.IsNullOrWhiteSpace(m_appConfig.PrepandFreeTextQueriesWithKQL)? string.Empty : m_appConfig.PrepandFreeTextQueriesWithKQL.Trim();
+            kqlSuffix += string.IsNullOrWhiteSpace(kqlSuffix) ? "| take  100" : "\n| take 100";
+
             var success = TabularDataHelper.TryConvertFreeTextToInlineQuery(
                 freeText,
+                kqlSuffix,
                 out var query);
 
             if (!success || query == null)

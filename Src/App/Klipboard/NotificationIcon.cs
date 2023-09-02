@@ -48,14 +48,6 @@ namespace Klipboard
 
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
-            // Init debug menu items
-            if (AppConstants.DevMode)
-            {
-                m_contextMenuStrip.Items.Add(new ToolStripSeparator());
-                m_contextMenuStrip.Items.Add("*** Debug Items ***");
-                m_contextMenuStrip.Items.Add("Paste Clipboard to Desktop", null, DebugPasteToDesktop_OnClick);
-            }
-
             // Handle the DoubleClick event to activate the form.
             m_notifyIcon.Click += new EventHandler(NotifyIcon_OnClick);
             m_notifyIcon.Text = "Klipboard";
@@ -93,30 +85,6 @@ namespace Klipboard
                 menuItem.ToolTipText = worker.GetToolTipText(content);
             }
         }
-
-        private void DebugPasteToDesktop_OnClick(object? Sender, EventArgs e)
-        {
-            if (m_clipboardHelper.TryGetDataAsMemoryStream(out var stream))
-            {
-                using (stream)
-                {
-                    var path = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Desktop\\ClipboardData.bin");
-                    using var fstream = new FileStream(path, FileMode.OpenOrCreate);
-                    
-                    stream.Seek(0, SeekOrigin.Begin);
-                    stream.CopyTo(fstream);
-                    fstream.Close();
-                }
-            }
-
-            if (m_clipboardHelper.TryGetDataAsString(out var data))
-            {
-                var path = Environment.ExpandEnvironmentVariables("%USERPROFILE%\\Desktop\\ClipboardData.txt");
-
-                File.WriteAllLines(path, new string[] { data });
-            }
-        }
-
         private void Worker_OnClick(object? Sender, EventArgs e)
         {
             var menuItem = Sender as ToolStripMenuItem;
@@ -133,7 +101,7 @@ namespace Klipboard
             switch(contentToHandle)
             {
                 case ClipboardContent.None:
-                    worker.HandleAsync(SendNotification);
+                    RunWorker(worker, () => worker.HandleAsync(SendNotification));
                     break;
 
                 case ClipboardContent.CSV:
@@ -143,7 +111,7 @@ namespace Klipboard
                         return;
                     }
 
-                    Task.Run(() => worker.HandleCsvAsync(csvData, SendNotification));
+                    RunWorker(worker, () => worker.HandleCsvAsync(csvData, SendNotification));
                     break;
 
                 case ClipboardContent.Text:
@@ -153,7 +121,7 @@ namespace Klipboard
                         return;
                     }
 
-                    Task.Run(() => worker.HandleTextAsync(textData, SendNotification));
+                    RunWorker(worker, () => worker.HandleTextAsync(textData, SendNotification));
                     break;
 
                 case ClipboardContent.Files:
@@ -165,11 +133,23 @@ namespace Klipboard
                         return;
                     }
 
-                    Task.Run(() => worker.HandleFilesAsync(filesAndFolders, SendNotification));
+                    RunWorker(worker, () => worker.HandleFilesAsync(filesAndFolders, SendNotification));
                     break;
 
                 default:
                     break;
+            }
+        }
+
+        private async void RunWorker(WorkerBase worker, Action action)
+        {
+            try
+            {
+                await Task.Run(action);
+            }
+            catch (Exception ex)
+            {
+                SendNotification(worker.GetType().ToString(), $"Worker run ended with exception!\n\n{ex}");
             }
         }
 

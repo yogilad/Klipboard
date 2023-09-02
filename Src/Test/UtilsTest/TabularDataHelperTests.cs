@@ -152,23 +152,23 @@ x	y	z
             var test4 = test3 + "\nxxx";
             var test5 = row.Replace(",end", "");
 
-            var res = TabularDataHelper.TryDetectTabularTextFormatV2(test1, out var separator);
+            var res = TabularDataHelper.TryDetectTabularTextFormat(test1, out var separator);
             Assert.IsTrue(res);
             Assert.IsTrue(separator == ',');
 
-            res = TabularDataHelper.TryDetectTabularTextFormatV2(test2, out separator);
+            res = TabularDataHelper.TryDetectTabularTextFormat(test2, out separator);
             Assert.IsTrue(res);
             Assert.IsTrue(separator == ',');
 
-            res = TabularDataHelper.TryDetectTabularTextFormatV2(test3, out separator);
+            res = TabularDataHelper.TryDetectTabularTextFormat(test3, out separator);
             Assert.IsTrue(res);
             Assert.IsTrue(separator == '\t');
 
-            res = TabularDataHelper.TryDetectTabularTextFormatV2(test4, out separator);
+            res = TabularDataHelper.TryDetectTabularTextFormat(test4, out separator);
             Assert.IsTrue(res);
             Assert.IsTrue(separator == '\t');
 
-            res = TabularDataHelper.TryDetectTabularTextFormatV2(test5, out separator);
+            res = TabularDataHelper.TryDetectTabularTextFormat(test5, out separator);
             Assert.AreEqual(res, false);
             Assert.IsTrue(separator == null);
         }

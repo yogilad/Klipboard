@@ -46,7 +46,7 @@ namespace Klipboard.Workers
         {
             char? separator;
 
-            TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+            TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
             
             // a failed detection could simply mean a single column
             return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
@@ -93,7 +93,7 @@ namespace Klipboard.Workers
             }
             else
             {
-                TabularDataHelper.TryDetectTabularTextFormatV2(textData, out separator);
+                TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
             }
 
             // a failed detection could simply mean a single column
@@ -104,13 +104,14 @@ namespace Klipboard.Workers
         {
             if (AppConstants.EnforceInlineQuerySizeLimits && csvData.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)} is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
+                sendNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
                 return;
             }
 
             var success = TabularDataHelper.TryConvertTableToInlineQuery(
                 csvData,
                 separator.ToString(),
+                "| take 100",
                 out var query);
 
             if (!success || query == null)

@@ -79,7 +79,7 @@ namespace Klipboard.Utils
     public static class TabularDataHelper
     {
         #region Public APIs
-        public static bool TryDetectTabularTextFormatV2(string data, out char? separator)
+        public static bool TryDetectTabularTextFormat(string data, out char? separator)
         {
             // TODO implement separator detection
             separator = null;
@@ -151,7 +151,7 @@ namespace Klipboard.Utils
             return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, out string inlineQuery)
+        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, string? optionalKqlSuffix, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
@@ -163,16 +163,16 @@ namespace Klipboard.Utils
             }
 
             using var stream2 = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
-            var builder = new StringBuilder();
+            var queryBuilder = new StringBuilder();
             var parser = new TextFieldParser(stream2)
             {
                 Delimiters = new string[] { delimiter },
                 HasFieldsEnclosedInQuotes = true,
             };
 
-            builder.Append("let Klipboard = datatable");
-            builder.AppendLine(tableScheme.ToString());
-            builder.AppendLine("[");
+            queryBuilder.Append("let Klipboard = datatable");
+            queryBuilder.AppendLine(tableScheme.ToString());
+            queryBuilder.AppendLine("[");
 
             if (firstRowIsHeader)
             {
@@ -190,20 +190,26 @@ namespace Klipboard.Utils
                 for (int i = 0; i < line.Length; i++)
                 {
                     var parsedField = tableScheme.Columns[i].Type.InlineSerializeData(line[i]);
-                    builder.Append(parsedField);
-                    builder.Append(",");
+                    queryBuilder.Append(parsedField);
+                    queryBuilder.Append(",");
                 }
 
-                builder.AppendLine("");
+                queryBuilder.AppendLine("");
             }
 
-            builder.AppendLine("];");
-            builder.AppendLine("Klipboard");
-            inlineQuery = builder.ToString();
+            queryBuilder.AppendLine("];");
+            queryBuilder.AppendLine("Klipboard");
+
+            if (!string.IsNullOrWhiteSpace(optionalKqlSuffix))
+            {
+                queryBuilder.AppendLine(optionalKqlSuffix);
+            }
+
+            inlineQuery = queryBuilder.ToString();
             return true;
         }
 
-        public static bool TryConvertFreeTextToInlineQuery(string freeText, out string inlineQuery)
+        public static bool TryConvertFreeTextToInlineQuery(string freeText, string? optionalKqlSuffix, out string inlineQuery)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(freeText));
             var streamReader = new StreamReader(stream);
@@ -229,6 +235,12 @@ namespace Klipboard.Utils
 
             queryBuilder.AppendLine("];");
             queryBuilder.AppendLine("Klipboard");
+
+            if (!string.IsNullOrWhiteSpace(optionalKqlSuffix))
+            {
+                queryBuilder.AppendLine(optionalKqlSuffix);
+            }
+
             inlineQuery = queryBuilder.ToString();
             return true;
         }
@@ -327,89 +339,6 @@ namespace Klipboard.Utils
                 colNo++;
             }
             return true;
-        }
-        #endregion
-
-        #region old APIs who may not be necessary
-        public static bool TryDetectTabularTextFormatV1(string data, out char seperator)
-        {
-            seperator = '\0';
-            if (string.IsNullOrWhiteSpace(data))
-            {
-                return false;
-            }
-
-            int pos = 0;
-            int lastTabs = 0;
-            int lastComas = 0;
-
-            while (ProcessNextLine(data, pos, out pos, out var lineLength, out var comas, out var tabs))
-            {
-                if (lineLength == 0)
-                    continue;
-
-                lastComas = (lastComas == 0) ? comas : lastComas;
-                lastComas = (lastComas != comas) ? -1 : lastComas;
-
-                lastTabs = (lastTabs == 0) ? tabs : lastTabs;
-                lastTabs = (lastTabs != tabs) ? -1 : lastTabs;
-
-                if (lastComas == -1 && lastTabs == -1)
-                {
-                    return false;
-                }
-            }
-
-            if (lastTabs > 0)
-            {
-                seperator = '\t';
-            }
-            else if (lastComas > 0)
-            {
-                seperator = ',';
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool ProcessNextLine(string data, int pos, out int newPos, out int length, out int comas, out int tabs)
-        {
-            comas = 0;
-            tabs = 0;
-            length = 0;
-
-            while (pos < data.Length)
-            {
-                var curChar = data[pos];
-                switch (curChar)
-                {
-                    case '\t':
-                        tabs++;
-                        break;
-
-                    case ',':
-                        comas++;
-                        break;
-                }
-
-                pos++;
-                if (curChar != '\r')
-                {
-                    length++;
-                }
-                
-                if (curChar == '\n')
-                {
-                    break;
-                }
-            }
-
-            newPos = pos;
-            return pos != data.Length;
         }
         #endregion
     }
