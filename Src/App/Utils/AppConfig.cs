@@ -22,7 +22,6 @@ namespace Klipboard.Utils
         public static readonly int MaxAllowedQueryLength = MaxAllowedQueryLengthKB * 1024;
         public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 10;
         public static readonly int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
-
     }
     #endregion
 
@@ -31,9 +30,9 @@ namespace Klipboard.Utils
     {
         #region Connection Configuration
         // Kusto Configuration
-        public HashSet<String> KustoConnectionStrings;
-        public String DefaultClusterConnectionString;
-        public String DefaultClusterDatabaseName;
+        public HashSet<String> KustoConnectionStrings = new HashSet<String>();
+        public String DefaultClusterConnectionString = string.Empty;
+        public String DefaultClusterDatabaseName = string.Empty;
         #endregion
 
         #region Behavior Configuration
@@ -47,7 +46,6 @@ namespace Klipboard.Utils
         #region Construction
         internal AppConfig()
         {
-            KustoConnectionStrings = new HashSet<String>();
         }
         #endregion 
     }
