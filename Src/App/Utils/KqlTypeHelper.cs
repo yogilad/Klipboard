@@ -44,7 +44,20 @@ namespace Klipboard.Utils
         private static readonly Regex s_timespanRegex1 = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex s_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Dictionary<KqlDataType, KqlTypeDefinition> s_types = new Dictionary<KqlDataType, KqlTypeDefinition>()
+        private static readonly Dictionary<string, KqlDataType> s_typeNames = new Dictionary<string, KqlDataType>()
+            {
+                // Order is important - if a value is equally matched by multiple entries the first one wins
+                { "bool",     KqlDataType.BoolType },
+                { "long",     KqlDataType.LongType },
+                { "real",     KqlDataType.RealType },
+                { "timespan", KqlDataType.TimeSpanType },
+                { "datetime", KqlDataType.DateTimeType },
+                { "dynamic",  KqlDataType.DynamicType },
+                { "guid",     KqlDataType.GuidType },
+                { "string",   KqlDataType.StringType },
+            };
+
+        private static readonly Dictionary<KqlDataType, KqlTypeDefinition> s_typeDefintions = new Dictionary<KqlDataType, KqlTypeDefinition>()
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { KqlDataType.BoolType,     new KqlTypeDefinition("bool",       KqlDataType.BoolType,       "bool(null)",       s => bool.TryParse(s, out _))},
@@ -70,7 +83,18 @@ namespace Klipboard.Utils
                 { KqlDataType.StringType,  s => SerializeString(s)},
             };
 
-        public static KqlTypeDefinition GetTypeDedfinition(KqlDataType type) => s_types[type];
+        public static KqlTypeDefinition GetTypeDedfinition(KqlDataType type) => s_typeDefintions[type];
+        public static bool TryGetTypeDedfinition(string typeName, out KqlTypeDefinition? typeDefintions)
+        {
+            if (s_typeNames.TryGetValue(typeName, out var type))
+            {
+                typeDefintions = s_typeDefintions[type];
+                return true;
+            }
+
+            typeDefintions = null;
+            return false;
+        }
 
         public static bool IsMatchTimeSpan(string s)
         {

@@ -62,9 +62,43 @@ namespace Klipboard.Utils
             throw new NotImplementedException();
         }
 
-        public bool TryGetBlobScheme(string blobUri, out string scheme)
+        public bool TryGetBlobScheme(string blobUri, out TableColumns? tableScheme, out string? error, string? format = null, bool? firstRowIsHeader = null)
         {
-            throw new NotImplementedException();
+            var engineClient = KustoClientFactory.CreateCslQueryProvider(m_engineKcsb);
+            var formatStr = (format != null) ? $", '{format}'" : string.Empty;
+            var firstRowStr = (format != null && firstRowIsHeader != null) ? $", dynamic({{'UseFirstRowAsHeader':{firstRowIsHeader}}})" : string.Empty;
+            var cmd = $"evaluate external_data_schema('{blobUri}'{formatStr}{firstRowStr})";
+
+            try
+            {
+                var res = engineClient.ExecuteQuery(m_databaseName, cmd, new ClientRequestProperties());
+                tableScheme = new TableColumns();
+                var nameCol = res.GetOrdinal("ColumnName");
+                var typeCol = res.GetOrdinal("ColumnType");
+
+                while (res.Read())
+                {
+                    var colName = res.GetString(nameCol);
+                    var typeStr = res.GetString(typeCol);
+
+                    if (!KqlTypeHelper.TryGetTypeDedfinition(typeStr, out var typeDefintions))
+                    {
+                        error = $"Failed to get the type defintions for type '{typeStr}'";
+                        return false;
+                    }
+
+                    tableScheme.Columns.Add((colName, typeDefintions));
+                }
+
+                error = null;
+                return tableScheme.Columns.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                tableScheme = null;
+                error = "Failed to get engine staging account: " + ex.Message;
+                return false;
+            }
         }
 
         public bool TryCreateTable(string tableName, string tableSceme)
