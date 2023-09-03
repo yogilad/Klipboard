@@ -127,10 +127,9 @@ namespace Klipboard.Utils
                     var zipFile = archive.CreateEntry(upsteramFileName);
 
                     using (var entryStream = zipFile.Open())
-                    using (var streamWriter = new StreamWriter(entryStream))
                     using (var fileStream = new FileStream(filePath, FileMode.Open))
                     {
-                        streamWriter.Write(fileStream);
+                        fileStream.CopyTo(entryStream);
                     }
                 }
 
