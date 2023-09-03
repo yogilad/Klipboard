@@ -24,7 +24,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText(ClipboardContent content)
         {
-            return $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLength}KB of clipboard data structured as a table";
+            return $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         }
 
         public override bool IsEnabled(ClipboardContent content)
@@ -122,7 +122,7 @@ namespace Klipboard.Workers
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
             {
-                sendNotification(NotifcationTitle, error);
+                sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;
             }
         }

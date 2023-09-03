@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\App\Utils\Klipboard.Utils.csproj" />
-    <ProjectReference Include="..\..\TestUtils\Test.Utils.csproj" />
+    <ProjectReference Include="..\TestUtils\Test.Utils.csproj" />
   </ItemGroup>
 
 </Project>

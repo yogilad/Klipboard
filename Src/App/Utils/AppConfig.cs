@@ -20,7 +20,7 @@ namespace Klipboard.Utils
         // Program Constants
         public static readonly int MaxAllowedQueryLengthKB = 12;
         public static readonly int MaxAllowedQueryLength = MaxAllowedQueryLengthKB * 1024;
-        public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 10;
+        public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 5;
         public static readonly int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
     }
     #endregion
