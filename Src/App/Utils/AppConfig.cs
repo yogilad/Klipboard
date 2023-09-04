@@ -13,7 +13,7 @@ namespace Klipboard.Utils
         public static readonly bool DevMode = true;
         public static readonly bool EnforceInlineQuerySizeLimits = true;
 #else
-        public bool DevMode = false;
+        public static bool DevMode = false;
         public static bool EnforceInlineQuerySizeLimits = true;
 #endif
 

@@ -40,11 +40,11 @@ namespace Klipboard.Utils.Test
 
             Assert.IsTrue(res);
 
-            res = m_kustoHelper.TryGetBlobScheme(blobUri, out var schema, out var error, "csv", firstRowIsHeader: true);
-            Assert.IsTrue(res);
-            Assert.IsNotNull(schema);
-            Assert.IsNull(error);
-            Assert.IsTrue(schema.Columns.Count > 0);
+            var schemeRes = m_kustoHelper.TryGetBlobSchemeAsync(blobUri, "csv", firstRowIsHeader: true).ConfigureAwait(false).ResultEx();
+            Assert.IsTrue(schemeRes.Success);
+            Assert.IsNotNull(schemeRes.TableScheme);
+            Assert.IsNull(schemeRes.Error);
+            Assert.IsTrue(schemeRes.TableScheme.Columns.Count > 0);
         }
 
         private bool TryUploadFileToBlob(out string? blobUri, out string? errorMsg)
@@ -52,9 +52,11 @@ namespace Klipboard.Utils.Test
             var dt = DateTime.Now;
             var upsteramFileName = $"TestFile_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.csv";
             var dataStream = new FileStream("C:\\Users\\yocha\\Desktop\\Klipboard Test Data\\snp.csv", FileMode.Open);
-            var res = m_kustoHelper.TryUploadFileToEngineStagingArea(dataStream, upsteramFileName, out blobUri, out errorMsg);
+            var res = m_kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upsteramFileName).ConfigureAwait(false).ResultEx();
 
-            return res;
+            blobUri = res.BlobUri;
+            errorMsg = res.Error;
+            return res.Success;
         }
     }
 }

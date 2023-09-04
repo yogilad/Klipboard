@@ -22,6 +22,11 @@ namespace Klipboard.Workers
             return $"Paste {contentStr} to External Data Query";
         }
 
+        public override bool IsVisible(ClipboardContent content)
+        {
+            return true;
+        }
+
         public override string GetToolTipText(ClipboardContent content)
         {
             return "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
@@ -68,10 +73,11 @@ namespace Klipboard.Workers
         public async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
             var kustoHelper = new KustoClientHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            var uploadRes = await kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
 
-            if (!kustoHelper.TryUploadFileToEngineStagingArea(dataStream, upstreamFileName, out var blobUri, out var erorr))
+            if (!uploadRes.Success)
             {
-                sendNotification(NotifcationTitle, $"Failed to upload file: {erorr}");
+                sendNotification(NotifcationTitle, $"Failed to upload file: {uploadRes.Error}");
                 return;
             }
 
@@ -87,9 +93,10 @@ namespace Klipboard.Workers
                 case "orc":
                 case "parquet":
                 case "avro":
-                    if (kustoHelper.TryGetBlobScheme(blobUri, out var schema, out var _, format: format))
+                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
+                    if (schemaRes.Success)
                     {
-                        schemaStr = schema.ToString();
+                        schemaStr = schemaRes.TableScheme.ToString();
                     }
                     else
                     {
@@ -110,7 +117,7 @@ namespace Klipboard.Workers
             queryBuilder.AppendLine(schemaStr);
             queryBuilder.AppendLine("[");
             queryBuilder.Append(" h'");
-            queryBuilder.Append(blobUri);
+            queryBuilder.Append(uploadRes.BlobUri);
             queryBuilder.AppendLine("'");
             queryBuilder.AppendLine("]");
             queryBuilder.Append("with(format = '");
