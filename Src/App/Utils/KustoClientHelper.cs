@@ -21,21 +21,26 @@ namespace Klipboard.Utils
         private readonly KustoConnectionStringBuilder m_dmKcsb;
         private string m_databaseName = string.Empty;
 
-        public KustoClientHelper(KustoConnectionStringBuilder connectionString, string databaseName)
+        public KustoClientHelper(string connectionString, string databaseName)
+            : this(new KustoConnectionStringBuilder(connectionString), databaseName)
         {
-            m_engineKcsb = new KustoConnectionStringBuilder(connectionString);
-            m_dmKcsb = new KustoConnectionStringBuilder(connectionString);
-            m_databaseName = databaseName;
-
-            m_dmKcsb.DataSource = "ingest-" + m_dmKcsb.DataSource;
         }
 
-        public bool TryUploadFileToEngineStagingArea(string filePath, string upstreamFileName, out string? blobUri, out string? error) 
+        public KustoClientHelper(KustoConnectionStringBuilder connectionString, string databaseName)
+        {
+            // TODO: This needs to be UX driven
+            m_engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
+            m_engineKcsb.SetConnectorDetails("Klipboard", "0.0.0", sendUser: false);
+
+            m_dmKcsb = new KustoConnectionStringBuilder(connectionString);
+            m_dmKcsb.DataSource = "ingest-" + m_dmKcsb.DataSource;
+
+            m_databaseName = databaseName;
+        }
+
+        public bool TryUploadFileToEngineStagingArea(Stream dataStream, string upstreamFileName, out string? blobUri, out string? error) 
         {
             var engineClient = KustoClientFactory.CreateCslAdminProvider(m_engineKcsb);
-
-            error = null;
-            blobUri = null;
 
             try 
             {
@@ -43,7 +48,7 @@ namespace Klipboard.Utils
                 res.Read();
                 
                 var tempStorage = res.GetString(0);
-                if (TryUploadFromFile(tempStorage, filePath, upstreamFileName, out blobUri, out error))
+                if (TryUploadFromFile(tempStorage, dataStream, upstreamFileName, out blobUri, out error))
                 {
                     return true;
                 }
@@ -51,7 +56,8 @@ namespace Klipboard.Utils
                 return false;
             }
             catch (Exception ex) 
-            { 
+            {
+                blobUri = null;
                 error = "Failed to get engine staging account: " + ex.Message;
                 return false;
             }
@@ -120,9 +126,9 @@ namespace Klipboard.Utils
             throw new NotImplementedException();
         }
 
-        private static bool TryUploadFromFile(string blobContainerUriStr, string localFilePath, string upstreamFileName, out string? blobUri, out string? error)
+        private static bool TryUploadFromFile(string blobContainerUriStr, Stream dataStream, string upstreamFileName, out string? blobUri, out string? error)
         {
-            if (!TryCreateZipStream(localFilePath, upstreamFileName, out var memoryStream, out error))
+            if (!TryCreateZipStream(dataStream, upstreamFileName, out var memoryStream, out error))
             {
                 blobUri = null;
                 return false;
@@ -150,10 +156,15 @@ namespace Klipboard.Utils
             }
         }
 
-        private static bool TryCreateZipStream(string filePath, string upsteramFileName, out MemoryStream memoryStream, out string? error)
+        private static bool TryCreateZipStream(Stream dataStream, string upsteramFileName, out MemoryStream memoryStream, out string? error)
         {
             try
             {
+                if (dataStream.CanSeek)
+                {
+                    dataStream.Seek(0, SeekOrigin.Begin);
+                }
+
                 memoryStream = new MemoryStream();
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
@@ -161,9 +172,8 @@ namespace Klipboard.Utils
                     var zipFile = archive.CreateEntry(upsteramFileName);
 
                     using (var entryStream = zipFile.Open())
-                    using (var fileStream = new FileStream(filePath, FileMode.Open))
                     {
-                        fileStream.CopyTo(entryStream);
+                        dataStream.CopyTo(entryStream);
                     }
                 }
 

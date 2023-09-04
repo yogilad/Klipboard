@@ -1,5 +1,6 @@
 ﻿using Klipboard.Utils;
 using Kusto.Cloud.Platform.Utils;
+using Kusto.Ingest.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +32,12 @@ namespace Klipboard.Workers
             return true;
         }
 
-        public override Task HandleAsync(SendNotification sendNotification)
+        public override bool IsVisible(ClipboardContent content)
+        {
+            return true;
+        }
+
+        public override async Task HandleAsync(SendNotification sendNotification)
         {
             var subject = "Have You Tried Klipboard for Kusto?";
             var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
@@ -41,8 +47,6 @@ namespace Klipboard.Workers
                 FileName = $"mailto:?subject={subject}&body={body}",
                 UseShellExecute = true
             });
-
-            return Task.CompletedTask;
         }
     }
 }

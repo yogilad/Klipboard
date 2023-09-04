@@ -33,12 +33,12 @@ namespace Klipboard.Workers
 
         public virtual bool IsVisible(ClipboardContent content)
         {
-            return true;
+            return AppConstants.DevMode;
         }
 
         public virtual bool IsEnabled(ClipboardContent content)
         {
-            return false;
+            return (content & SupportedContent) != ClipboardContent.None;
         }
 
         public virtual string GetMenuText(ClipboardContent content)
@@ -51,32 +51,32 @@ namespace Klipboard.Workers
             return string.Empty;
         }
 
-        public virtual Task HandleAsync(SendNotification sendNotification)
+        public virtual async Task HandleAsync(SendNotification sendNotification)
         {
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleAsync)}");
 
-            return Task.CompletedTask;
+            return;
         }
 
-        public virtual Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public virtual async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleCsvAsync)}");
 
-            return Task.CompletedTask;
+            return;
         }
 
-        public virtual Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public virtual async Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextAsync)}");
 
-            return Task.CompletedTask;
+            return;
         }
 
-        public virtual Task HandleFilesAsync(List<string> filesAndFolders , SendNotification sendNotification)
+        public virtual async Task HandleFilesAsync(List<string> filesAndFolders , SendNotification sendNotification)
         {
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleFilesAsync)}");
 
-            return Task.CompletedTask;
+            return;
         }
     }
 }

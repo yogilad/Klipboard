@@ -71,7 +71,11 @@ namespace Klipboard.Utils
             var config = new AppConfig();
             var myCluster = Environment.GetEnvironmentVariable("KUSTO_ENGINE") ?? "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/";
             var myDb = Environment.GetEnvironmentVariable("KUSTO_DATABASE") ?? "MyDatabase";
-            var freeTextKQL = Environment.GetEnvironmentVariable("FREE_TEXT_KQL") ?? "| parse-where Line with Timestamp:datetime \"-04:00 \" Level:string \"(\" SomeNumber:int \") \" ProcessName:string \" (\" ProcesId:int \",\" ThreadId:int \"|\" Task:string \") ClientIP(\" IP:string \") SessionId(\" SessionId:int \") \" File:string \"(\" LineNumber:int \") \" EventText:string\r\n| project-away Line\r\n| extend Level = trim_end(\"[ \\\\t]+\", Level)\r\n| extend Level = iff(Level == \"NOTICE\", \"VERBOSE\", Level)\r\n";
+            var freeTextKQL = Environment.GetEnvironmentVariable("FREE_TEXT_KQL") ??
+@"| parse-where Line with Timestamp:datetime ""-04:00 "" Level:string ""("" * "") "" ProcessName:string "" ("" ProcesId:int "","" ThreadId:int * "") "" EventText:string
+| project-away Line
+| extend Level = trim_end(""[ \\t]+"", Level)
+| extend Level = iff(Level == ""NOTICE"", ""VERBOSE"", Level)";
 
             myCluster = myCluster.Trim().TrimEnd('/');
             config.DefaultClusterConnectionString = myCluster;

@@ -101,7 +101,7 @@ namespace Klipboard
             switch(contentToHandle)
             {
                 case ClipboardContent.None:
-                    RunWorker(worker, () => worker.HandleAsync(SendNotification));
+                    RunWorker(worker, async () => await worker.HandleAsync(SendNotification));
                     break;
 
                 case ClipboardContent.CSV:
@@ -111,7 +111,7 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleCsvAsync(csvData, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleCsvAsync(csvData, SendNotification));
                     break;
 
                 case ClipboardContent.Text:
@@ -121,7 +121,7 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleTextAsync(textData, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleTextAsync(textData, SendNotification));
                     break;
 
                 case ClipboardContent.Files:
@@ -133,7 +133,7 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleFilesAsync(filesAndFolders, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleFilesAsync(filesAndFolders, SendNotification));
                     break;
 
                 default:
@@ -141,16 +141,19 @@ namespace Klipboard
             }
         }
 
-        private async void RunWorker(WorkerBase worker, Action action)
+        private void RunWorker(WorkerBase worker, Func<Task> action)
         {
-            try
+            Task.Run(async () =>
             {
-                await Task.Run(action);
-            }
-            catch (Exception ex)
-            {
-                SendNotification(worker.GetType().ToString(), $"Worker run ended with exception!\n\n{ex}");
-            }
+                try
+                {
+                    await action();
+                }
+                catch (Exception ex)
+                {
+                    SendNotification(worker.GetType().ToString(), $"Worker run ended with exception!\n\n{ex}");
+                }
+            });
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)

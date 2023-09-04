@@ -20,15 +20,20 @@ namespace Klipboard.Workers
             return true;
         }
 
-        public override Task HandleAsync(SendNotification sendNotification)
+        public override bool IsVisible(ClipboardContent content)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo
+            return true;
+        }
+
+        public override async Task HandleAsync(SendNotification sendNotification)
+        {
+            Process.Start(new ProcessStartInfo
             {
                 FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
                 UseShellExecute = true
             });
 
-            return Task.CompletedTask;
+            return;
         }
     }
 }

@@ -51,7 +51,8 @@ namespace Klipboard.Utils.Test
         {
             var dt = DateTime.Now;
             var upsteramFileName = $"TestFile_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.csv";
-            var res = m_kustoHelper.TryUploadFileToEngineStagingArea("C:\\Users\\yocha\\Desktop\\Klipboard Test Data\\snp.csv", upsteramFileName, out blobUri, out errorMsg);
+            var dataStream = new FileStream("C:\\Users\\yocha\\Desktop\\Klipboard Test Data\\snp.csv", FileMode.Open);
+            var res = m_kustoHelper.TryUploadFileToEngineStagingArea(dataStream, upsteramFileName, out blobUri, out errorMsg);
 
             return res;
         }
