@@ -11,13 +11,48 @@ namespace Klipboard.Utils
     #region Table Scheme Config
     public class TableColumns
     {
+        public bool m_disableNameEscaping;
+
+        public TableColumns(bool disableNameEscaping = false)
+        {
+            m_disableNameEscaping = disableNameEscaping;
+        }
+
+
         public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
         public override string ToString()
         {
-            var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
-            
-            return composedScheme;
+            var schemaBuilder = new StringBuilder();
+            var notFirstCol = false;
+            //var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
+
+            schemaBuilder.Append("(");
+            foreach(var column in Columns)
+            {
+                if (notFirstCol)
+                {
+                    schemaBuilder.Append(", ");
+                }
+
+                if(m_disableNameEscaping)
+                {
+                    schemaBuilder.Append(column.Name);
+                }
+                else
+                {
+                    schemaBuilder.Append("['");
+                    schemaBuilder.Append(column.Name.Replace("'", "\\'"));
+                    schemaBuilder.Append("']");
+                }
+
+                schemaBuilder.Append(":");
+                schemaBuilder.Append(column.Type.Name);
+                notFirstCol = true;
+            }
+
+            schemaBuilder.Append(")");
+            return schemaBuilder.ToString();
         }
     }
     #endregion
@@ -302,8 +337,8 @@ namespace Klipboard.Utils
             {
                 var fields = parser.ReadFields();
 
-                if (fields == null) 
-                { 
+                if (fields == null)
+                {
                     break;
                 }
 
@@ -312,7 +347,7 @@ namespace Klipboard.Utils
                     return false;
                 }
 
-                for(int i = 0; i < fields.Length; i++)
+                for (int i = 0; i < fields.Length; i++)
                 {
                     if (rowNum == 0)
                     {

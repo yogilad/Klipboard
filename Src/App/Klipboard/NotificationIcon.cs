@@ -114,6 +114,16 @@ namespace Klipboard
                     RunWorker(worker, async () => await worker.HandleCsvAsync(csvData, SendNotification));
                     break;
 
+                case ClipboardContent.CSV_Stream:
+                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var csvStream) || csvStream == null)
+                    {
+                        SendNotification("Error!", "Failed to get CSV Data from clipboard");
+                        return;
+                    }
+
+                    RunWorker(worker, async () => await worker.HandleCsvStreamAsync(csvStream, SendNotification));
+                    break;
+
                 case ClipboardContent.Text:
                     if (!m_clipboardHelper.TryGetDataAsString(out var textData) || string.IsNullOrWhiteSpace(textData))
                     {
@@ -124,6 +134,16 @@ namespace Klipboard
                     RunWorker(worker, async () => await worker.HandleTextAsync(textData, SendNotification));
                     break;
 
+                case ClipboardContent.Text_Stream:
+                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var textStream) || textStream == null)
+                    {
+                        SendNotification("Error!", "Failed to get Text Data from clipboard");
+                        return;
+                    }
+
+                    RunWorker(worker, async () => await worker.HandleTextStreamAsync(textStream, SendNotification));
+                    break;
+                
                 case ClipboardContent.Files:
                     if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) || 
                             filesAndFolders == null || 

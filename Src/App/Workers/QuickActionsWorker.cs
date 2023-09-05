@@ -22,23 +22,26 @@ namespace Klipboard.Workers
             string clusterName = m_appConfig.DefaultClusterConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".kusto").ToUpper();
             string targetStr = $"{clusterName}-{m_appConfig.DefaultClusterDatabaseName}";
 
+            var x = content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream);
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
             {
-                return $"Table Text => {targetStr}";
+                return $"Clipboard Table => {targetStr}";
             }
             
-            if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
+            if ((content & (ClipboardContent.Text | ClipboardContent.Text_Stream)) != ClipboardContent.None)
             {
-                return $"Free Text => {targetStr}";
+                return $"Clipboard Text => {targetStr}";
             }
             
             if ((content & ClipboardContent.Files) != ClipboardContent.None)
             {
-                return $"Files => {targetStr}";
+                return $"Clipboard Files => {targetStr}";
             }
 
             return targetStr;
         }
+
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
 
         public override string GetToolTipText(ClipboardContent content) => "Click to set the default cluster and database for Quick Actions";
     }

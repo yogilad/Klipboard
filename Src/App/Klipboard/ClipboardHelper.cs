@@ -13,13 +13,13 @@ namespace Klipboard
 
             if (Clipboard.ContainsData(DataFormats.CommaSeparatedValue))
             {
-                return ClipboardContent.CSV;
+                return ClipboardContent.CSV | ClipboardContent.CSV_Stream;
             }
             
             // Keep this last on the text data list as many types are also text represented (CSV, HTML, etc.)
             if (Clipboard.ContainsText())
             {
-                return ClipboardContent.Text;
+                return ClipboardContent.Text | ClipboardContent.Text_Stream;
             }
 
             if (Clipboard.ContainsFileDropList())
@@ -32,34 +32,29 @@ namespace Klipboard
 
         public bool TryGetDataAsString(out string? data)
         {
-            var content = GetClipboardContent();
+            var content = GetClipboardContent() & (ClipboardContent.CSV | ClipboardContent.Text);
 
-            switch (content)
+            if (content != ClipboardContent.None)
             {
-                case ClipboardContent.CSV:
-                case ClipboardContent.Text:
-                    data = Clipboard.GetText();
-                    break;
-
-                default:
-                    data = null;
-                    break;
+                data = Clipboard.GetText();
+                return true;
             }
 
-            return data != null;
+            data = null;
+            return false;
         }
 
         public bool TryGetDataAsMemoryStream(out Stream? stream)
         {
-            var content = GetClipboardContent();
+            var content = GetClipboardContent() & (ClipboardContent.CSV_Stream | ClipboardContent.Text_Stream);
 
             switch (content)
             {
-                case ClipboardContent.CSV:
+                case ClipboardContent.CSV_Stream:
                     stream = Clipboard.GetData(DataFormats.CommaSeparatedValue) as MemoryStream;
                     break;
 
-                case ClipboardContent.Text:
+                case ClipboardContent.Text_Stream:
                     var data = Clipboard.GetText();
                     stream = new MemoryStream(Encoding.UTF8.GetBytes(data));
                     break;

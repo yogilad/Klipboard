@@ -1,14 +1,20 @@
 ﻿using Klipboard.Utils;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Linq;
+using System;
+using System.IO;
 using System.Net;
+using System.Net.Security;
+using System.Reflection;
 using System.Text;
 
 namespace Klipboard.Workers
 {
     public class ExternalDataQueryWorker : WorkerBase
     {
-        public string NotifcationTitle => "External Data Query";
+        public const string NotifcationTitle = "External Data Query";
+
+        public const string UnknownFormat = "Unknown";
 
         public ExternalDataQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
             : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon)
@@ -23,12 +29,18 @@ namespace Klipboard.Workers
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleCsvAsync)}");
+            var upstreamFileName = CreateUploadFileName("Table", ".tsv");
+            using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData)); ;
+
+            await HandleStreamAsync(csvStream, "tsv", upstreamFileName, sendNotification);
         }
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
-            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextAsync)}");
+            var upstreamFileName = CreateUploadFileName("Text", string.Empty);
+            using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData)); ;
+
+            await HandleStreamAsync(textStream, string.Empty, upstreamFileName, sendNotification);
         }
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
@@ -53,7 +65,7 @@ namespace Klipboard.Workers
             }
 
             var dt = DateTime.Now;
-            var upsteramFileName = $"Klipboard_{fileInfo.Name.SplitLast(".", out var _)}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}{fileInfo.Extension}";
+            var upsteramFileName = CreateUploadFileName(fileInfo.Name);
             var dataStream = new FileStream(file, FileMode.Open);
 
             await HandleStreamAsync(dataStream, fileInfo.Extension, upsteramFileName, sendNotification);
@@ -71,18 +83,12 @@ namespace Klipboard.Workers
             }
 
             string schemaStr = "(Line:string)";
+
             format = format.ToLower().TrimStart(".");
             switch (format)
             {
-                case "csv":
-                case "tsv":
-                case "tsve":
-                case "json":
-                case "multijson":
-                case "orc":
-                case "parquet":
-                case "avro":
-                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
+                case UnknownFormat:
+                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri);
                     if (schemaRes.Success)
                     {
                         schemaStr = schemaRes.TableScheme.ToString();
@@ -91,7 +97,25 @@ namespace Klipboard.Workers
                     {
                         format = "txt";
                     }
+                    break;
 
+                case "csv":
+                case "tsv":
+                case "tsve":
+                case "json":
+                case "multijson":
+                case "orc":
+                case "parquet":
+                case "avro":
+                    schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
+                    if (schemaRes.Success)
+                    {
+                        schemaStr = schemaRes.TableScheme.ToString();
+                    }
+                    else
+                    {
+                        format = "txt";
+                    }
                     break;
 
                 default:
@@ -109,9 +133,16 @@ namespace Klipboard.Workers
             queryBuilder.Append(uploadRes.BlobUri);
             queryBuilder.AppendLine("'");
             queryBuilder.AppendLine("]");
-            queryBuilder.Append("with(format = '");
-            queryBuilder.Append(format);
-            queryBuilder.AppendLine("', ignoreFirstRecord = false);");
+            queryBuilder.Append("with(");
+
+            if (format != UnknownFormat)
+            {
+                queryBuilder.Append("format = '");
+                queryBuilder.Append(format);
+                queryBuilder.Append("', ");
+            }
+            
+            queryBuilder.AppendLine("ignoreFirstRecord = false);");
             queryBuilder.AppendLine("Klipboard");
 
             if (format == "txt" && !string.IsNullOrWhiteSpace(m_appConfig.PrepandFreeTextQueriesWithKQL))
@@ -127,6 +158,20 @@ namespace Klipboard.Workers
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;
             }
+        }
+
+        private static string CreateUploadFileName(string filename)
+        {
+            var file = filename.SplitLast(".", out var extension);
+
+            return CreateUploadFileName(file, extension);
+        }
+
+        private static string CreateUploadFileName(string filename, string extension)
+        {
+            var dt = DateTime.Now;
+            var upsteramFileName = $"Klipboard_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}{extension}";
+            return upsteramFileName;
         }
     }
 }
