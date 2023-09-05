@@ -29,7 +29,7 @@ namespace Klipboard.Workers
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            var upstreamFileName = CreateUploadFileName("Table", ".tsv");
+            var upstreamFileName = CreateUploadFileName("Table", "tsv");
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData)); ;
 
             await HandleStreamAsync(csvStream, "tsv", upstreamFileName, sendNotification);
@@ -37,7 +37,7 @@ namespace Klipboard.Workers
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
-            var upstreamFileName = CreateUploadFileName("Text", string.Empty);
+            var upstreamFileName = CreateUploadFileName("Text", "txt");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData)); ;
 
             await HandleStreamAsync(textStream, string.Empty, upstreamFileName, sendNotification);
@@ -66,7 +66,7 @@ namespace Klipboard.Workers
 
             var dt = DateTime.Now;
             var upsteramFileName = CreateUploadFileName(fileInfo.Name);
-            var dataStream = new FileStream(file, FileMode.Open);
+            var dataStream = new FileStream(file, FileMode.Open, FileAccess.Read);
 
             await HandleStreamAsync(dataStream, fileInfo.Extension, upsteramFileName, sendNotification);
         }
@@ -170,7 +170,7 @@ namespace Klipboard.Workers
         private static string CreateUploadFileName(string filename, string extension)
         {
             var dt = DateTime.Now;
-            var upsteramFileName = $"Klipboard_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}{extension}";
+            var upsteramFileName = $"Klipboard_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.{extension}";
             return upsteramFileName;
         }
     }
