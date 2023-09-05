@@ -79,8 +79,8 @@ namespace Klipboard
                     continue;
                 }
 
-                menuItem.Visible = worker.IsVisible(content);
-                menuItem.Enabled = worker.IsEnabled(content);
+                menuItem.Visible = worker.IsMenuVisible(content);
+                menuItem.Enabled = worker.IsMenuEnabled(content);
                 menuItem.Text = worker.GetMenuText(content);
                 menuItem.ToolTipText = worker.GetToolTipText(content);
             }

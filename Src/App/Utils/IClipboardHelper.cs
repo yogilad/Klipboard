@@ -5,8 +5,10 @@
     {
         None,
         CSV,
+        CSV_Stream,
         Text,
-        Files
+        Text_Stream,
+        Files,
     }
 
     public interface IClipboardHelper

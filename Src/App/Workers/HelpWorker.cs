@@ -10,20 +10,11 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Help";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Help";
 
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => true;
 
         public override async Task HandleAsync(SendNotification sendNotification)
         {

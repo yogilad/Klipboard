@@ -11,20 +11,11 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return $"Inspect Clipboard Content ({content})";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Inspect Clipboard Content";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return "Display a preview of Clipboard Data"; ;
-        }
+        public override string GetToolTipText(ClipboardContent content) => "Display a preview of Clipboard Data";
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return AppConstants.DevMode;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => AppConstants.DevMode;
 
         public abstract Task ShowContent(string clipboardContent);
 

@@ -1,35 +1,25 @@
 ﻿using System.Diagnostics;
 
 using Klipboard.Utils;
-
+using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard.Workers
 {
     public class FreeTextInlineQueryWorker : WorkerBase
     {
-        private static string NotifcationTitle => "Free Text Inline Query";
+        private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard contiainig unstructured text";
+        private static readonly string NotifcationTitle = "Free Text Inline Query";
 
         public FreeTextInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
         : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon) // Todo Support Text and File Data
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            var contentToConsider = content & SupportedContent;
-            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
-            return $"Paste {contentStr} to Free Text Inline Query";
-        }
+        public override string GetMenuText(ClipboardContent content) => $"Paste to Free Text Inline Query";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard contiainig unstructured text";
-        }
+        public override string GetToolTipText(ClipboardContent content) => ToolTipText;
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => true;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

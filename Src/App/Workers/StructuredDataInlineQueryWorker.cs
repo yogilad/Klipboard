@@ -7,7 +7,7 @@ namespace Klipboard.Workers
 {
     public class StructuredDataInlineQueryWorker : WorkerBase
     {
-        // Static members
+        private static readonly string ToolTipText = $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         private static string NotifcationTitle => "Inline Query";
 
         public StructuredDataInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
@@ -15,22 +15,11 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            var contentToConsider = content & SupportedContent;
-            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
-            return $"Paste {contentStr} to Inline Query";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Paste to Inline Query";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
-        }
+        public override string GetToolTipText(ClipboardContent content) => ToolTipText;
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => true;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

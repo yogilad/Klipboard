@@ -15,22 +15,11 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            var contentToConsider = content & SupportedContent;
-            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
-            return $"Paste {contentStr} to External Data Query";
-        }
+        public override string GetMenuText(ClipboardContent content) => $"Paste to External Data Query";
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => true;
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
-        }
+        public override string GetToolTipText(ClipboardContent content) => "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

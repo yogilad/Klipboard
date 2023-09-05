@@ -17,25 +17,13 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Share Klipboard";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Share Klipboard";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return string.Empty;
-        }
+        public override string GetToolTipText(ClipboardContent content) => string.Empty;
 
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
 
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuVisible(ClipboardContent content) => true;
 
         public override async Task HandleAsync(SendNotification sendNotification)
         {

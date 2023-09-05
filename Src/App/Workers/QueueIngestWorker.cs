@@ -16,14 +16,8 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Queue Data to Table";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Queue Data to Table";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return "Queue clipboard tabular data or any number of files to a table"; ;
-        }
+        public override string GetToolTipText(ClipboardContent content) => "Queue clipboard tabular data or any number of files to a table";
     }
 }
