@@ -123,15 +123,18 @@ namespace Klipboard.Workers
                     break;
             }
 
+            var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine("let Klipboard =");
             queryBuilder.Append("externaldata");
             queryBuilder.AppendLine(schemaStr);
             queryBuilder.AppendLine("[");
-            queryBuilder.Append(" h'");
-            queryBuilder.Append(uploadRes.BlobUri);
-            queryBuilder.AppendLine("'");
+            queryBuilder.Append(" '");
+            queryBuilder.Append(blobPath);
+            queryBuilder.Append("' h'?");
+            queryBuilder.Append(blboSas);
+            queryBuilder.Append("'");
             queryBuilder.AppendLine("]");
             queryBuilder.Append("with(");
 
