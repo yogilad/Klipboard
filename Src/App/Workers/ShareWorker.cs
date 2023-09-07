@@ -1,5 +1,6 @@
 ﻿using Klipboard.Utils;
 using Kusto.Cloud.Platform.Utils;
+using Kusto.Ingest.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,22 +17,15 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Share Klipboard";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Share Klipboard";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return string.Empty;
-        }
+        public override string GetToolTipText(ClipboardContent content) => string.Empty;
 
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
 
-        public override Task HandleAsync(SendNotification sendNotification)
+        public override bool IsMenuVisible(ClipboardContent content) => true;
+
+        public override async Task HandleAsync(SendNotification sendNotification)
         {
             var subject = "Have You Tried Klipboard for Kusto?";
             var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
@@ -41,8 +35,6 @@ namespace Klipboard.Workers
                 FileName = $"mailto:?subject={subject}&body={body}",
                 UseShellExecute = true
             });
-
-            return Task.CompletedTask;
         }
     }
 }

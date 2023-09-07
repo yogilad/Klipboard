@@ -7,7 +7,7 @@ namespace Klipboard.Workers
 {
     public class StructuredDataInlineQueryWorker : WorkerBase
     {
-        // Static members
+        private static readonly string ToolTipText = $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         private static string NotifcationTitle => "Inline Query";
 
         public StructuredDataInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
@@ -15,44 +15,28 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
+        public override string GetMenuText(ClipboardContent content) => "Paste to Inline Query";
+
+        public override string GetToolTipText(ClipboardContent content) => ToolTipText;
+
+        public override bool IsMenuVisible(ClipboardContent content) => true;
+
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            var contentToConsider = content & SupportedContent;
-            var contentStr = contentToConsider == ClipboardContent.None ? "Data" : content.ToString();
-            return $"Paste {contentStr} to Inline Query";
+            await Task.Run(() => HandleCsvData(csvData, '\t', sendNotification));
         }
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
-        }
-
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return (content & SupportedContent) != ClipboardContent.None;
-        }
-
-        public override bool IsVisible(ClipboardContent content)
-        {
-            return true;
-        }
-
-        public override Task HandleCsvAsync(string csvData, SendNotification sendNotification)
-        {
-            return Task.Run(() => HandleCsvData(csvData, '\t', sendNotification));
-        }
-
-        public override Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
             char? separator;
 
             TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
             
             // a failed detection could simply mean a single column
-            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
+            await Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
         }
 
-        public override Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
         {
             if (files.Count > 1) 
             {
@@ -65,22 +49,22 @@ namespace Klipboard.Workers
             if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
                 sendNotification(NotifcationTitle, "Inline query does not support directories.");
-                return Task.CompletedTask;
+                return;
             }
 
             if (!fileInfo.Exists) 
             {
                 sendNotification(NotifcationTitle, $"File '{file}' does not exist.");
-                return Task.CompletedTask;
+                return;
             }
 
             if (fileInfo.Length > AppConstants.MaxAllowedDataLength)
             {
                 sendNotification(NotifcationTitle, $"File size exceeds max limit of {AppConstants.MaxAllowedDataLengthKb}KB for inline query ");
-                return Task.CompletedTask;
+                return;
             }
 
-            string textData = File.ReadAllText(file);
+            string textData = await File.ReadAllTextAsync(file);
             char? separator;
 
             if (fileInfo.Extension.Equals("csv", StringComparison.OrdinalIgnoreCase))
@@ -97,7 +81,7 @@ namespace Klipboard.Workers
             }
 
             // a failed detection could simply mean a single column
-            return Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
+            await Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
         }
 
         private void HandleCsvData(string csvData, char separator, SendNotification sendNotification)

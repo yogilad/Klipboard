@@ -10,14 +10,8 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Options";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Options";
 
-        public override string GetToolTipText(ClipboardContent content)
-        {
-            return string.Empty;
-        }
+        public override string GetToolTipText(ClipboardContent content) => string.Empty;
     }
 }

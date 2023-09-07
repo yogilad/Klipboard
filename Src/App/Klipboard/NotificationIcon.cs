@@ -79,8 +79,8 @@ namespace Klipboard
                     continue;
                 }
 
-                menuItem.Visible = worker.IsVisible(content);
-                menuItem.Enabled = worker.IsEnabled(content);
+                menuItem.Visible = worker.IsMenuVisible(content);
+                menuItem.Enabled = worker.IsMenuEnabled(content);
                 menuItem.Text = worker.GetMenuText(content);
                 menuItem.ToolTipText = worker.GetToolTipText(content);
             }
@@ -101,7 +101,7 @@ namespace Klipboard
             switch(contentToHandle)
             {
                 case ClipboardContent.None:
-                    RunWorker(worker, () => worker.HandleAsync(SendNotification));
+                    RunWorker(worker, async () => await worker.HandleAsync(SendNotification));
                     break;
 
                 case ClipboardContent.CSV:
@@ -111,7 +111,17 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleCsvAsync(csvData, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleCsvAsync(csvData, SendNotification));
+                    break;
+
+                case ClipboardContent.CSV_Stream:
+                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var csvStream) || csvStream == null)
+                    {
+                        SendNotification("Error!", "Failed to get CSV Data from clipboard");
+                        return;
+                    }
+
+                    RunWorker(worker, async () => await worker.HandleCsvStreamAsync(csvStream, SendNotification));
                     break;
 
                 case ClipboardContent.Text:
@@ -121,9 +131,19 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleTextAsync(textData, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleTextAsync(textData, SendNotification));
                     break;
 
+                case ClipboardContent.Text_Stream:
+                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var textStream) || textStream == null)
+                    {
+                        SendNotification("Error!", "Failed to get Text Data from clipboard");
+                        return;
+                    }
+
+                    RunWorker(worker, async () => await worker.HandleTextStreamAsync(textStream, SendNotification));
+                    break;
+                
                 case ClipboardContent.Files:
                     if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) || 
                             filesAndFolders == null || 
@@ -133,7 +153,7 @@ namespace Klipboard
                         return;
                     }
 
-                    RunWorker(worker, () => worker.HandleFilesAsync(filesAndFolders, SendNotification));
+                    RunWorker(worker, async () => await worker.HandleFilesAsync(filesAndFolders, SendNotification));
                     break;
 
                 default:
@@ -141,16 +161,19 @@ namespace Klipboard
             }
         }
 
-        private async void RunWorker(WorkerBase worker, Action action)
+        private void RunWorker(WorkerBase worker, Func<Task> action)
         {
-            try
+            Task.Run(async () =>
             {
-                await Task.Run(action);
-            }
-            catch (Exception ex)
-            {
-                SendNotification(worker.GetType().ToString(), $"Worker run ended with exception!\n\n{ex}");
-            }
+                try
+                {
+                    await action();
+                }
+                catch (Exception ex)
+                {
+                    SendNotification(worker.GetType().ToString(), $"Worker run ended with exception!\n\n{ex}");
+                }
+            });
         }
 
         private void Exit_OnClick(object? Sender, EventArgs e)

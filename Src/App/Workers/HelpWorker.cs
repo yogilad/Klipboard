@@ -10,25 +10,21 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content)
-        {
-            return "Help";
-        }
+        public override string GetMenuText(ClipboardContent content) => "Help";
 
-        public override bool IsEnabled(ClipboardContent content)
-        {
-            return true;
-        }
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
 
-        public override Task HandleAsync(SendNotification sendNotification)
+        public override bool IsMenuVisible(ClipboardContent content) => true;
+
+        public override async Task HandleAsync(SendNotification sendNotification)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo
+            Process.Start(new ProcessStartInfo
             {
                 FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
                 UseShellExecute = true
             });
 
-            return Task.CompletedTask;
+            return;
         }
     }
 }
