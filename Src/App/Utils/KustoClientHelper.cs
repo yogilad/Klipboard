@@ -64,7 +64,7 @@ namespace Klipboard.Utils
             throw new NotImplementedException();
         }
 
-        public async Task<(bool Success, TableColumns? TableScheme, string? Error)> TryGetBlobSchemeAsync(string blobUri, string? format = null, bool? firstRowIsHeader = null)
+        public async Task<(bool Success, TableColumns? TableScheme, string? format, string? Error)> TryGetBlobSchemeAsync(string blobUri, string? format = null, bool? firstRowIsHeader = null)
         {
             var engineClient = KustoClientFactory.CreateCslQueryProvider(m_engineKcsb);
             var formatStr = (format != null) ? $", '{format}'" : string.Empty;
@@ -85,7 +85,7 @@ namespace Klipboard.Utils
 
                     if (!KqlTypeHelper.TryGetTypeDedfinition(typeStr, out var typeDefintions))
                     {
-                        return (false, null, $"Failed to get the type defintions for type '{typeStr}'");
+                        return (false, null, format, $"Failed to get the type defintions for type '{typeStr}'");
                     }
 
                     tableScheme.Columns.Add((colName, typeDefintions));
@@ -93,14 +93,14 @@ namespace Klipboard.Utils
 
                 if (tableScheme.Columns.Count > 0)
                 {
-                    return (true, tableScheme, null);
+                    return (true, tableScheme, format, null);
                 }
 
-                return (false, null, "Scheme detection returned no results");
+                return (false, null, format, "Scheme detection returned no results");
             }
             catch (Exception ex)
             {
-                return (false, null, "Failed to get engine staging account: " + ex.Message);
+                return (false, null, format, "Failed to get engine staging account: " + ex.Message);
             }
         }
 

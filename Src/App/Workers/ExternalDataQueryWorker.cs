@@ -12,9 +12,9 @@ namespace Klipboard.Workers
 {
     public class ExternalDataQueryWorker : WorkerBase
     {
-        public const string NotifcationTitle = "External Data Query";
-
-        public const string UnknownFormat = "Unknown";
+        private const string NotifcationTitle = "External Data Query";
+        private const string UnknownFormat = "unknown";
+        private const string TextLinesScheme = "(Line:string)";
 
         public ExternalDataQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
             : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon)
@@ -40,7 +40,7 @@ namespace Klipboard.Workers
             var upstreamFileName = CreateUploadFileName("Text", "txt");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData)); ;
 
-            await HandleStreamAsync(textStream, string.Empty, upstreamFileName, sendNotification);
+            await HandleStreamAsync(textStream, UnknownFormat, upstreamFileName, sendNotification);
         }
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
@@ -82,21 +82,41 @@ namespace Klipboard.Workers
                 return;
             }
 
-            string schemaStr = "(Line:string)";
+            string schemaStr = TextLinesScheme;
 
             format = format.ToLower().TrimStart(".");
             switch (format)
             {
                 case UnknownFormat:
-                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri);
-                    if (schemaRes.Success)
+                    var csvSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "csv");
+                    var tsvSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "tsv");
+                    var multiJsonSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "multijson");
+                    var jsonSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "json");
+
+                    var curScheme = csvSchemaRes;
+                    if (tsvSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < tsvSchemaRes.TableScheme.Columns.Count))
                     {
-                        schemaStr = schemaRes.TableScheme.ToString();
+                        curScheme = tsvSchemaRes;
                     }
-                    else
+
+                    if (multiJsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < multiJsonSchemaRes.TableScheme.Columns.Count))
                     {
-                        format = "txt";
+                        curScheme = multiJsonSchemaRes;
                     }
+
+                    if (jsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < jsonSchemaRes.TableScheme.Columns.Count))
+                    {
+                        curScheme = jsonSchemaRes;
+                    }
+
+                    if (curScheme.Success)
+                    {
+                        schemaStr = curScheme.TableScheme.ToString();
+                        format = curScheme.format;
+                        break;
+                    }
+
+                    format = "txt";
                     break;
 
                 case "csv":
@@ -107,15 +127,14 @@ namespace Klipboard.Workers
                 case "orc":
                 case "parquet":
                 case "avro":
-                    schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
+                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
                     if (schemaRes.Success)
                     {
                         schemaStr = schemaRes.TableScheme.ToString();
+                        break;
                     }
-                    else
-                    {
-                        format = "txt";
-                    }
+
+                    format = "txt";
                     break;
 
                 default:
@@ -134,7 +153,7 @@ namespace Klipboard.Workers
             queryBuilder.Append(blobPath);
             queryBuilder.Append("' h'?");
             queryBuilder.Append(blboSas);
-            queryBuilder.Append("'");
+            queryBuilder.AppendLine("'");
             queryBuilder.AppendLine("]");
             queryBuilder.Append("with(");
 
