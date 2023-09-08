@@ -1,51 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 
 using Azure.Storage.Blobs;
 using Kusto.Data;
 using Kusto.Data.Common;
-using Kusto.Data.Net;
 using Kusto.Data.Net.Client;
-using Kusto.Ingest;
 
 namespace Klipboard.Utils
 {
-    public class KustoClientHelper
+    public class KustoDatabaseHelper : IDisposable
     {
-        private readonly KustoConnectionStringBuilder m_engineKcsb;
-        private readonly KustoConnectionStringBuilder m_dmKcsb;
+        private ICslAdminProvider m_engineAdminClient;
+        private ICslQueryProvider m_engineQueryClient;
         private string m_databaseName = string.Empty;
 
-        public KustoClientHelper(string connectionString, string databaseName)
+        public KustoDatabaseHelper(string connectionString, string databaseName)
             : this(new KustoConnectionStringBuilder(connectionString), databaseName)
         {
         }
 
-        public KustoClientHelper(KustoConnectionStringBuilder connectionString, string databaseName)
+        public KustoDatabaseHelper(KustoConnectionStringBuilder connectionString, string databaseName)
         {
             // TODO: This needs to be UX driven
-            m_engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
-            m_engineKcsb.SetConnectorDetails("Klipboard", "0.0.0", sendUser: false);
+            var engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
+            engineKcsb.SetConnectorDetails(AppConstants.ApplicationName, AppConstants.ApplicationVersion, sendUser: false);
 
-            m_dmKcsb = new KustoConnectionStringBuilder(connectionString);
-            m_dmKcsb.DataSource = "ingest-" + m_dmKcsb.DataSource;
-
+            m_engineAdminClient = KustoClientFactory.CreateCslAdminProvider(engineKcsb);
+            m_engineQueryClient = KustoClientFactory.CreateCslQueryProvider(engineKcsb);
             m_databaseName = databaseName;
+        }
+
+        public void Dispose() 
+        { 
+            m_engineAdminClient?.Dispose();
+            m_engineAdminClient = null;
+            m_engineQueryClient?.Dispose();
+            m_engineQueryClient = null;
         }
 
         public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName) 
         {
-            var engineClient = KustoClientFactory.CreateCslAdminProvider(m_engineKcsb);
-
             try 
             {
-                var res = await engineClient.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
+                using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
                 res.Read();
                 
                 var tempStorage = res.GetString(0);
@@ -59,21 +55,15 @@ namespace Klipboard.Utils
             }
         }
 
-        public async Task<(bool Success, string? blobUri)> TryUploadFileToDataManagementStagingAreaAsync(string filePath)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<(bool Success, TableColumns? TableScheme, string? format, string? Error)> TryGetBlobSchemeAsync(string blobUri, string? format = null, bool? firstRowIsHeader = null)
         {
-            var engineClient = KustoClientFactory.CreateCslQueryProvider(m_engineKcsb);
             var formatStr = (format != null) ? $", '{format}'" : string.Empty;
             var firstRowStr = (format != null && firstRowIsHeader != null) ? $", dynamic({{'UseFirstRowAsHeader':{firstRowIsHeader}}})" : string.Empty;
             var cmd = $"evaluate external_data_schema('{blobUri}'{formatStr}{firstRowStr})";
 
             try
             {
-                var res = await engineClient.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
+                using var res = await m_engineQueryClient.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
                 var tableScheme = new TableColumns(disableNameEscaping: true);
                 var nameCol = res.GetOrdinal("ColumnName");
                 var typeCol = res.GetOrdinal("ColumnType");
@@ -104,23 +94,75 @@ namespace Klipboard.Utils
             }
         }
 
-        public async Task<bool> TryCreateTableAync(string tableName, string tableSceme)
+        public async Task<(bool Success, string? Error)> TryCreateTableAync(string tableName, string tableSceme, int? ingestionBatchingTimeSeconds = null, int? tableLifetimeDays = null)
         {
-            throw new NotImplementedException();
-        }
+            var dt = DateTime.Now;
+            string tableSchemeStr = tableSceme.ToString();
+            string docstring;
+            string createTableCommand;
+            string alterIngestionBatchingCommand = string.Empty;
+            string setTableLifetimeCommand = string.Empty;
 
-        public async Task<bool> TryCreateTempTableAync(string tableName, string tableSceme, TimeSpan tableLifetime)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<bool> TryDirectIngestFileAync(string tableName, string fileName, object fileSourceOptions, object ingestionProperties)
-        {
-            throw new NotImplementedException();
-        }
+            if (ingestionBatchingTimeSeconds != null)
+            {
+                ingestionBatchingTimeSeconds = ingestionBatchingTimeSeconds < 10 ? 10 : ingestionBatchingTimeSeconds;
+                ingestionBatchingTimeSeconds = ingestionBatchingTimeSeconds > 600 ? 600 : ingestionBatchingTimeSeconds;
+                var batchingTime = TimeSpan.FromSeconds(ingestionBatchingTimeSeconds.Value);
 
-        public async Task<bool> TryQueueIngestFileAync(string tableName, string fileName, object fileSourceOptions, object ingestionProperties)
-        {
-            throw new NotImplementedException();
+                alterIngestionBatchingCommand = $".alter-merge table [\"{tableName}\"] policy ingestionbatching '{{ \"MaximumBatchingTimeSpan\" : \"{batchingTime.ToString()}\" }}'";
+            }
+
+            if (tableLifetimeDays == null || tableLifetimeDays.Value <= 0)
+            {
+                docstring = $"Table created by Klipboard on {dt.ToShortDateString()} {dt.ToShortTimeString()}";
+            }
+            else
+            {
+                var tableExpiryDate = DateTime.Today.AddDays(tableLifetimeDays.Value + 1); // Round up to midnight the next day
+                docstring = $"Temporary table created by klipboard on {dt.ToShortDateString()} {dt.ToShortTimeString()}, and is set for deletion on {tableExpiryDate.ToShortDateString()} {tableExpiryDate.ToShortTimeString()}";
+
+                setTableLifetimeCommand = $".alter table [\"{tableName}\"] policy auto_delete @'{{ \"ExpiryDate\" : \"{tableExpiryDate.Year}-{tableExpiryDate.Month}-{tableExpiryDate.Day}\", \"DeleteIfNotEmpty\": true }}'";
+            }
+
+            createTableCommand = $".create table [\"{tableName}\"] {tableSchemeStr} with (docstring = \"{docstring}\")";
+
+            // Create the table
+            try
+            {
+                using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, createTableCommand);
+            }
+            catch (Exception ex) 
+            {
+                return (false, $"Failed to create table '{tableName}': {ex.Message}");
+            }
+
+            // Set ingestion time batching 
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(alterIngestionBatchingCommand))
+                {
+                    using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, alterIngestionBatchingCommand);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Failed to create table '{tableName}': {ex.Message}");
+            }
+
+            // Set auto delete policy
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(setTableLifetimeCommand))
+                {
+                    using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, setTableLifetimeCommand);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Failed to create table '{tableName}': {ex.Message}");
+            }
+
+            return (true, null);
         }
 
         private static async Task<(bool Success, string? BlobUri, string? Error)> TryUploadStreamAync(string blobContainerUriStr, Stream dataStream, string upstreamFileName)

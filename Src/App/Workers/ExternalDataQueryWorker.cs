@@ -73,7 +73,7 @@ namespace Klipboard.Workers
 
         public async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
-            var kustoHelper = new KustoClientHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            using var kustoHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
             var uploadRes = await kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
 
             if (!uploadRes.Success)
