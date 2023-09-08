@@ -6,11 +6,16 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Resources\adx_color.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\adx_blue.ico" />
     <None Remove="Resources\adx_color.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\adx_color.ico" />
   </ItemGroup>
 
   <ItemGroup>
