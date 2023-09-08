@@ -4,15 +4,20 @@ using Azure.Storage.Blobs;
 using Kusto.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Net.Client;
+using Kusto.Ingest;
 
 namespace Klipboard.Utils
 {
     public class KustoDatabaseHelper : IDisposable
     {
-        private ICslAdminProvider m_engineAdminClient;
-        private ICslQueryProvider m_engineQueryClient;
+        #region Members
+        private Lazy<ICslAdminProvider> m_engineAdminClient;
+        private Lazy<ICslQueryProvider> m_engineQueryClient;
+        private Lazy<IKustoIngestClient> m_directIngestClient;
         private string m_databaseName = string.Empty;
+        #endregion
 
+        #region Construction
         public KustoDatabaseHelper(string connectionString, string databaseName)
             : this(new KustoConnectionStringBuilder(connectionString), databaseName)
         {
@@ -24,24 +29,27 @@ namespace Klipboard.Utils
             var engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
             engineKcsb.SetConnectorDetails(AppConstants.ApplicationName, AppConstants.ApplicationVersion, sendUser: false);
 
-            m_engineAdminClient = KustoClientFactory.CreateCslAdminProvider(engineKcsb);
-            m_engineQueryClient = KustoClientFactory.CreateCslQueryProvider(engineKcsb);
+            m_engineAdminClient = new Lazy<ICslAdminProvider>(() => KustoClientFactory.CreateCslAdminProvider(engineKcsb));
+            m_engineQueryClient = new Lazy<ICslQueryProvider>(() => KustoClientFactory.CreateCslQueryProvider(engineKcsb));
+            m_directIngestClient = new Lazy<IKustoIngestClient>(() => KustoIngestFactory.CreateDirectIngestClient(engineKcsb));
             m_databaseName = databaseName;
         }
 
         public void Dispose() 
         { 
-            m_engineAdminClient?.Dispose();
+            m_engineAdminClient?.Value.Dispose();
             m_engineAdminClient = null;
-            m_engineQueryClient?.Dispose();
+            m_engineQueryClient?.Value.Dispose();
             m_engineQueryClient = null;
         }
+        #endregion
 
+        #region Public APIs
         public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName) 
         {
             try 
             {
-                using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
+                using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
                 res.Read();
                 
                 var tempStorage = res.GetString(0);
@@ -63,7 +71,7 @@ namespace Klipboard.Utils
 
             try
             {
-                using var res = await m_engineQueryClient.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
+                using var res = await m_engineQueryClient.Value.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
                 var tableScheme = new TableColumns(disableNameEscaping: true);
                 var nameCol = res.GetOrdinal("ColumnName");
                 var typeCol = res.GetOrdinal("ColumnType");
@@ -129,7 +137,7 @@ namespace Klipboard.Utils
             // Create the table
             try
             {
-                using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, createTableCommand);
+                using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, createTableCommand);
             }
             catch (Exception ex) 
             {
@@ -141,7 +149,7 @@ namespace Klipboard.Utils
             {
                 if (!string.IsNullOrWhiteSpace(alterIngestionBatchingCommand))
                 {
-                    using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, alterIngestionBatchingCommand);
+                    using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, alterIngestionBatchingCommand);
                 }
             }
             catch (Exception ex)
@@ -154,7 +162,7 @@ namespace Klipboard.Utils
             {
                 if (!string.IsNullOrWhiteSpace(setTableLifetimeCommand))
                 {
-                    using var res = await m_engineAdminClient.ExecuteControlCommandAsync(m_databaseName, setTableLifetimeCommand);
+                    using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, setTableLifetimeCommand);
                 }
             }
             catch (Exception ex)
@@ -165,6 +173,28 @@ namespace Klipboard.Utils
             return (true, null);
         }
 
+        public async Task<(bool Success, string? Error)> TryDirectIngestStreamToTable(Stream stream, string table, KustoIngestionProperties ingestionProperties, StreamSourceOptions sourceOptions)
+        {
+            try
+            {
+                var res = await m_directIngestClient.Value.IngestFromStreamAsync(stream, ingestionProperties, sourceOptions);
+                var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
+
+                if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
+                {
+                    return (true, null);
+                }
+
+                return (false, $"Failed to ingest stream to Kusto: Status='{ingestStatus.Status}', ErrorCode='{ingestStatus.ErrorCode}', FailureStatus='{ingestStatus.FailureStatus}'");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Failed to ingest stream to Kusto: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region Private APIs
         private static async Task<(bool Success, string? BlobUri, string? Error)> TryUploadStreamAync(string blobContainerUriStr, Stream dataStream, string upstreamFileName)
         {
             var compRes = await TryCreateZipStreamAsync(dataStream, upstreamFileName);
@@ -222,5 +252,6 @@ namespace Klipboard.Utils
                 return (false, null, "Failed to compress memory stream: " + ex.Message);
             }
         }
+        #endregion
     }
 }
