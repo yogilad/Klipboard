@@ -19,8 +19,8 @@ namespace Klipboard.Utils.Test
         public KustoDatabaseHelperTests()
         {
             var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).ResultEx();
-            var kcsb = new KustoConnectionStringBuilder(appConfig.DefaultClusterConnectionString).WithAadUserPromptAuthentication();
-            m_kustoHelper = new KustoDatabaseHelper(kcsb, appConfig.DefaultClusterDatabaseName);
+            var kcsb = new KustoConnectionStringBuilder(appConfig.ChosenCluster.ConnectionString).WithAadUserPromptAuthentication();
+            m_kustoHelper = new KustoDatabaseHelper(kcsb, appConfig.ChosenCluster.DatabaseName);
         }
 
         [TestMethod]

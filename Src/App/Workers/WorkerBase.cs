@@ -16,9 +16,9 @@ namespace Klipboard.Workers
         public delegate void SendNotification(string title, string message);
 
         protected readonly ClipboardContent m_supportedContent;
+        protected readonly ISettings m_settings;
         protected readonly WorkerCategory m_category;
         protected readonly object? m_icon;
-        protected readonly AppConfig m_appConfig;
 
         public ClipboardContent SupportedContent => m_supportedContent;
         public WorkerCategory Category => m_category;
@@ -26,12 +26,12 @@ namespace Klipboard.Workers
         #endregion
 
         #region Construction
-        protected WorkerBase(WorkerCategory category, ClipboardContent supportedContent, AppConfig config, object? icon = null)
+        protected WorkerBase(WorkerCategory category, ClipboardContent supportedContent, ISettings mSettings, object? icon = null)
         {
             m_supportedContent = supportedContent;
+            m_settings = mSettings;
             m_category = category;
             m_icon = icon;
-            m_appConfig = config;
         }
         #endregion
 
@@ -54,7 +54,7 @@ namespace Klipboard.Workers
 
         // Handle a click event that requires CSV stream data
         public virtual async Task HandleCsvStreamAsync(Stream csvData, SendNotification sendNotification) => sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleCsvStreamAsync)}");
-        
+
         // Handle a click event that requires Text string data
         public virtual async Task HandleTextAsync(string textData, SendNotification sendNotification) =>sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextAsync)}");
 

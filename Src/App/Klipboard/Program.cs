@@ -19,40 +19,44 @@ namespace Klipboard
 
             //
             var icons = new Dictionary<string, object>()
-            { 
-                { "QuickActions", ResourceLoader.GetIcon() } 
+            {
+                { "QuickActions", ResourceLoader.GetIcon() }
             };
 
-            var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).GetAwaiter().GetResult();
-            var clipboardHelper = new ClipboardHelper();
-            var workers = CreateAppWorkers(appConfig, icons);
+            var settings = new Settings();
+            settings.InitSettings().ConfigureAwait(false).GetAwaiter().GetResult();
 
-            using var notifIcon = new NotificationIcon(appConfig, clipboardHelper, workers);
+            var clipboardHelper = new ClipboardHelper();
+            var workers = CreateAppWorkers(settings, icons);
+
+            using var notifIcon = new NotificationIcon(settings, clipboardHelper, workers);
             Application.Run();
-            AppConfigFile.Write(appConfig).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        public static IEnumerable<WorkerBase> CreateAppWorkers(AppConfig config, Dictionary<string, object> icons)
+        public static IEnumerable<WorkerBase> CreateAppWorkers(Settings settings, Dictionary<string, object> icons)
         {
             var workers = new List<WorkerBase>();
 
-            // Quick Actions 
-            icons.TryGetValue("QuickActions", out var quickActionIcon);
-            workers.Add(new QuickActionsWorker(WorkerCategory.QuickActions, config, quickActionIcon));
-            workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, config));
-            workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, config));
-            workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, config));
-            workers.Add(new TempTableWorker(WorkerCategory.QuickActions, config));
-            workers.Add(new InspectDataWorkerUx(WorkerCategory.QuickActions, config));
+            // Quick Actions
+            if (!icons.TryGetValue("QuickActions", out var quickActionIcon))
+            {
+                throw new Exception("QuickActions icon not found");
+            }
 
-            // Actions 
-            workers.Add(new DirectIngestWorker(WorkerCategory.Actions, config));
-            workers.Add(new QueueIngestWorker(WorkerCategory.Actions, config));
+            workers.Add(new QuickActionsWorker(WorkerCategory.QuickActions, settings, quickActionIcon));
+            workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new TempTableWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new InspectDataWorkerUx(WorkerCategory.QuickActions, settings));
 
-            // Management 
-            workers.Add(new OptionsWorker(WorkerCategory.Management, config));
-            workers.Add(new ShareWorker(WorkerCategory.Management, config));
-            workers.Add(new HelpWorker(WorkerCategory.Management, config));
+            // Actions
+            workers.Add(new DirectIngestWorker(WorkerCategory.Actions, settings));
+            workers.Add(new QueueIngestWorker(WorkerCategory.Actions, settings));
+
+            // Management
+            workers.Add(new ShareWorker(WorkerCategory.Management, settings));
+            workers.Add(new HelpWorker(WorkerCategory.Management, settings));
             return workers;
         }
     }

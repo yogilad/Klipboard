@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class DirectIngestWorker : WorkerBase
     {
-        public DirectIngestWorker(WorkerCategory category, AppConfig config, object? icon = null) 
-            : base(category, ClipboardContent.None, config, icon)
+        public DirectIngestWorker(WorkerCategory category, ISettings settings, object? icon = null) 
+            : base(category, ClipboardContent.None, settings, icon)
         {
         }
 

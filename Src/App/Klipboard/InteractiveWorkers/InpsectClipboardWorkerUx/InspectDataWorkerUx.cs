@@ -11,8 +11,8 @@ namespace Klipboard.InteractiveWorkers.InpsectClipboardWorkerUx
 {
     internal class InspectDataWorkerUx : InspectDataWorker
     {
-        public InspectDataWorkerUx(WorkerCategory category, AppConfig config, object? icon = null) 
-            : base(category, config, icon)
+        public InspectDataWorkerUx(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, settings, icon)
         {
         }
 

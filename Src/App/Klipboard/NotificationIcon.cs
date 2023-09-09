@@ -16,7 +16,7 @@ namespace Klipboard
         private ContextMenuStrip m_contextMenuStrip;
         private IClipboardHelper m_clipboardHelper;
 
-        public NotificationIcon(AppConfig config, IClipboardHelper clipboardHelper, IEnumerable<WorkerBase> workers)
+        public NotificationIcon(Settings settings, IClipboardHelper clipboardHelper, IEnumerable<WorkerBase> workers)
         {
             m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
@@ -42,9 +42,12 @@ namespace Klipboard
                 m_contextMenuStrip.Items.Add(worker.GetMenuText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(), Worker_OnClick);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].ToolTipText = worker.GetToolTipText(ClipboardContent.None);
                 m_contextMenuStrip.Items[m_contextMenuStrip.Items.Count - 1].Tag = worker;
-            
+
                 lastWorkerCategory = worker.Category;
             }
+
+            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
+            m_contextMenuStrip.Items.Add("Settings", null, (s, e) => settings.ShowDialog());
 
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
 
@@ -143,10 +146,10 @@ namespace Klipboard
 
                     RunWorker(worker, async () => await worker.HandleTextStreamAsync(textStream, SendNotification));
                     break;
-                
+
                 case ClipboardContent.Files:
-                    if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) || 
-                            filesAndFolders == null || 
+                    if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) ||
+                            filesAndFolders == null ||
                             filesAndFolders.Count == 0)
                     {
                         SendNotification("Error!", "Failed to get Files Data from clipboard");

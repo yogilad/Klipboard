@@ -12,8 +12,8 @@ namespace Klipboard.Workers
 {
     public class ShareWorker : WorkerBase
     {
-        public ShareWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.None, config, icon)
+        public ShareWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.None, settings, icon)
         {
         }
 

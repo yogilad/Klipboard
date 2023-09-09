@@ -6,8 +6,8 @@ namespace Klipboard.Workers
 {
     public abstract class InspectDataWorker : WorkerBase
     {
-        public InspectDataWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files , config, icon)
+        public InspectDataWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files , settings, icon)
         {
         }
 
