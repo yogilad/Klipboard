@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kusto.Data.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Klipboard.Utils
     public static class KustoDatabaseHelperExtended
     {
         // Set format to null or AppConstants.UnknownFormat to trigger auto detection of textual data
-        public static async Task<(bool Success, string? Schema, string? format, string? error)> TryAutoDetectTextBlobScheme(this KustoDatabaseHelper databaseHelper, string blobUri)
+        public static async Task<(bool Success, TableColumns? Schema, string? Format, string? Error)> TryAutoDetectTextBlobScheme(this KustoDatabaseHelper databaseHelper, string blobUri)
         {
             try
             {
@@ -36,11 +37,10 @@ namespace Klipboard.Utils
 
                 if (curScheme.Success)
                 {
-                    var schemaStr = curScheme.TableScheme.ToString();
-                    return (true, schemaStr, curScheme.format, null);
+                    return (true, curScheme.TableScheme, curScheme.format, null);
                 }
                 
-                return (true, AppConstants.TextLinesScheme, "txt", null);
+                return (true, AppConstants.TextLinesSchema, "txt", null);
             }
             catch (Exception ex)
             {

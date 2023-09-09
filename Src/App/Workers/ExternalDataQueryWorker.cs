@@ -27,16 +27,16 @@ namespace Klipboard.Workers
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
-            var upstreamFileName = CreateUploadFileName("Table", "tsv");
-            using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData)); ;
+            var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
+            using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
             await HandleStreamAsync(csvStream, "tsv", upstreamFileName, sendNotification);
         }
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
         {
-            var upstreamFileName = CreateUploadFileName("Text", "txt");
-            using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData)); ;
+            var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
+            using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
             await HandleStreamAsync(textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification);
         }
@@ -63,13 +63,13 @@ namespace Klipboard.Workers
             }
 
             var dt = DateTime.Now;
-            var upsteramFileName = CreateUploadFileName(fileInfo.Name);
+            var upsteramFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
             var dataStream = new FileStream(file, FileMode.Open, FileAccess.Read);
 
             await HandleStreamAsync(dataStream, fileInfo.Extension, upsteramFileName, sendNotification);
         }
 
-        public async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
+        private async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
@@ -80,7 +80,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            string schemaStr = AppConstants.TextLinesScheme;
+            string schemaStr = AppConstants.TextLinesSchemaStr;
 
             format = format.ToLower().TrimStart(".");
             switch (format)
@@ -90,12 +90,12 @@ namespace Klipboard.Workers
                     
                     if (autoDetectRes.Success)
                     {
-                        schemaStr = autoDetectRes.Schema;
-                        format = autoDetectRes.format;
+                        schemaStr = autoDetectRes.Schema.ToString();
+                        format = autoDetectRes.Format;
                         break;
                     }
 
-                    schemaStr = AppConstants.TextLinesScheme;
+                    schemaStr = AppConstants.TextLinesSchemaStr;
                     format = "txt";
                     break;
 
@@ -160,20 +160,6 @@ namespace Klipboard.Workers
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;
             }
-        }
-
-        private static string CreateUploadFileName(string filename)
-        {
-            var file = filename.SplitLast(".", out var extension);
-
-            return CreateUploadFileName(file, extension);
-        }
-
-        private static string CreateUploadFileName(string filename, string extension)
-        {
-            var dt = DateTime.Now;
-            var upsteramFileName = $"Klipboard_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.{extension}";
-            return upsteramFileName;
         }
     }
 }

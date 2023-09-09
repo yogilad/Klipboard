@@ -192,6 +192,13 @@ namespace Klipboard.Utils
                 return (false, $"Failed to ingest stream to Kusto: {ex.Message}");
             }
         }
+
+        public static string CreateTempTableName()
+        {
+            var dt = DateTime.Now;
+            var upsteramFileName = $"{AppConstants.ApplicationName}TempTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
+            return upsteramFileName;
+        }
         #endregion
 
         #region Private APIs

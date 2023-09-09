@@ -19,12 +19,18 @@
         public const int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
 
         public const string UnknownFormat = "unknown";
-        public const string TextLinesScheme = "(Line:string)";
-
+        public const string TextLinesSchemaStr = "(Line:string)";
+        public static readonly TableColumns TextLinesSchema;
 
         // App Name and Version
         public const string ApplicationName = "Klipboard";
         public const string ApplicationVersion = "v0.0.0";
+
+        static AppConstants()
+        {
+            TextLinesSchema = new TableColumns();
+            TextLinesSchema.Columns.Add(("Line", KqlTypeHelper.GetTypeDedfinition(KqlDataType.StringType)));
+        }
     }
     #endregion
 }
