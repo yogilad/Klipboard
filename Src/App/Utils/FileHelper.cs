@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using Kusto.Cloud.Platform.Utils;
+using Kusto.Data.Common;
+using System.Text.RegularExpressions;
 
 namespace Klipboard.Utils
 {
@@ -266,6 +268,49 @@ namespace Klipboard.Utils
             }
 
             return false;
+        }
+
+        public static string CreateUploadFileName(string filename)
+        {
+            var file = filename.SplitLast(".", out var extension);
+
+            return CreateUploadFileName(file, extension);
+        }
+
+        public static string CreateUploadFileName(string filename, string extension)
+        {
+            var dt = DateTime.Now;
+            var upsteramFileName = $"{AppConstants.ApplicationName}_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.{extension}";
+            return upsteramFileName;
+        }
+
+        public static DataSourceFormat GetFormatFromExtension(string extension)
+        {
+            extension = extension.TrimStart('.').ToLower();
+
+            switch(extension)
+            {
+                case "csv":
+                    return DataSourceFormat.csv;
+
+                case "tsv":
+                    return DataSourceFormat.tsv;
+
+                case "json":
+                    return DataSourceFormat.multijson;
+
+                case "avro":
+                    return DataSourceFormat.avro;
+
+                case "parquet":
+                    return DataSourceFormat.parquet;
+                
+                case "orc":
+                    return DataSourceFormat.orc;
+
+                default:
+                    return DataSourceFormat.txt;
+            }
         }
     }
 }

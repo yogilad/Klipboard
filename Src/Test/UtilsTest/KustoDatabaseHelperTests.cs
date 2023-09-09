@@ -12,15 +12,15 @@ using NuGet.Frameworks;
 namespace Klipboard.Utils.Test
 {
     [TestClass]
-    public class KustoClientHelperTests
+    public class KustoDatabaseHelperTests
     {
-        private KustoClientHelper m_kustoHelper;
+        private KustoDatabaseHelper m_kustoHelper;
 
-        public KustoClientHelperTests()
+        public KustoDatabaseHelperTests()
         {
             var appConfig = AppConfigFile.CreateDebugConfig().ConfigureAwait(false).ResultEx();
             var kcsb = new KustoConnectionStringBuilder(appConfig.DefaultClusterConnectionString).WithAadUserPromptAuthentication();
-            m_kustoHelper = new KustoClientHelper(kcsb, appConfig.DefaultClusterDatabaseName);
+            m_kustoHelper = new KustoDatabaseHelper(kcsb, appConfig.DefaultClusterDatabaseName);
         }
 
         [TestMethod]
@@ -57,6 +57,39 @@ namespace Klipboard.Utils.Test
             blobUri = res.BlobUri;
             errorMsg = res.Error;
             return res.Success;
+        }
+
+        [TestMethod]
+        public void CreateTable()
+        {
+            var dt = DateTime.Now;
+            var tableName = $"RegularTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
+            var res = m_kustoHelper.TryCreateTableAync(tableName, "(Line:string)").ConfigureAwait(false).ResultEx();
+
+            Assert.IsTrue(res.Success);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(res.Error));
+        }
+
+        [TestMethod]
+        public void CreateTableWithShortBatching()
+        {
+            var dt = DateTime.Now;
+            var tableName = $"BatchingTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
+            var res = m_kustoHelper.TryCreateTableAync(tableName, "(Line:string)", ingestionBatchingTimeSeconds: 30).ConfigureAwait(false).ResultEx();
+
+            Assert.IsTrue(res.Success);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(res.Error));
+        }
+
+        [TestMethod]
+        public void CreateTableWithShortBatchingAndExpiray()
+        {
+            var dt = DateTime.Now;
+            var tableName = $"TempTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
+            var res = m_kustoHelper.TryCreateTableAync(tableName, "(Line:string)", ingestionBatchingTimeSeconds: 30, tableLifetimeDays:2).ConfigureAwait(false).ResultEx();
+
+            Assert.IsTrue(res.Success);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(res.Error));
         }
     }
 }
