@@ -12,7 +12,7 @@ namespace Klipboard.Workers
     public class TempTableWorker : WorkerBase
     {
         public TempTableWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.None, config, icon)
+            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, config, icon)
         {
         }
 

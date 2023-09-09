@@ -5,29 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace Klipboard.Utils
 {
-    #region App Constats
-    public static class AppConstants
-    {
-        // Debug Config
-#if DEBUG
-        public static readonly bool DevMode = true;
-        public static readonly bool EnforceInlineQuerySizeLimits = true;
-#else
-        public static bool DevMode = false;
-        public static bool EnforceInlineQuerySizeLimits = true;
-#endif
-
-        // Program Constants
-        public static readonly int MaxAllowedQueryLengthKB = 12;
-        public static readonly int MaxAllowedQueryLength = MaxAllowedQueryLengthKB * 1024;
-        public static readonly int MaxAllowedDataLengthKb = MaxAllowedQueryLengthKB * 5;
-        public static readonly int MaxAllowedDataLength = MaxAllowedDataLengthKb * 1024;
-
-        public static readonly string ApplicationName = "Klipboard";
-        public static readonly string ApplicationVersion = "v0.0.0";
-    }
-    #endregion
-
     #region App Config
     public class AppConfig
     {

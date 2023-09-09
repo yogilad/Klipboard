@@ -13,8 +13,6 @@ namespace Klipboard.Workers
     public class ExternalDataQueryWorker : WorkerBase
     {
         private const string NotifcationTitle = "External Data Query";
-        private const string UnknownFormat = "unknown";
-        private const string TextLinesScheme = "(Line:string)";
 
         public ExternalDataQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
             : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon)
@@ -40,7 +38,7 @@ namespace Klipboard.Workers
             var upstreamFileName = CreateUploadFileName("Text", "txt");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData)); ;
 
-            await HandleStreamAsync(textStream, UnknownFormat, upstreamFileName, sendNotification);
+            await HandleStreamAsync(textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification);
         }
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
@@ -73,8 +71,8 @@ namespace Klipboard.Workers
 
         public async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
-            using var kustoHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
-            var uploadRes = await kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
+            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
 
             if (!uploadRes.Success)
             {
@@ -82,40 +80,22 @@ namespace Klipboard.Workers
                 return;
             }
 
-            string schemaStr = TextLinesScheme;
+            string schemaStr = AppConstants.TextLinesScheme;
 
             format = format.ToLower().TrimStart(".");
             switch (format)
             {
-                case UnknownFormat:
-                    var csvSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "csv");
-                    var tsvSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "tsv");
-                    var multiJsonSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "multijson");
-                    var jsonSchemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: "json");
-
-                    var curScheme = csvSchemaRes;
-                    if (tsvSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < tsvSchemaRes.TableScheme.Columns.Count))
+                case AppConstants.UnknownFormat:
+                    var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri);
+                    
+                    if (autoDetectRes.Success)
                     {
-                        curScheme = tsvSchemaRes;
-                    }
-
-                    if (multiJsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < multiJsonSchemaRes.TableScheme.Columns.Count))
-                    {
-                        curScheme = multiJsonSchemaRes;
-                    }
-
-                    if (jsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < jsonSchemaRes.TableScheme.Columns.Count))
-                    {
-                        curScheme = jsonSchemaRes;
-                    }
-
-                    if (curScheme.Success)
-                    {
-                        schemaStr = curScheme.TableScheme.ToString();
-                        format = curScheme.format;
+                        schemaStr = autoDetectRes.Schema;
+                        format = autoDetectRes.format;
                         break;
                     }
 
+                    schemaStr = AppConstants.TextLinesScheme;
                     format = "txt";
                     break;
 
@@ -127,7 +107,7 @@ namespace Klipboard.Workers
                 case "orc":
                 case "parquet":
                 case "avro":
-                    var schemaRes = await kustoHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
+                    var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format);
                     if (schemaRes.Success)
                     {
                         schemaStr = schemaRes.TableScheme.ToString();
@@ -157,7 +137,7 @@ namespace Klipboard.Workers
             queryBuilder.AppendLine("]");
             queryBuilder.Append("with(");
 
-            if (format != UnknownFormat)
+            if (format != AppConstants.UnknownFormat)
             {
                 queryBuilder.Append("format = '");
                 queryBuilder.Append(format);
