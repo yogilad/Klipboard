@@ -312,5 +312,50 @@ namespace Klipboard.Utils
                     return DataSourceFormat.txt;
             }
         }
+
+        public static IEnumerable<string> ExpandDropFileList(List<string> dropFiles, string? extension = null)
+        {
+            var wildCardFileMatcher = "*";
+            var enumOptions = new EnumerationOptions()
+            { 
+                MatchCasing = MatchCasing.CaseInsensitive,
+                MatchType = MatchType.Simple,
+                RecurseSubdirectories = true,
+                ReturnSpecialDirectories = false,
+            };
+
+            if (extension != null)
+            {
+                extension = extension.StartsWith(".") ? extension : $".{extension}";
+                wildCardFileMatcher = $"*{extension}";
+            }
+
+            foreach(var path in dropFiles)
+            {
+                var fileInfo = new FileInfo(path);
+
+                if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    foreach (var subFile in Directory.GetFiles(path, wildCardFileMatcher, enumOptions))
+                    {
+                        yield return subFile;
+                    }
+                }
+
+                if (!fileInfo.Exists)
+                {
+                    continue;
+                }
+
+                if (extension != null && !path.EndsWith(extension)) 
+                {
+                    continue;
+                }
+
+                yield return path;
+            }
+
+            yield break;
+        }
     }
 }

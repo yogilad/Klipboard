@@ -59,5 +59,20 @@ namespace Klipboard.Utils.Test
             Assert.IsTrue(FileHelper.TryGetFileCreationTimeFromName(filename, regex, out var creationTime));
             Assert.AreEqual(expectedTime, creationTime);
         }
+
+        [TestMethod]
+        public void GivenDropFiles_WhenHasDirrectories_AllFilesAreReturned()
+        {
+            var dropFiles = new List<string>()
+            {
+                "C:\\Users\\yocha\\Desktop\\Klipboard Test Data",
+                "C:\\Users\\yocha\\Desktop\\privacy.txt"
+            };
+
+            foreach(var file in FileHelper.ExpandDropFileList(dropFiles, ".csv"))
+            {
+                Console.WriteLine(file);
+            }
+        }
     }
 }
