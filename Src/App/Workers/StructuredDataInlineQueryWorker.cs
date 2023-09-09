@@ -64,18 +64,31 @@ namespace Klipboard.Workers
                 return;
             }
 
-            string textData = await File.ReadAllTextAsync(file);
-            char? separator;
+            var extension = fileInfo.Extension.TrimStart('.').ToLower(); 
+            char? separator = null;
 
-            if (fileInfo.Extension.Equals("csv", StringComparison.OrdinalIgnoreCase))
+            switch(extension)
             {
-                separator = ',';
+                case "csv":
+                    separator = ',';
+                    break;
+
+                case "tsv":
+                    separator = '\t';
+                    break;
+
+                case "txt":
+                case "log":
+                    break;
+
+                default:
+                    sendNotification(NotifcationTitle, $"File extension '{extension}' not supported free . Try using other options.");
+                    return;
             }
-            else if (fileInfo.Extension.Equals("tsv", StringComparison.OrdinalIgnoreCase))
-            {
-                separator = '\t';
-            }
-            else
+
+            string textData = await File.ReadAllTextAsync(file);
+
+            if (separator == null)
             {
                 TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
             }
