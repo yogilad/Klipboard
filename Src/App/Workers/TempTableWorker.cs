@@ -15,8 +15,8 @@ namespace Klipboard.Workers
     {
         private const string NotifcationTitle = "Temp Table Query";
 
-        public TempTableWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, config, icon)
+        public TempTableWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings, icon)
         {
         }
 
@@ -46,7 +46,7 @@ namespace Klipboard.Workers
 
         private async Task HandleSingleTextStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
-            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
 
             if (!uploadRes.Success)
@@ -60,7 +60,7 @@ namespace Klipboard.Workers
             if (format == AppConstants.UnknownFormat)
             {
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri);
-                if (autoDetectRes.Success) 
+                if (autoDetectRes.Success)
                 {
                     schemaStr = autoDetectRes.Schema.ToString();
                     format = autoDetectRes.Format;
@@ -97,9 +97,11 @@ namespace Klipboard.Workers
                 CompressionType = Kusto.Data.Common.DataSourceCompressionType.GZip,
             };
 
+            var appConfig = m_settings.GetConfig();
+
             var ingestionProperties = new KustoIngestionProperties()
             {
-                DatabaseName = m_appConfig.DefaultClusterDatabaseName,
+                DatabaseName = appConfig.ChosenCluster.DatabaseName,
                 TableName = tempTableName,
                 Format = FileHelper.GetFormatFromExtension(format),
                 IgnoreFirstRecord = false, // TODO consider if there's a way to detect that
@@ -107,7 +109,7 @@ namespace Klipboard.Workers
 
 
             var uploadBlobRes = await databaseHelper.TryDirectIngestBlobToTable(uploadRes.BlobUri, tempTableName, ingestionProperties, storageOptions);
-            
+
             if (!uploadBlobRes.Success)
             {
                 sendNotification(NotifcationTitle, uploadBlobRes.Error);
@@ -115,7 +117,7 @@ namespace Klipboard.Workers
             }
 
             var query = $"['{tempTableName}']\n| take 100";
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;

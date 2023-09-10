@@ -13,12 +13,12 @@
 
     public interface IClipboardHelper
     {
-        ClipboardContent GetClipboardContent();
+        Task<ClipboardContent> GetClipboardContent();
 
-        bool TryGetDataAsString(out string? data);
+        Task<string?> TryGetDataAsString();
 
-        bool TryGetDataAsMemoryStream(out Stream? stream);
+        Task<Stream?> TryGetDataAsMemoryStream();
 
-        bool TryGetFileDropList(out List<string>? fileList);
+        Task<List<string>?> TryGetFileDropList();
     }
 }

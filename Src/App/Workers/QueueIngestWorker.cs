@@ -11,8 +11,8 @@ namespace Klipboard.Workers
 {
     public class QueueIngestWorker : WorkerBase
     {
-        public QueueIngestWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.None, config, icon)
+        public QueueIngestWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.None, settings, icon)
         {
         }
 

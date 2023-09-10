@@ -12,27 +12,28 @@ namespace Klipboard.Workers
 {
     public class QuickActionsWorker : WorkerBase
     {
-        public QuickActionsWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.None, config, icon)
+        public QuickActionsWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.None, settings, icon)
         {
         }
 
         public override string GetMenuText(ClipboardContent content)
         {
-            string clusterName = m_appConfig.DefaultClusterConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".kusto").ToUpper();
-            string targetStr = $"{clusterName}-{m_appConfig.DefaultClusterDatabaseName}";
+            var config = m_settings.GetConfig();
+            string clusterName = config.ChosenCluster.ConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".kusto").ToUpper();
+            string targetStr = $"{clusterName}-{config.ChosenCluster.DatabaseName}";
 
             var x = content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream);
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
             {
                 return $"Clipboard Table => {targetStr}";
             }
-            
+
             if ((content & (ClipboardContent.Text | ClipboardContent.Text_Stream)) != ClipboardContent.None)
             {
                 return $"Clipboard Text => {targetStr}";
             }
-            
+
             if ((content & ClipboardContent.Files) != ClipboardContent.None)
             {
                 return $"Clipboard Files => {targetStr}";

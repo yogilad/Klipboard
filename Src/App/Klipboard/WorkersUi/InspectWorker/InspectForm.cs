@@ -1,8 +1,10 @@
+using Klipboard.Utils.Interfaces;
+
 namespace Klipboard
 {
-    public partial class ClipboardContentForm : Form
+    public partial class InspectForm: Form
     {
-        public ClipboardContentForm(string content)
+        public InspectForm(string content)
         {
             InitializeComponent();
 

@@ -10,8 +10,8 @@ namespace Klipboard.Workers
         private static readonly string ToolTipText = $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         private static string NotifcationTitle => "Inline Query";
 
-        public StructuredDataInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
-        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon) // Todo Support Text and File Data
+        public StructuredDataInlineQueryWorker(WorkerCategory category, ISettings settings, object? icon = null)
+        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, icon) // Todo Support Text and File Data
         {
         }
 
@@ -31,14 +31,14 @@ namespace Klipboard.Workers
             char? separator;
 
             TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
-            
+
             // a failed detection could simply mean a single column
             await Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
         }
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
         {
-            if (files.Count > 1) 
+            if (files.Count > 1)
             {
                 sendNotification(NotifcationTitle, "Inline query only supports a single file.");
             }
@@ -52,7 +52,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            if (!fileInfo.Exists) 
+            if (!fileInfo.Exists)
             {
                 sendNotification(NotifcationTitle, $"File '{file}' does not exist.");
                 return;
@@ -64,7 +64,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            var extension = fileInfo.Extension.TrimStart('.').ToLower(); 
+            var extension = fileInfo.Extension.TrimStart('.').ToLower();
             char? separator = null;
 
             switch(extension)
@@ -116,8 +116,9 @@ namespace Klipboard.Workers
                 sendNotification(NotifcationTitle, "Failed to create query text.");
                 return;
             }
+            var appConfig = m_settings.GetConfig();
 
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;

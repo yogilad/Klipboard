@@ -23,6 +23,11 @@ namespace Klipboard.Utils
         {
         }
 
+        public KustoDatabaseHelper(Cluster cluster)
+            : this(cluster.ConnectionString, cluster.DatabaseName)
+        {
+        }
+
         public KustoDatabaseHelper(KustoConnectionStringBuilder connectionString, string databaseName)
         {
             // TODO: This needs to be UX driven
@@ -35,8 +40,8 @@ namespace Klipboard.Utils
             m_databaseName = databaseName;
         }
 
-        public void Dispose() 
-        { 
+        public void Dispose()
+        {
             m_engineAdminClient?.Value.Dispose();
             m_engineAdminClient = null;
             m_engineQueryClient?.Value.Dispose();
@@ -45,19 +50,19 @@ namespace Klipboard.Utils
         #endregion
 
         #region Public APIs
-        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName) 
+        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName)
         {
-            try 
+            try
             {
                 using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
                 res.Read();
-                
+
                 var tempStorage = res.GetString(0);
                 var resp = await TryUploadStreamAync(tempStorage, dataStream, upstreamFileName);
-                
+
                 return resp;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return (false, null, "Failed to get engine staging account: " + ex.Message);
             }
@@ -139,12 +144,12 @@ namespace Klipboard.Utils
             {
                 using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, createTableCommand);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return (false, $"Failed to create table '{tableName}': {ex.Message}");
             }
 
-            // Set ingestion time batching 
+            // Set ingestion time batching
             try
             {
                 if (!string.IsNullOrWhiteSpace(alterIngestionBatchingCommand))
@@ -211,7 +216,7 @@ namespace Klipboard.Utils
             }
 
             upstreamFileName += ".zip";
-            
+
             using (compRes.MemoryStream)
             {
                 var blobContainerUri = new Uri(blobContainerUriStr);
@@ -254,7 +259,7 @@ namespace Klipboard.Utils
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 return (true, memoryStream, null);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return (false, null, "Failed to compress memory stream: " + ex.Message);
             }
