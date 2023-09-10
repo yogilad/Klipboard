@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -21,6 +20,8 @@ namespace Klipboard.Utils
         string? PrependFreeTextQueriesWithKql = null
     )
     {
+        public static readonly object[] s_QueryAppNames = Enum.GetNames(typeof(QueryApp)).Cast<object>().ToArray();
+
         [JsonIgnore]
         public Cluster ChosenCluster => KustoConnectionStrings[DefaultClusterIndex];
 
@@ -83,13 +84,15 @@ namespace Klipboard.Utils
         {
             if (!File.Exists(ConfigPath))
             {
-                return new AppConfig();
+                var config = new AppConfig();
+                await Write(config).ConfigureAwait(false);
+                return config;
             }
 
             try
             {
                 var jsonData = await File.ReadAllTextAsync(ConfigPath).ConfigureAwait(false);
-                var appConfig = JsonSerializer.Deserialize<AppConfig>(jsonData);
+                var appConfig = JsonSerializer.Deserialize<AppConfig>(jsonData, s_jsonOptions);
 
                 if (appConfig == null)
                 {
@@ -109,8 +112,7 @@ namespace Klipboard.Utils
 
         public async Task<bool> Write(AppConfig appConfig)
         {
-            var options = new JsonSerializerOptions() { WriteIndented = true };
-            var jsonData = JsonSerializer.Serialize<AppConfig>(appConfig, options);
+            var jsonData = JsonSerializer.Serialize<AppConfig>(appConfig, s_jsonOptions);
 
             try
             {

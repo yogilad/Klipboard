@@ -57,6 +57,7 @@ namespace Klipboard
 
             // Dispaly the notification icon
             m_notifyIcon.Visible = true;
+
         }
 
         public void Dispose() => Dispose(true);

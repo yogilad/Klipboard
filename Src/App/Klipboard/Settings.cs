@@ -7,54 +7,52 @@ namespace Klipboard
 {
     public partial class Settings : Form, ISettings
     {
-        private AppConfigFile? _appConfigFile;
-        private AppConfig _config;
+        // These are guaranteed to be initialized in the Init method, and the constructor is private
+        private AppConfigFile m_appConfigFile = null!;
+        private AppConfig m_config = null!;
 
-        public Settings()
+        private Settings()
         {
             InitializeComponent();
         }
 
-        protected override async void OnLoad(EventArgs e)
+        public static async Task<Settings> Init()
         {
-            base.OnLoad(e);
-            await LoadSettings();
+            var settings = new Settings();
+            await settings.LoadSettingsToUi().ConfigureAwait(false);
+            return settings;
+        }
+
+        private async Task LoadSettingsToUi()
+        {
+            UpdateConfigPath();
+            await ReadConfigFromPath().ConfigureAwait(false);
+            DataToUi();
+        }
+
+        private async Task ReadConfigFromPath()
+        {
+            m_config = await m_appConfigFile.Read().ConfigureAwait(false);
+        }
+
+        private void UpdateConfigPath()
+        {
+            var path = m_appConfigFile?.ConfigPath ?? Properties.Settings.Default.SettingsPath;
+            m_appConfigFile = string.IsNullOrWhiteSpace(path) ? new AppConfigFile() : new AppConfigFile(path);
+            Properties.Settings.Default.SettingsPath = m_appConfigFile.ConfigPath;
             txtSettingsPath.Text = Properties.Settings.Default.SettingsPath;
         }
 
-        public async Task LoadSettings()
+        private ConfiguredTaskAwaitable<bool> SaveSettings()
         {
-            var config = await InitSettings().ConfigureAwait(false);
-            DataToUi(config);
+            var config = UiToData();
+            return m_appConfigFile.Write(config).ConfigureAwait(false);
         }
 
-        public async Task<AppConfig> InitSettings()
-        {
-            var path = _appConfigFile?.ConfigPath ?? Properties.Settings.Default.SettingsPath;
-            _appConfigFile = string.IsNullOrWhiteSpace(path) ? new AppConfigFile() : new AppConfigFile(path);
-            Properties.Settings.Default.SettingsPath = _appConfigFile?.ConfigPath ?? Properties.Settings.Default.SettingsPath;
-            _config = await _appConfigFile.Read().ConfigureAwait(false);
-            SaveSettings(_config);
-            return _config;
-        }
-
-
-        private async void btnLoadSettings_Click(object sender, EventArgs e)
-        {
-            try { await LoadSettings(); }
-            catch (Exception ex) { Debug.WriteLine(ex.ToString()); }
-        }
-
-        private ConfiguredTaskAwaitable<bool> SaveSettings(AppConfig? config = null)
-        {
-            var configToSave = config ?? UiToData();
-            return _appConfigFile.Write(configToSave).ConfigureAwait(false);
-        }
-
-        private void DataToUi(AppConfig config)
+        private void DataToUi()
         {
             lstClusters.Items.Clear();
-            foreach (var cluster in config.KustoConnectionStrings)
+            foreach (var cluster in m_config.KustoConnectionStrings)
             {
                 lstClusters.Items.Add(
                     new ListViewItem(
@@ -62,16 +60,17 @@ namespace Klipboard
                     ));
             }
             lstClusters.SelectedItems.Clear();
-            if (config.DefaultClusterIndex >= 0 && config.DefaultClusterIndex < lstClusters.Items.Count)
+            if (m_config.DefaultClusterIndex >= 0 && m_config.DefaultClusterIndex < lstClusters.Items.Count)
             {
-                lstClusters.Items[config.DefaultClusterIndex].Selected = true;
+                lstClusters.Items[m_config.DefaultClusterIndex].Selected = true;
             }
 
-            chkStartWithWindows.Checked = config.StartAutomatically;
+            chkStartWithWindows.Checked = m_config.StartAutomatically;
             cmbApp.Items.Clear();
-            cmbApp.Items.AddRange(Enum.GetNames(typeof(QueryApp)));
-            cmbApp.SelectedIndex = (int)config.DefaultQueryApp;
-            txtQuery.Text = config.PrependFreeTextQueriesWithKql;
+            string[] strings = Enum.GetNames(typeof(QueryApp));
+            cmbApp.Items.AddRange(strings);
+            cmbApp.SelectedIndex = (int)m_config.DefaultQueryApp;
+            txtQuery.Text = m_config.PrependFreeTextQueriesWithKql;
         }
 
         private AppConfig UiToData()
@@ -85,59 +84,85 @@ namespace Klipboard
             return new AppConfig(clusters, defaultClusterIndex, defaultQueryApp, startAutomatically, prependFreeTextQueriesWithKql);
         }
 
+        #region Events
+        private async void btnLoadSettings_Click(object sender, EventArgs e)
+        {
+            await ExceptionUtils.Protect(async () => await LoadSettingsToUi()).ConfigureAwait(false);
+        }
+
         private void lstClusters_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lstClusters.SelectedItems.Count == 0)
+            ExceptionUtils.Protect(() =>
             {
-                return;
-            }
-            var selected = lstClusters.SelectedItems[0];
-            if (selected == null)
-            {
-                return;
-            }
-            txtConnectionStr.Text = selected.SubItems[0].Text;
-            txtDatabase.Text = selected.SubItems[1].Text;
+                if (lstClusters.SelectedItems.Count == 0)
+                {
+                    return;
+                }
+                var selected = lstClusters.SelectedItems[0];
+                if (selected == null)
+                {
+                    return;
+                }
+                txtConnectionStr.Text = selected.SubItems[0].Text;
+                txtDatabase.Text = selected.SubItems[1].Text;
+            });
         }
 
         private void btUpdate_Click(object sender, EventArgs e)
         {
-            var selectedItems = lstClusters.SelectedItems;
-            if (selectedItems.Count == 0)
+            ExceptionUtils.Protect(() =>
             {
-                return;
-            }
+                var selectedItems = lstClusters.SelectedItems;
+                if (selectedItems.Count == 0)
+                {
+                    return;
+                }
 
-            var selected = lstClusters.SelectedItems[0];
-            if (selected == null)
-            {
-                return;
-            }
-            selected.SubItems[0].Text = txtConnectionStr.Text;
-            selected.SubItems[1].Text = txtDatabase.Text;
+                var selected = lstClusters.SelectedItems[0];
+                if (selected == null)
+                {
+                    return;
+                }
+                selected.SubItems[0].Text = txtConnectionStr.Text;
+                selected.SubItems[1].Text = txtDatabase.Text;
+            });
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            var item = new ListViewItem(new[] { txtConnectionStr.Text, txtDatabase.Text });
-            lstClusters.Items.Add(item);
+            ExceptionUtils.Protect(() =>
+            {
+                var item = new ListViewItem(new[] { txtConnectionStr.Text, txtDatabase.Text });
+                lstClusters.Items.Add(item);
+            });
         }
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
-            await SaveSettings();
+            await ExceptionUtils.Protect(async () => await SaveSettings());
         }
-
-        public AppConfig GetConfig() => _config;
-
         protected override async void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            // Show a message box asking users if they want to save
-            if (MessageBox.Show("Do you want to save your changes?", "Save changes", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            await ExceptionUtils.Protect(async () =>
             {
-                await SaveSettings();
-            }
+                // Show a message box asking users if they want to save
+                if (MessageBox.Show(@"Do you want to save your changes?", @"Save changes", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    await SaveSettings();
+                }
+            }).ConfigureAwait(false);
+
         }
+        #endregion
+
+
+        #region ISettings
+
+        public AppConfig GetConfig() => m_config;
+
+        #endregion
+
+
     }
 }

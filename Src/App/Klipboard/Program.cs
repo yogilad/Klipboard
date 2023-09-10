@@ -23,8 +23,7 @@ namespace Klipboard
                 { "QuickActions", ResourceLoader.GetIcon() }
             };
 
-            var settings = new Settings();
-            settings.InitSettings().ConfigureAwait(false).GetAwaiter().GetResult();
+            var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
 
             var clipboardHelper = new ClipboardHelper();
             var workers = CreateAppWorkers(settings, icons);
