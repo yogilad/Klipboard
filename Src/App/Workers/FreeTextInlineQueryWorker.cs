@@ -10,8 +10,8 @@ namespace Klipboard.Workers
         private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard contiainig unstructured text";
         private static readonly string NotifcationTitle = "Free Text Inline Query";
 
-        public FreeTextInlineQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
-        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon) // Todo Support Text and File Data
+        public FreeTextInlineQueryWorker(WorkerCategory category, ISettings settings, object? icon = null)
+        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, icon) // Todo Support Text and File Data
         {
         }
 
@@ -34,7 +34,7 @@ namespace Klipboard.Workers
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
         {
-            if (files.Count > 1) 
+            if (files.Count > 1)
             {
                 sendNotification(NotifcationTitle, "Inline query only supports a single file.");
             }
@@ -48,7 +48,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            if (!fileInfo.Exists) 
+            if (!fileInfo.Exists)
             {
                 sendNotification(NotifcationTitle, $"File '{file}' does not exist.");
                 return;
@@ -73,8 +73,10 @@ namespace Klipboard.Workers
                 sendNotification(NotifcationTitle, $"Source data size {(int) (freeText.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
                 return;
             }
+            var appConfig = m_settings.GetConfig();
 
-            var kqlSuffix = string.IsNullOrWhiteSpace(m_appConfig.PrepandFreeTextQueriesWithKQL)? string.Empty : m_appConfig.PrepandFreeTextQueriesWithKQL.Trim();
+            var prependFreeTextQueriesWithKql = appConfig.PrependFreeTextQueriesWithKql;
+            var kqlSuffix = string.IsNullOrWhiteSpace(prependFreeTextQueriesWithKql)? string.Empty : prependFreeTextQueriesWithKql.Trim();
             kqlSuffix += string.IsNullOrWhiteSpace(kqlSuffix) ? "| take  100" : "\n| take 100";
 
             var success = TabularDataHelper.TryConvertFreeTextToInlineQuery(
@@ -88,7 +90,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;

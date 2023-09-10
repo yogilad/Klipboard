@@ -8,8 +8,8 @@
         public const bool DevMode = true;
         public const bool EnforceInlineQuerySizeLimits = true;
 #else
-        public const DevMode = false;
-        public const EnforceInlineQuerySizeLimits = true;
+        public const bool DevMode = false;
+        public const bool EnforceInlineQuerySizeLimits = true;
 #endif
 
         // Program Constants

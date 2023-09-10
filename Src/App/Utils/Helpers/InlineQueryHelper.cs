@@ -17,7 +17,7 @@ namespace Klipboard.Utils
             var clusterHost = clusterUri.Trim().TrimEnd('/').Replace("https://", "");
             string queryLink;
 
-            if (string.IsNullOrWhiteSpace(query)) 
+            if (string.IsNullOrWhiteSpace(query))
             {
                 error = "Query string is empty.";
                 return false;
@@ -32,7 +32,7 @@ namespace Klipboard.Utils
                 return false;
             }
 
-            if (appConfig.InvokeQueryInDesktopApp)
+            if (appConfig.DefaultQueryApp == QueryApp.Desktop)
             {
                 queryLink = $"https://{clusterHost}/{databaseName}?query={query}&web=0";
             }
@@ -40,6 +40,7 @@ namespace Klipboard.Utils
             {
                 queryLink = $"https://dataexplorer.azure.com/clusters/{clusterHost}/databases/{databaseName}?query={query}";
             }
+            Debug.WriteLine(queryLink);
 
             Process.Start(new ProcessStartInfo
             {

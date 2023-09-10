@@ -14,8 +14,8 @@ namespace Klipboard.Workers
     {
         private const string NotifcationTitle = "External Data Query";
 
-        public ExternalDataQueryWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, config, icon)
+        public ExternalDataQueryWorker(WorkerCategory category, ISettings mSettings, object? icon = null)
+            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, mSettings, icon)
         {
         }
 
@@ -71,7 +71,7 @@ namespace Klipboard.Workers
 
         private async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
         {
-            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
 
             if (!uploadRes.Success)
@@ -87,7 +87,7 @@ namespace Klipboard.Workers
             {
                 case AppConstants.UnknownFormat:
                     var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri);
-                    
+
                     if (autoDetectRes.Success)
                     {
                         schemaStr = autoDetectRes.Schema.ToString();
@@ -143,19 +143,20 @@ namespace Klipboard.Workers
                 queryBuilder.Append(format);
                 queryBuilder.Append("', ");
             }
-            
+
             queryBuilder.AppendLine("ignoreFirstRecord = false);");
             queryBuilder.AppendLine("Klipboard");
 
-            if (format == "txt" && !string.IsNullOrWhiteSpace(m_appConfig.PrepandFreeTextQueriesWithKQL))
+            var appConfig = m_settings.GetConfig();
+            if (format == "txt" && !string.IsNullOrWhiteSpace(appConfig.PrependFreeTextQueriesWithKql))
             {
-                queryBuilder.AppendLine(m_appConfig.PrepandFreeTextQueriesWithKQL);
+                queryBuilder.AppendLine(appConfig.PrependFreeTextQueriesWithKql);
             }
 
             queryBuilder.AppendLine("| take 100");
 
             var query = queryBuilder.ToString();
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
                 return;

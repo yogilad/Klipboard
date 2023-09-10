@@ -1,6 +1,7 @@
 ﻿using Klipboard.Utils;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Ingest;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,8 +17,8 @@ namespace Klipboard.Workers
     {
         private const string NotifcationTitle = "Temp Table Query";
 
-        public TempTableWorker(WorkerCategory category, AppConfig config, object? icon = null)
-            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, config, icon)
+        public TempTableWorker(WorkerCategory category, ISettings settings, object? icon = null)
+            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings, icon)
         {
         }
 
@@ -31,7 +32,8 @@ namespace Klipboard.Workers
         {
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
-            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            var target = GetQuickActionTarget();
+            using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
             if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, "tsv", upstreamFileName, sendNotification))
@@ -44,7 +46,8 @@ namespace Klipboard.Workers
         {
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
-            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            var target = GetQuickActionTarget();
+            using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
             if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification))
@@ -58,8 +61,10 @@ namespace Klipboard.Workers
             var firstFile = true;
             var successCount = 0;
             var fileCount = 0;
+            var target = GetQuickActionTarget();
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
-            using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
+            using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
+
 
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders)) 
             {
@@ -81,7 +86,7 @@ namespace Klipboard.Workers
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, format, $"{fileInfo.Name}_{Guid.NewGuid}", sendNotification);
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, format, $"{fileInfo.Name}_{Guid.NewGuid()}", sendNotification);
                     if (!success)
                     {
                         // A notification was sent from the failed function
@@ -96,7 +101,7 @@ namespace Klipboard.Workers
                 var storageOptions = new StorageSourceOptions();
                 var ingestionProperties = new KustoIngestionProperties()
                 {
-                    DatabaseName = m_appConfig.DefaultClusterDatabaseName,
+                    DatabaseName = target.DatabaseName,
                     TableName = tempTableName,
                     Format = FileHelper.GetFormatFromExtension(format),
                     IgnoreFirstRecord = false, // TODO consider if there's a way to detect that
@@ -133,7 +138,7 @@ namespace Klipboard.Workers
             if (format == AppConstants.UnknownFormat)
             {
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri);
-                if (autoDetectRes.Success) 
+                if (autoDetectRes.Success)
                 {
                     schemaStr = autoDetectRes.Schema.ToString();
                     format = autoDetectRes.Format;
@@ -169,9 +174,11 @@ namespace Klipboard.Workers
                 CompressionType = Kusto.Data.Common.DataSourceCompressionType.GZip,
             };
 
+            var appConfig = m_settings.GetConfig();
+
             var ingestionProperties = new KustoIngestionProperties()
             {
-                DatabaseName = m_appConfig.DefaultClusterDatabaseName,
+                DatabaseName = appConfig.ChosenCluster.DatabaseName,
                 TableName = tempTableName,
                 Format = FileHelper.GetFormatFromExtension(format),
                 IgnoreFirstRecord = false, // TODO consider if there's a way to detect that
@@ -179,7 +186,7 @@ namespace Klipboard.Workers
 
 
             var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, tempTableName, ingestionProperties, storageOptions);
-            
+
             if (!uploadBlobRes.Success)
             {
                 sendNotification(NotifcationTitle, uploadBlobRes.Error);
@@ -191,12 +198,18 @@ namespace Klipboard.Workers
 
         private void InvokeTempTableQuery(string tempTableName, SendNotification sendNotification)
         {
+            var target = GetQuickActionTarget();
             var query = $"['{tempTableName}']\n| take 100";
 
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_appConfig, m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
             {
                 sendNotification(NotifcationTitle, error ?? "Unknown error.");
             }
+        }
+
+        private Cluster GetQuickActionTarget()
+        {
+            return m_settings.GetConfig().ChosenCluster;
         }
     }
 }

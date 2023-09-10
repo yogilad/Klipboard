@@ -1,89 +1,103 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Klipboard.Utils
 {
-    #region App Config
-    public class AppConfig
+    public enum QueryApp
     {
-        #region Connection Configuration
-        // Kusto Configuration
-        public HashSet<String> KustoConnectionStrings = new HashSet<String>();
-        public String DefaultClusterConnectionString = string.Empty;
-        public String DefaultClusterDatabaseName = string.Empty;
-        #endregion
+        Web,
+        Desktop
+    }
 
-        #region Behavior Configuration
-        // if set to true invokes queries in Kusto Explorer, otherwise invokes queries in Kusto Web Explorer
-        public bool InvokeQueryInDesktopApp = false;
+    public record Cluster(string ConnectionString, string DatabaseName);
 
-        // Auto start application when windows starts 
-        public bool StartAutomatically = false;
+    public record AppConfig(
+        List<Cluster> KustoConnectionStrings,
+        int DefaultClusterIndex = 0,
+        QueryApp DefaultQueryApp = QueryApp.Web,
+        bool StartAutomatically = false,
+        string? PrependFreeTextQueriesWithKql = null
+    )
+    {
+        public static readonly object[] s_QueryAppNames = Enum.GetNames(typeof(QueryApp)).Cast<object>().ToArray();
 
-        // Create free text queries with a default parse command
-        public string PrepandFreeTextQueriesWithKQL = string.Empty;
-        #endregion
+        [JsonIgnore]
+        public Cluster ChosenCluster => KustoConnectionStrings[DefaultClusterIndex];
 
-        #region Construction
-        internal AppConfig()
+        public AppConfig()
+            : this(new List<Cluster> { new ("https://help.kusto.windows.net", "Samples") })
         {
         }
-        #endregion 
     }
-    #endregion
 
     #region App Config File
+
     public class AppConfigFile
     {
-        public static readonly string s_configDir;
-        public static readonly string s_configPath;
+        public string ConfigDir { get; set; }
+        public string ConfigPath { get; set; }
 
-        static AppConfigFile()
+        private static readonly JsonSerializerOptions s_jsonOptions = new JsonSerializerOptions()
         {
-            s_configDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Klipboard");
-            s_configPath = Path.Combine(s_configDir, "config.json");
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() },
+            AllowTrailingCommas = true,
+            PropertyNameCaseInsensitive = true,
+        };
+
+        public AppConfigFile()
+        {
+            ConfigDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Klipboard");
+            ConfigPath = Path.Combine(ConfigDir, "config.json");
+        }
+
+        public AppConfigFile(string path)
+        {
+            ConfigDir = Path.GetDirectoryName(path);
+            ConfigPath = path;
         }
 
         public static Task<AppConfig> CreateDebugConfig()
         {
             var AlgotecKQlParse =
-@"| parse-where Line with Timestamp:datetime ""-04:00 "" Level:string ""("" * "") "" ProcessName:string "" ("" ProcesId:int "","" ThreadId:int * "") "" EventText:string
+                @"| parse-where Line with Timestamp:datetime ""-04:00 "" Level:string ""("" * "") "" ProcessName:string "" ("" ProcesId:int "","" ThreadId:int * "") "" EventText:string
 | project-away Line
 | extend Level = trim_end(""[ \\t]+"", Level)
 | extend Level = iff(Level == ""NOTICE"", ""VERBOSE"", Level)";
 
-            var config = new AppConfig();
             var myCluster = Environment.GetEnvironmentVariable("KUSTO_ENGINE") ?? "https://kvcd8ed305830f049bbac1.northeurope.kusto.windows.net/";
             var myDb = Environment.GetEnvironmentVariable("KUSTO_DATABASE") ?? "MyDatabase";
             var freeTextKQL = Environment.GetEnvironmentVariable("FREE_TEXT_KQL") ?? string.Empty;
-
             myCluster = myCluster.Trim().TrimEnd('/');
-            config.DefaultClusterConnectionString = myCluster;
-            config.DefaultClusterDatabaseName = myDb;
-            config.KustoConnectionStrings.Add(myCluster);
-            config.PrepandFreeTextQueriesWithKQL = freeTextKQL;
+
+            var config = new AppConfig
+            {
+                KustoConnectionStrings = new List<Cluster>() { new (myCluster, myDb) },
+                PrependFreeTextQueriesWithKql = freeTextKQL
+            };
 
             return Task.FromResult(config);
         }
 
-        public static async Task<AppConfig> Read()
+        public async Task<AppConfig> Read()
         {
-            if (!File.Exists(s_configPath))
+            if (!File.Exists(ConfigPath))
             {
-                return new AppConfig();
+                var config = new AppConfig();
+                await Write(config).ConfigureAwait(false);
+                return config;
             }
 
             try
             {
-                var jsonData = await File.ReadAllTextAsync(s_configPath);
-                var appConfig = JsonSerializer.Deserialize<AppConfig>(jsonData);
+                var jsonData = await File.ReadAllTextAsync(ConfigPath).ConfigureAwait(false);
+                var appConfig = JsonSerializer.Deserialize<AppConfig>(jsonData, s_jsonOptions);
 
                 if (appConfig == null)
                 {
                     Debug.WriteLine("File does not contain proper config:");
-                    Debug.WriteLine(jsonData); 
+                    Debug.WriteLine(jsonData);
                     appConfig = new AppConfig();
                 }
 
@@ -96,15 +110,14 @@ namespace Klipboard.Utils
             }
         }
 
-        public static async Task<bool> Write(AppConfig appConfig)
+        public async Task<bool> Write(AppConfig appConfig)
         {
-            var options = new JsonSerializerOptions() { WriteIndented = true };
-            var jsonData = JsonSerializer.Serialize<AppConfig>(appConfig, options);
+            var jsonData = JsonSerializer.Serialize<AppConfig>(appConfig, s_jsonOptions);
 
             try
             {
-                Directory.CreateDirectory(s_configDir);
-                await File.WriteAllTextAsync(s_configPath, jsonData);
+                Directory.CreateDirectory(ConfigDir);
+                await File.WriteAllTextAsync(ConfigPath, jsonData);
                 return true;
             }
             catch (Exception ex)
@@ -114,5 +127,7 @@ namespace Klipboard.Utils
             }
         }
     }
+
     #endregion
+
 }
