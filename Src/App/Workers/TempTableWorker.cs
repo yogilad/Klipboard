@@ -56,12 +56,19 @@ namespace Klipboard.Workers
         public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification)
         {
             var firstFile = true;
+            var successCount = 0;
             var fileCount = 0;
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             using var databaseHelper = new KustoDatabaseHelper(m_appConfig.DefaultClusterConnectionString, m_appConfig.DefaultClusterDatabaseName);
 
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders)) 
             {
+                if(fileCount++ > 100)
+                {
+                    sendNotification(NotifcationTitle, "Limit of 100 files reached");
+                    break;
+                }
+
                 var format = AppConstants.UnknownFormat;
                 var fileInfo = new FileInfo(path);
 
@@ -81,7 +88,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    fileCount++;
+                    successCount++;
                     firstFile = false;
                     continue;
                 }
@@ -102,10 +109,10 @@ namespace Klipboard.Workers
                     continue;
                 }
 
-                fileCount++;
+                successCount++;
             }
 
-            if (fileCount > 0) 
+            if (successCount > 0) 
             {
                 InvokeTempTableQuery(tempTableName, sendNotification);
             }
