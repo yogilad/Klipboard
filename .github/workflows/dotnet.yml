@@ -21,5 +21,14 @@ jobs:
         dotnet-version: 7.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
+    - name: Build Debug
       run: dotnet build --no-restore
+    - name: Build Release
+      run: dotnet build --no-restore --configuration Release
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: |
+          Src/MyProject/bin/Debug/net7.0
+          Src/MyProject/bin/Release/net7.0
