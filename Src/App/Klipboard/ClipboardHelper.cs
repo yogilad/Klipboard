@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Specialized;
+using System.Text;
 using Kusto.Cloud.Platform.Utils;
 
 using Klipboard.Utils;
@@ -7,88 +8,57 @@ namespace Klipboard
 {
     public class ClipboardHelper : IClipboardHelper
     {
-        public ClipboardContent GetClipboardContent()
+        public Task<ClipboardContent> GetClipboardContent()
         {
-            // TODO: Consider supporting extracting html tables from HTML drop content 
+            // TODO: Consider supporting extracting html tables from HTML drop content
 
             if (Clipboard.ContainsData(DataFormats.CommaSeparatedValue))
             {
-                return ClipboardContent.CSV | ClipboardContent.CSV_Stream;
+                return Task.FromResult(ClipboardContent.CSV | ClipboardContent.CSV_Stream);
             }
-            
+
             // Keep this last on the text data list as many types are also text represented (CSV, HTML, etc.)
             if (Clipboard.ContainsText())
             {
-                return ClipboardContent.Text | ClipboardContent.Text_Stream;
+                return Task.FromResult(ClipboardContent.Text | ClipboardContent.Text_Stream);
             }
 
             if (Clipboard.ContainsFileDropList())
             {
-                return ClipboardContent.Files;
+                return Task.FromResult(ClipboardContent.Files);
             }
 
-            return ClipboardContent.None;
+            return Task.FromResult(ClipboardContent.None);
         }
 
-        public bool TryGetDataAsString(out string? data)
+        public async Task<string?> TryGetDataAsString()
         {
-            var content = GetClipboardContent() & (ClipboardContent.CSV | ClipboardContent.Text);
+            var content = await GetClipboardContent() & (ClipboardContent.CSV | ClipboardContent.Text);
 
-            if (content != ClipboardContent.None)
-            {
-                data = Clipboard.GetText();
-                return true;
-            }
+            return content != ClipboardContent.None ? Clipboard.GetText() : null;
 
-            data = null;
-            return false;
         }
 
-        public bool TryGetDataAsMemoryStream(out Stream? stream)
+        public async Task<Stream?> TryGetDataAsMemoryStream()
         {
-            var content = GetClipboardContent() & (ClipboardContent.CSV_Stream | ClipboardContent.Text_Stream);
+            var content = (await GetClipboardContent()) & (ClipboardContent.CSV_Stream | ClipboardContent.Text_Stream);
 
-            switch (content)
+            return content switch
             {
-                case ClipboardContent.CSV_Stream:
-                    stream = Clipboard.GetData(DataFormats.CommaSeparatedValue) as MemoryStream;
-                    break;
-
-                case ClipboardContent.Text_Stream:
-                    var data = Clipboard.GetText();
-                    stream = new MemoryStream(Encoding.UTF8.GetBytes(data));
-                    break;
-
-                default:
-                    stream = null;
-                    break;
-            }
-
-            return stream != null;
+                ClipboardContent.CSV_Stream => Clipboard.GetData(DataFormats.CommaSeparatedValue) as MemoryStream,
+                ClipboardContent.Text_Stream => new MemoryStream(Encoding.UTF8.GetBytes(Clipboard.GetText())),
+                _ => null,
+            };
         }
 
-        public bool TryGetFileDropList(out List<string>? fileList)
+        public async Task<List<string>?> TryGetFileDropList()
         {
-            fileList = null;
-
-            if (GetClipboardContent() == ClipboardContent.Files)
+            if ((await GetClipboardContent()) != ClipboardContent.Files)
             {
-                var files = Clipboard.GetFileDropList();
-
-                if (files != null)
-                {
-                    fileList = new List<string>();
-                    foreach (var file in files)
-                    {
-                        if (file != null)
-                        {
-                            fileList.Add(file);
-                        }
-                    }
-                }
+                return null;
             }
 
-            return fileList.SafeFastAny();
+            return Clipboard.GetFileDropList().Cast<string?>().Where(x => x != null).ToList()!;
         }
     }
 }

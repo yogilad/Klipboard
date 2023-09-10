@@ -70,9 +70,9 @@ namespace Klipboard
                     m_components.Dispose();
         }
 
-        private void NotifyIcon_OnClick(object? Sender, EventArgs e)
+        private async void NotifyIcon_OnClick(object? Sender, EventArgs e)
         {
-            var content = m_clipboardHelper.GetClipboardContent();
+            var content = await m_clipboardHelper.GetClipboardContent().ConfigureAwait(false);
 
             for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
             {
@@ -89,7 +89,7 @@ namespace Klipboard
                 menuItem.ToolTipText = worker.GetToolTipText(content);
             }
         }
-        private void Worker_OnClick(object? Sender, EventArgs e)
+        private async void Worker_OnClick(object? Sender, EventArgs e)
         {
             var menuItem = Sender as ToolStripMenuItem;
             var worker = menuItem?.Tag as WorkerBase;
@@ -99,7 +99,7 @@ namespace Klipboard
                 return;
             }
 
-            var content = m_clipboardHelper.GetClipboardContent();
+            var content = await m_clipboardHelper.GetClipboardContent();
             var contentToHandle = content & worker.SupportedContent;
 
             switch(contentToHandle)
@@ -109,7 +109,8 @@ namespace Klipboard
                     break;
 
                 case ClipboardContent.CSV:
-                    if (!m_clipboardHelper.TryGetDataAsString(out var csvData) || string.IsNullOrWhiteSpace(csvData))
+                    var csvData = await m_clipboardHelper.TryGetDataAsString();
+                    if (string.IsNullOrWhiteSpace(csvData))
                     {
                         SendNotification("Error!", "Failed to get CSV Data from clipboard");
                         return;
@@ -119,7 +120,8 @@ namespace Klipboard
                     break;
 
                 case ClipboardContent.CSV_Stream:
-                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var csvStream) || csvStream == null)
+                    var csvStream = await m_clipboardHelper.TryGetDataAsMemoryStream();
+                    if (csvStream == null)
                     {
                         SendNotification("Error!", "Failed to get CSV Data from clipboard");
                         return;
@@ -129,7 +131,8 @@ namespace Klipboard
                     break;
 
                 case ClipboardContent.Text:
-                    if (!m_clipboardHelper.TryGetDataAsString(out var textData) || string.IsNullOrWhiteSpace(textData))
+                    var textData = await m_clipboardHelper.TryGetDataAsString();
+                    if (string.IsNullOrWhiteSpace(textData))
                     {
                         SendNotification("Error!", "Failed to get Text Data from clipboard");
                         return;
@@ -139,7 +142,8 @@ namespace Klipboard
                     break;
 
                 case ClipboardContent.Text_Stream:
-                    if (!m_clipboardHelper.TryGetDataAsMemoryStream(out var textStream) || textStream == null)
+                    var textStream = await m_clipboardHelper.TryGetDataAsMemoryStream();
+                    if (textStream == null)
                     {
                         SendNotification("Error!", "Failed to get Text Data from clipboard");
                         return;
@@ -149,8 +153,8 @@ namespace Klipboard
                     break;
 
                 case ClipboardContent.Files:
-                    if (!m_clipboardHelper.TryGetFileDropList(out var filesAndFolders) ||
-                            filesAndFolders == null ||
+                    var filesAndFolders = await m_clipboardHelper.TryGetFileDropList();
+                    if (filesAndFolders == null ||
                             filesAndFolders.Count == 0)
                     {
                         SendNotification("Error!", "Failed to get Files Data from clipboard");
