@@ -1,4 +1,5 @@
 using Klipboard.Utils;
+using Klipboard.Utils.Interfaces;
 using Klipboard.Workers;
 
 namespace Klipboard
@@ -19,12 +20,19 @@ namespace Klipboard
             {
                 { "QuickActions", ResourceLoader.GetIcon() }
             };
+
+            var workerUis = new Dictionary<string, IWorkerUi>()
+            {
+                { "InspectData", new InspectFormHandler() }
+            };
+
             var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
             var clipboardHelper = new ClipboardHelper();
 
             var notifIcon = new NotificationIcon();
 
-            var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons, WorkerBase.CreateWorkers(settings, icons).ToList());
+            var workers = WorkerBase.CreateWorkers(settings, icons, workerUis).ToList();
+            var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons, workers);
             notificationLogic.Init();
 
             Application.Run();

@@ -1,4 +1,5 @@
 ﻿using Klipboard.Utils;
+using Klipboard.Utils.Interfaces;
 
 namespace Klipboard.Workers
 {
@@ -71,7 +72,7 @@ namespace Klipboard.Workers
         #endregion
 
 
-        public static IEnumerable<IWorker> CreateWorkers(ISettings settings, Dictionary<string, object> icons)
+        public static IEnumerable<IWorker> CreateWorkers(ISettings settings, Dictionary<string, object> icons, Dictionary<string, IWorkerUi> workerUis)
         {
             var workers = new List<IWorker>();
 
@@ -80,13 +81,17 @@ namespace Klipboard.Workers
             {
                 throw new Exception("QuickActions icon not found");
             }
+            if (!workerUis.TryGetValue("InspectData", out var inspectDataUi))
+            {
+                throw new Exception("InspectDataUi not found");
+            }
 
             workers.Add(new QuickActionsWorker(WorkerCategory.QuickActions, settings, quickActionIcon));
             workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, settings));
             workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, settings));
             workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, settings));
             workers.Add(new TempTableWorker(WorkerCategory.QuickActions, settings));
-            //todo workers.Add(new InspectDataWorkerUx(WorkerCategory.QuickActions, settings));
+            workers.Add(new InspectDataWorker(WorkerCategory.QuickActions, settings, inspectDataUi));
 
             // Actions
             workers.Add(new DirectIngestWorker(WorkerCategory.Actions, settings));

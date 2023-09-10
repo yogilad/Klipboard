@@ -1,6 +1,6 @@
 ﻿namespace Klipboard
 {
-    partial class ClipboardContentForm
+    partial class InspectForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -46,7 +46,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(textBox);
-            Name = "ClipboardContentForm";
+            Name = "InspectForm";
             Text = "Clipboard Content";
             ResumeLayout(false);
             PerformLayout();
