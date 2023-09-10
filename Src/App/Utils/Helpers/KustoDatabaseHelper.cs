@@ -178,11 +178,11 @@ namespace Klipboard.Utils
             return (true, null);
         }
 
-        public async Task<(bool Success, string? Error)> TryDirectIngestBlobToTable(string blobUri, string table, KustoIngestionProperties ingestionProperties, StorageSourceOptions sourceOptions)
+        public async Task<(bool Success, string? Error)> TryDirectIngestStorageToTable(string blobUriOrFile, string table, KustoIngestionProperties ingestionProperties, StorageSourceOptions sourceOptions)
         {
             try
             {
-                var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUri, ingestionProperties, sourceOptions);
+                var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
                 var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
 
                 if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
