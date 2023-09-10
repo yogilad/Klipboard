@@ -52,7 +52,7 @@ namespace Klipboard
             m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None);
         }
 
-        public object AddWorker(WorkerBase worker, Func<WorkerBase?, Task> workerClick)
+        public object AddWorker(IWorker worker, Func<IWorker?, Task> workerClick)
         {
             var item = new ToolStripMenuItem(worker.GetMenuText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(),
                 async (s, e) => await ExceptionUtils.Protect(() => workerClick(worker)))
@@ -70,7 +70,7 @@ namespace Klipboard
             m_contextMenuStrip.Items.Add(new ToolStripSeparator());
         }
 
-        public void UpdateWorker(object item, WorkerBase worker, ClipboardContent content)
+        public void UpdateWorker(object item, IWorker worker, ClipboardContent content)
         {
             var menuItem = item as ToolStripMenuItem;
             menuItem.Visible = worker.IsMenuVisible(content);

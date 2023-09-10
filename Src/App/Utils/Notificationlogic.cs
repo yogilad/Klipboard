@@ -7,16 +7,20 @@ public class Notificationlogic
     INotificationIcon m_notificationIcon;
     private readonly ISettings m_settings;
     private readonly IClipboardHelper m_clipboardHelper;
-    private readonly List<(object item, WorkerBase worker)> _items = new ();
+    private readonly List<(object item, IWorker worker)> _items = new ();
     private Dictionary<string, object> m_icons;
+    private readonly List<IWorker> m_workers;
 
     public Notificationlogic(
         INotificationIcon notificationIcon,
         ISettings settings,
         IClipboardHelper clipboardHelper,
-        Dictionary<string, object> icons)
+        Dictionary<string, object> icons,
+        List<IWorker> workers
+        )
     {
         m_icons = icons;
+        m_workers = workers;
         m_notificationIcon = notificationIcon;
         m_settings = settings;
         m_clipboardHelper = clipboardHelper;
@@ -28,39 +32,10 @@ public class Notificationlogic
         AddWorkers();
     }
 
-
-    private static IEnumerable<WorkerBase> CreateAppWorkers(ISettings settings, Dictionary<string, object> icons)
-    {
-        var workers = new List<WorkerBase>();
-
-        // Quick Actions
-        if (!icons.TryGetValue("QuickActions", out var quickActionIcon))
-        {
-            throw new Exception("QuickActions icon not found");
-        }
-
-        workers.Add(new QuickActionsWorker(WorkerCategory.QuickActions, settings, quickActionIcon));
-        workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, settings));
-        workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, settings));
-        workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, settings));
-        workers.Add(new TempTableWorker(WorkerCategory.QuickActions, settings));
-        //todo workers.Add(new InspectDataWorkerUx(WorkerCategory.QuickActions, settings));
-
-        // Actions
-        workers.Add(new DirectIngestWorker(WorkerCategory.Actions, settings));
-        workers.Add(new QueueIngestWorker(WorkerCategory.Actions, settings));
-
-        // Management
-        workers.Add(new ShareWorker(WorkerCategory.Management, settings));
-        workers.Add(new HelpWorker(WorkerCategory.Management, settings));
-        return workers;
-    }
-
     private void AddWorkers()
     {
-        var workers = CreateAppWorkers(m_settings, m_icons);
-        WorkerBase? previousWorker = null;
-        foreach (var worker in workers)
+        IWorker? previousWorker = null;
+        foreach (var worker in m_workers)
         {
             var item = m_notificationIcon.AddWorker(worker, WorkerClick);
             _items.Add((item, worker));
@@ -90,7 +65,7 @@ public class Notificationlogic
         m_notificationIcon.SendNotification(title, message);
     }
 
-    private async Task WorkerClick(WorkerBase? worker)
+    private async Task WorkerClick(IWorker? worker)
     {
         if (worker == null)
         {
@@ -165,7 +140,7 @@ public class Notificationlogic
         }
     }
 
-    private void RunWorker(WorkerBase worker, Func<Task> action)
+    private void RunWorker(IWorker worker, Func<Task> action)
     {
         Task.Run(async () =>
         {

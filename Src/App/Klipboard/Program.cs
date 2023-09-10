@@ -1,4 +1,5 @@
 using Klipboard.Utils;
+using Klipboard.Workers;
 
 namespace Klipboard
 {
@@ -14,7 +15,6 @@ namespace Klipboard
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            //
             var icons = new Dictionary<string, object>()
             {
                 { "QuickActions", ResourceLoader.GetIcon() }
@@ -24,7 +24,7 @@ namespace Klipboard
 
             var notifIcon = new NotificationIcon();
 
-            var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons);
+            var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons, WorkerBase.CreateWorkers(settings, icons).ToList());
             notificationLogic.Init();
 
             Application.Run();
