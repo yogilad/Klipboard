@@ -30,26 +30,24 @@
         {
             textBox = new TextBox();
             SuspendLayout();
-            // 
+            //
             // textBox
-            // 
+            //
             textBox.Location = new Point(12, 12);
             textBox.Multiline = true;
             textBox.Name = "textBox";
             textBox.Size = new Size(776, 426);
             textBox.TabIndex = 0;
-            textBox.UseWaitCursor = true;
             textBox.WordWrap = false;
-            // 
+            //
             // ClipboardContentForm
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(textBox);
             Name = "ClipboardContentForm";
             Text = "Clipboard Content";
-            UseWaitCursor = true;
             ResumeLayout(false);
             PerformLayout();
         }

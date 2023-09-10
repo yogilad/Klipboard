@@ -19,8 +19,7 @@ namespace Klipboard.InteractiveWorkers.InpsectClipboardWorkerUx
         public override Task ShowContent(string clipboardContent)
         {
             var ux = new ClipboardContentForm(clipboardContent);
-            ux.Show();
-
+            ux.ShowDialog();
             return Task.CompletedTask;
         }
     }
