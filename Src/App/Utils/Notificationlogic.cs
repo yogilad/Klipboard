@@ -37,12 +37,14 @@ public class Notificationlogic
         IWorker? previousWorker = null;
         foreach (var worker in m_workers)
         {
-            var item = m_notificationIcon.AddWorker(worker, WorkerClick);
-            _items.Add((item, worker));
             if (previousWorker != null && previousWorker.Category != worker.Category)
             {
                 m_notificationIcon.AddSeparator();
             }
+
+            var item = m_notificationIcon.AddWorker(worker, WorkerClick);
+            _items.Add((item, worker));
+
 
             previousWorker = worker;
         }

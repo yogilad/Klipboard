@@ -74,13 +74,13 @@ namespace Klipboard.Utils
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { KqlDataType.BoolType,    s => s},
-                { KqlDataType.LongType,    s => SerializeLong(s)},
-                { KqlDataType.RealType,    s => SerializeReal(s)},
-                { KqlDataType.TimeSpanType,s => SerializeTimeSpan(s)},
-                { KqlDataType.DateTimeType,s => SerializeDatetime(s)},
-                { KqlDataType.DynamicType, s => SerializeDynamic(s)},
-                { KqlDataType.GuidType,    s => SerializeGuid(s)},
-                { KqlDataType.StringType,  s => SerializeString(s)},
+                { KqlDataType.LongType,    SerializeLong},
+                { KqlDataType.RealType,    SerializeReal},
+                { KqlDataType.TimeSpanType,SerializeTimeSpan},
+                { KqlDataType.DateTimeType,SerializeDatetime},
+                { KqlDataType.DynamicType, SerializeDynamic},
+                { KqlDataType.GuidType,    SerializeGuid},
+                { KqlDataType.StringType,  SerializeString},
             };
 
         public static KqlTypeDefinition GetTypeDedfinition(KqlDataType type) => s_typeDefintions[type];
@@ -139,7 +139,7 @@ namespace Klipboard.Utils
 
         public static string SerializeDynamic(string field)
         {
-            if (field.StartsWith("\"") && field.EndsWith("\"")) 
+            if (field.StartsWith("\"") && field.EndsWith("\""))
             {
                 return field;
             }
@@ -147,12 +147,33 @@ namespace Klipboard.Utils
             return $"\"{field.Replace("\"", "\\\"")}\"";
         }
 
+        private static string EscapeString(string input) {
+            var literal = new StringBuilder(input.Length + 2);
+            literal.Append('"');
+            foreach (var c in input)
+            {
+                switch (c) {
+                    case '\"': literal.Append("\\\""); break;
+                    case '\\': literal.Append(@"\\"); break;
+                    case '\0': literal.Append(@"\0"); break;
+                    case '\a': literal.Append(@"\a"); break;
+                    case '\b': literal.Append(@"\b"); break;
+                    case '\f': literal.Append(@"\f"); break;
+                    case '\n': literal.Append(@"\n"); break;
+                    case '\r': literal.Append(@"\r"); break;
+                    case '\t': literal.Append(@"\t"); break;
+                    case '\v': literal.Append(@"\v"); break;
+                    default: literal.Append(c);
+                        break;
+                }
+            }
+            literal.Append('"');
+            return literal.ToString();
+        }
+
         public static string SerializeString(string field)
         {
-            field = field.Replace("\\", "\\\\");
-            field = field.Replace("\"", "\\\"");
-
-            return $"\"{field}\"";
+            return EscapeString(field);
         }
 
         public static string SerializeGuid(string field)
@@ -160,12 +181,11 @@ namespace Klipboard.Utils
             return $"\"{field}\"";
         }
 
+        private static readonly Regex UnwantedRegex = new Regex("[^0-9.]", RegexOptions.Compiled);
+
         public static string SerializeReal(string field)
         {
-            if(!field.Contains(","))
-            {
-                return field;
-            }
+            field = UnwantedRegex.Replace(field, "");
 
             if (double.TryParse(field, out var r))
             {
@@ -178,10 +198,7 @@ namespace Klipboard.Utils
 
         public static string SerializeLong(string field)
         {
-            if (!field.Contains(","))
-            {
-                return field;
-            }
+            field = UnwantedRegex.Replace(field, "");
 
             if (long.TryParse(field, out var l))
             {

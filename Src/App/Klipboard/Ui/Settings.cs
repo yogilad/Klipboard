@@ -45,8 +45,8 @@ namespace Klipboard
 
         private ConfiguredTaskAwaitable<bool> SaveSettings()
         {
-            var config = UiToData();
-            return m_appConfigFile.Write(config).ConfigureAwait(false);
+            m_config = UiToData();
+            return m_appConfigFile.Write(m_config).ConfigureAwait(false);
         }
 
         private void DataToUi()
