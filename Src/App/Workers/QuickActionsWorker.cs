@@ -20,9 +20,15 @@ namespace Klipboard.Workers
         public override string GetMenuText(ClipboardContent content)
         {
             var config = m_settings.GetConfig();
-            string clusterName = config.ChosenCluster.ConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".kusto").ToUpper();
-            string targetStr = $"{clusterName}-{config.ChosenCluster.DatabaseName}";
+            string clusterName = config.ChosenCluster.ConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".").ToUpper();
 
+            // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show vesion once on creation.
+            if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
+            {
+                clusterName = "MyFreeCluster";
+            }
+
+            string targetStr = $"{clusterName}/{config.ChosenCluster.DatabaseName}";
             var x = content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream);
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
             {
