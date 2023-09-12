@@ -23,7 +23,6 @@ namespace Klipboard
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
 
-
             // Handle the DoubleClick event to activate the form.
             m_notifyIcon.Text = "Klipboard";
 
@@ -81,9 +80,7 @@ namespace Klipboard
 
         public void AddAdditionalItems(ISettings settings)
         {
-            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
             m_contextMenuStrip.Items.Add("Settings", null, (s, e) => ((Settings)settings).ShowDialog());
-
             m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
         }
 
