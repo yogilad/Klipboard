@@ -28,11 +28,15 @@ namespace Klipboard.Workers
         public override async Task HandleAsync(SendNotification sendNotification)
         {
             var subject = "Have You Tried Klipboard for Kusto?";
-            var body = @"Hi, I'm using Klipboard for Kusto and I think you'd find it useful. You can get it in https://github.com/yogilad/Klipboard/blob/main/README.md";
+            var body = 
+@"Hi, 
+
+I'm using Klipboard for Kusto and I think you'd find it useful. 
+You can get it from https://github.com/yogilad/Klipboard/blob/main/README.md";
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                FileName = $"mailto:?subject={subject}&body={body}",
+                FileName = $"mailto:?subject={subject}&body={Uri.EscapeUriString(body)}",
                 UseShellExecute = true
             });
         }
