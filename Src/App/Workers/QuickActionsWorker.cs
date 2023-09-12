@@ -48,6 +48,8 @@ namespace Klipboard.Workers
             return targetStr;
         }
 
+        public override bool IsMenuVisible(ClipboardContent content) => true;
+
         public override bool IsMenuEnabled(ClipboardContent content) => true;
 
         public override string GetToolTipText(ClipboardContent content) => "Click to set the default cluster and database for Quick Actions";
