@@ -1,15 +1,8 @@
-﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
+﻿using System.Text;
 using Kusto.Ingest;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Klipboard.Workers.WorkerBase;
+
+using Klipboard.Utils;
+
 
 namespace Klipboard.Workers
 {

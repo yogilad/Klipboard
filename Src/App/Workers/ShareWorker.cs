@@ -1,12 +1,7 @@
-﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
-using Kusto.Ingest.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+
+using Klipboard.Utils;
+
 
 namespace Klipboard.Workers
 {

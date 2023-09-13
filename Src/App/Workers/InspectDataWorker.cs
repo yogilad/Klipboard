@@ -1,6 +1,6 @@
-﻿using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
-using System.Text;
+﻿using System.Text;
+
+using Klipboard.Utils;
 using Klipboard.Utils.Interfaces;
 
 namespace Klipboard.Workers

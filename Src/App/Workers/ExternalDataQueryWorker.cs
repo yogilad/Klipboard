@@ -1,12 +1,7 @@
-﻿using Klipboard.Utils;
+﻿using System.Text;
 using Kusto.Cloud.Platform.Utils;
-using Kusto.Data.Linq;
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Security;
-using System.Reflection;
-using System.Text;
+
+using Klipboard.Utils;
 
 namespace Klipboard.Workers
 {
