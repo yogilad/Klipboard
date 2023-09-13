@@ -1,6 +1,5 @@
-using Klipboard.Workers;
 
-namespace Klipboard.Utils.Interfaces;
+namespace Klipboard.Utils;
 
 public interface IWorkerUi
 {

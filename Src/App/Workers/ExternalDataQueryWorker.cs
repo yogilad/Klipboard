@@ -3,6 +3,7 @@ using Kusto.Cloud.Platform.Utils;
 
 using Klipboard.Utils;
 
+
 namespace Klipboard.Workers
 {
     public class ExternalDataQueryWorker : WorkerBase

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 
 using Klipboard.Utils;
-using Klipboard.Utils.Interfaces;
+
 
 namespace Klipboard.Workers
 {

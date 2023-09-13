@@ -14,11 +14,8 @@
     public interface IClipboardHelper
     {
         Task<ClipboardContent> GetClipboardContent();
-
         Task<string?> TryGetDataAsString();
-
         Task<Stream?> TryGetDataAsMemoryStream();
-
         Task<List<string>?> TryGetFileDropList();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System.IO.Compression;
-
 using Azure.Storage.Blobs;
 using Kusto.Data;
 using Kusto.Data.Common;
 using Kusto.Data.Net.Client;
 using Kusto.Ingest;
+
 
 namespace Klipboard.Utils
 {
