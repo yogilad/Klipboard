@@ -27,6 +27,7 @@ namespace Klipboard.WorkersUi.QuickActionsUiWorker
             UserSelection = new QuickActionsUserSelection();
 
             InitializeComponent();
+            StyleDesigner.SetFormDesign(this);
         }
 
         private void QuickActionsTargetSelector_Load(object sender, EventArgs e)

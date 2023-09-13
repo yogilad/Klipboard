@@ -30,22 +30,27 @@
         {
             textBox = new TextBox();
             SuspendLayout();
-            //
+            // 
             // textBox
-            //
+            // 
+            textBox.BorderStyle = BorderStyle.FixedSingle;
             textBox.Location = new Point(12, 12);
             textBox.Multiline = true;
             textBox.Name = "textBox";
+            textBox.ScrollBars = ScrollBars.Both;
             textBox.Size = new Size(776, 426);
             textBox.TabIndex = 0;
             textBox.WordWrap = false;
-            //
-            // ClipboardContentForm
-            //
+            // 
+            // InspectForm
+            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Controls.Add(textBox);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "InspectForm";
             Text = "Clipboard Content";
             ResumeLayout(false);

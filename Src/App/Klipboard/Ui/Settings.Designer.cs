@@ -54,10 +54,11 @@
             lstClusters.Columns.AddRange(new ColumnHeader[] { clmConnectionString, clmDb });
             lstClusters.FullRowSelect = true;
             lstClusters.GridLines = true;
-            lstClusters.Location = new Point(22, 75);
+            lstClusters.Location = new Point(15, 45);
+            lstClusters.Margin = new Padding(2, 2, 2, 2);
             lstClusters.MultiSelect = false;
             lstClusters.Name = "lstClusters";
-            lstClusters.Size = new Size(825, 383);
+            lstClusters.Size = new Size(579, 231);
             lstClusters.TabIndex = 0;
             lstClusters.UseCompatibleStateImageBehavior = false;
             lstClusters.View = View.Details;
@@ -75,25 +76,28 @@
             // 
             // txtSettingsPath
             // 
-            txtSettingsPath.Location = new Point(78, 12);
+            txtSettingsPath.Location = new Point(55, 7);
+            txtSettingsPath.Margin = new Padding(2, 2, 2, 2);
             txtSettingsPath.Name = "txtSettingsPath";
-            txtSettingsPath.Size = new Size(691, 31);
+            txtSettingsPath.Size = new Size(485, 23);
             txtSettingsPath.TabIndex = 1;
             // 
             // lblSettingsPath
             // 
             lblSettingsPath.AutoSize = true;
-            lblSettingsPath.Location = new Point(22, 15);
+            lblSettingsPath.Location = new Point(15, 9);
+            lblSettingsPath.Margin = new Padding(2, 0, 2, 0);
             lblSettingsPath.Name = "lblSettingsPath";
-            lblSettingsPath.Size = new Size(50, 25);
+            lblSettingsPath.Size = new Size(34, 15);
             lblSettingsPath.TabIndex = 2;
             lblSettingsPath.Text = "Path:";
             // 
             // btnLoadSettings
             // 
-            btnLoadSettings.Location = new Point(775, 10);
+            btnLoadSettings.Location = new Point(542, 6);
+            btnLoadSettings.Margin = new Padding(2, 2, 2, 2);
             btnLoadSettings.Name = "btnLoadSettings";
-            btnLoadSettings.Size = new Size(112, 34);
+            btnLoadSettings.Size = new Size(78, 20);
             btnLoadSettings.TabIndex = 3;
             btnLoadSettings.Text = "Load";
             btnLoadSettings.UseVisualStyleBackColor = true;
@@ -102,50 +106,56 @@
             // chkStartWithWindows
             // 
             chkStartWithWindows.AutoSize = true;
-            chkStartWithWindows.Location = new Point(22, 607);
+            chkStartWithWindows.Location = new Point(15, 364);
+            chkStartWithWindows.Margin = new Padding(2, 2, 2, 2);
             chkStartWithWindows.Name = "chkStartWithWindows";
-            chkStartWithWindows.Size = new Size(195, 29);
+            chkStartWithWindows.Size = new Size(130, 19);
             chkStartWithWindows.TabIndex = 6;
             chkStartWithWindows.Text = "Start With Windows";
             chkStartWithWindows.UseVisualStyleBackColor = true;
             // 
             // txtConnectionStr
             // 
-            txtConnectionStr.Location = new Point(155, 485);
+            txtConnectionStr.Location = new Point(108, 291);
+            txtConnectionStr.Margin = new Padding(2, 2, 2, 2);
             txtConnectionStr.Name = "txtConnectionStr";
-            txtConnectionStr.Size = new Size(536, 31);
+            txtConnectionStr.Size = new Size(376, 23);
             txtConnectionStr.TabIndex = 7;
             // 
             // txtDatabase
             // 
-            txtDatabase.Location = new Point(155, 533);
+            txtDatabase.Location = new Point(108, 320);
+            txtDatabase.Margin = new Padding(2, 2, 2, 2);
             txtDatabase.Name = "txtDatabase";
-            txtDatabase.Size = new Size(268, 31);
+            txtDatabase.Size = new Size(189, 23);
             txtDatabase.TabIndex = 8;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(17, 488);
+            label1.Location = new Point(12, 293);
+            label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new Size(132, 25);
+            label1.Size = new Size(89, 15);
             label1.TabIndex = 9;
             label1.Text = "Connection Str:";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(17, 536);
+            label2.Location = new Point(12, 322);
+            label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(90, 25);
+            label2.Size = new Size(58, 15);
             label2.TabIndex = 10;
             label2.Text = "Database:";
             // 
             // btUpdate
             // 
-            btUpdate.Location = new Point(451, 531);
+            btUpdate.Location = new Point(316, 319);
+            btUpdate.Margin = new Padding(2, 2, 2, 2);
             btUpdate.Name = "btUpdate";
-            btUpdate.Size = new Size(112, 34);
+            btUpdate.Size = new Size(78, 20);
             btUpdate.TabIndex = 11;
             btUpdate.Text = "Update";
             btUpdate.UseVisualStyleBackColor = true;
@@ -153,9 +163,10 @@
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(579, 530);
+            btnAdd.Location = new Point(405, 318);
+            btnAdd.Margin = new Padding(2, 2, 2, 2);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(112, 34);
+            btnAdd.Size = new Size(78, 20);
             btnAdd.TabIndex = 12;
             btnAdd.Text = "Add";
             btnAdd.UseVisualStyleBackColor = true;
@@ -164,42 +175,47 @@
             // cmbApp
             // 
             cmbApp.FormattingEnabled = true;
-            cmbApp.Location = new Point(381, 605);
+            cmbApp.Location = new Point(267, 363);
+            cmbApp.Margin = new Padding(2, 2, 2, 2);
             cmbApp.Name = "cmbApp";
-            cmbApp.Size = new Size(182, 33);
+            cmbApp.Size = new Size(129, 23);
             cmbApp.TabIndex = 13;
             // 
             // lblOpenWith
             // 
             lblOpenWith.AutoSize = true;
-            lblOpenWith.Location = new Point(273, 611);
+            lblOpenWith.Location = new Point(191, 367);
+            lblOpenWith.Margin = new Padding(2, 0, 2, 0);
             lblOpenWith.Name = "lblOpenWith";
-            lblOpenWith.Size = new Size(102, 25);
+            lblOpenWith.Size = new Size(67, 15);
             lblOpenWith.TabIndex = 14;
             lblOpenWith.Text = "Open With:";
             // 
             // txtQuery
             // 
-            txtQuery.Location = new Point(155, 688);
+            txtQuery.Location = new Point(108, 413);
+            txtQuery.Margin = new Padding(2, 2, 2, 2);
             txtQuery.Multiline = true;
             txtQuery.Name = "txtQuery";
-            txtQuery.Size = new Size(473, 225);
+            txtQuery.Size = new Size(332, 137);
             txtQuery.TabIndex = 15;
             // 
             // lblPrepend
             // 
             lblPrepend.AutoSize = true;
-            lblPrepend.Location = new Point(22, 691);
+            lblPrepend.Location = new Point(15, 415);
+            lblPrepend.Margin = new Padding(2, 0, 2, 0);
             lblPrepend.Name = "lblPrepend";
-            lblPrepend.Size = new Size(119, 25);
+            lblPrepend.Size = new Size(79, 15);
             lblPrepend.TabIndex = 16;
             lblPrepend.Text = "Prepend KQL:";
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(657, 611);
+            btnSave.Location = new Point(460, 367);
+            btnSave.Margin = new Padding(2, 2, 2, 2);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(190, 94);
+            btnSave.Size = new Size(133, 56);
             btnSave.TabIndex = 17;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
@@ -207,9 +223,9 @@
             // 
             // Settings
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(892, 1026);
+            ClientSize = new Size(624, 616);
             Controls.Add(btnSave);
             Controls.Add(lblPrepend);
             Controls.Add(txtQuery);
@@ -226,6 +242,7 @@
             Controls.Add(lblSettingsPath);
             Controls.Add(txtSettingsPath);
             Controls.Add(lstClusters);
+            Margin = new Padding(2, 2, 2, 2);
             Name = "Settings";
             Text = "Settings";
             ResumeLayout(false);
