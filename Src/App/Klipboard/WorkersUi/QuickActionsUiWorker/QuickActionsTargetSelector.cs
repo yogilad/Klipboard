@@ -1,4 +1,5 @@
 ﻿using Klipboard.Utils;
+using Klipboard.Workers;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
@@ -10,15 +11,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Klipboard.Workers.QuickActionsWorker;
 
 namespace Klipboard.WorkersUi.QuickActionsUiWorker
 {
     public partial class QuickActionsTargetSelector : Form
     {
-        public bool UserConfirmedSelection;
-        public int CurrentClusterIndex;
-        public string CurrentDatabase;
-
+        public QuickActionsWorker.QuickActionsUserSelection UserSelection = new QuickActionsUserSelection();
         private List<Cluster> m_clusterList;
 
         public QuickActionsTargetSelector()
@@ -40,13 +39,13 @@ namespace Klipboard.WorkersUi.QuickActionsUiWorker
 
         private void clusterComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CurrentClusterIndex = clusterComboBox.SelectedIndex;
-            databaseTextBox.Text = m_clusterList[CurrentClusterIndex].DatabaseName;
+            UserSelection.CurrentClusterIndex = clusterComboBox.SelectedIndex;
+            databaseTextBox.Text = m_clusterList[UserSelection.CurrentClusterIndex].DatabaseName;
         }
 
         private void databaseNameTextBox_TextChanged(object sender, EventArgs e)
         {
-            CurrentDatabase = databaseTextBox.Text;
+            UserSelection.CurrentDatabase = databaseTextBox.Text;
         }
 
         private void closeButton_Click(object sender, EventArgs e)
@@ -56,7 +55,7 @@ namespace Klipboard.WorkersUi.QuickActionsUiWorker
 
         private void selectButton_Click(object sender, EventArgs e)
         {
-            UserConfirmedSelection = true;
+            UserSelection.UserConfirmedSelection = true;
             Close();
         }
     }

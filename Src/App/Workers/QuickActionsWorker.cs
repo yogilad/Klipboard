@@ -10,8 +10,15 @@ using System.Threading.Tasks;
 
 namespace Klipboard.Workers
 {
-    public class QuickActionsWorker : WorkerBase
+    public abstract class QuickActionsWorker : WorkerBase
     {
+        public class QuickActionsUserSelection
+        {
+            public bool UserConfirmedSelection = false;
+            public int CurrentClusterIndex = -1;
+            public string CurrentDatabase = string.Empty;
+        }
+
         public QuickActionsWorker(WorkerCategory category, ISettings settings, object? icon = null)
             : base(category, ClipboardContent.None, settings, icon)
         {
@@ -45,5 +52,19 @@ namespace Klipboard.Workers
         public override bool IsMenuEnabled(ClipboardContent content) => true;
 
         public override string GetToolTipText(ClipboardContent content) => "Click to set the default cluster and database for Quick Actions";
+
+        public override async Task HandleAsync(SendNotification sendNotification)
+        {
+            var result = await PromptUser();
+
+            if (result.UserConfirmedSelection)
+            {
+                // Do something with chosen cluster
+                // Do something with chosen DB
+
+            }
+        }
+
+        public abstract Task<QuickActionsUserSelection> PromptUser();
     }
 }

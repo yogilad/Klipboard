@@ -14,15 +14,11 @@ public class QuickActionsUiWorker : QuickActionsWorker
         m_ui = new QuickActionsTargetSelector();
     }
 
-    public override async Task HandleAsync(SendNotification sendNotification)
+    public override Task<QuickActionsUserSelection> PromptUser()
     {
         m_ui.Init(m_settings);
         m_ui.ShowDialog();
 
-        if (m_ui.UserConfirmedSelection)
-        {
-            // Do something with chosen cluster
-            // Do something with chosen DB
-        }
+        return Task.FromResult(m_ui.UserSelection);
     }
 }
