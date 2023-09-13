@@ -35,6 +35,11 @@ namespace Klipboard.Utils
             IWorker? previousWorker = null;
             foreach (var worker in m_workers)
             {
+                if (!worker.IsMenuVisible())
+                {
+                    continue;
+                }
+
                 if (previousWorker != null && previousWorker.Category != worker.Category)
                 {
                     m_notificationIcon.AddSeparator();

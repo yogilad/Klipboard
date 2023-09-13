@@ -61,7 +61,7 @@ namespace Klipboard.Workers
             return targetStr;
         }
 
-        public override bool IsMenuVisible(ClipboardContent content) => true;
+        public override bool IsMenuVisible() => true;
 
         public override bool IsMenuEnabled(ClipboardContent content) => true;
 

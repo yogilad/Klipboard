@@ -19,7 +19,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText(ClipboardContent content) => "Upload clipboard tabular data or up to 100 files to a temporary table and invoke a query on it";
 
-        public override bool IsMenuVisible(ClipboardContent content) => true;
+        public override bool IsMenuVisible() => true;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {
