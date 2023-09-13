@@ -23,7 +23,17 @@ namespace Klipboard.Utils
         public static readonly object[] s_QueryAppNames = Enum.GetNames(typeof(QueryApp)).Cast<object>().ToArray();
 
         [JsonIgnore]
-        public Cluster ChosenCluster => KustoConnectionStrings[DefaultClusterIndex];
+        public Cluster ChosenCluster
+        {
+            get
+            {
+                return KustoConnectionStrings[DefaultClusterIndex];
+            }
+            set
+            {
+                KustoConnectionStrings[DefaultClusterIndex] = value;
+            }
+        }
 
         public AppConfig()
             : this(new List<Cluster> { new ("https://help.kusto.windows.net", "Samples") })

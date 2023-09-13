@@ -111,6 +111,7 @@
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "Select Default Cluster and Database for Quick Actions";
+            Load += QuickActionsTargetSelector_Load;
             ResumeLayout(false);
             PerformLayout();
         }

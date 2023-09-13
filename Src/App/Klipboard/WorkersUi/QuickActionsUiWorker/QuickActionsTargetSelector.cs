@@ -17,17 +17,21 @@ namespace Klipboard.WorkersUi.QuickActionsUiWorker
 {
     public partial class QuickActionsTargetSelector : Form
     {
-        public QuickActionsWorker.QuickActionsUserSelection UserSelection = new QuickActionsUserSelection();
+        public QuickActionsWorker.QuickActionsUserSelection UserSelection;
+        private ISettings m_settings;
         private List<Cluster> m_clusterList;
 
-        public QuickActionsTargetSelector()
+        public QuickActionsTargetSelector(ISettings settings)
         {
+            m_settings = settings;
+            UserSelection = new QuickActionsUserSelection();
+
             InitializeComponent();
         }
 
-        public void Init(ISettings settings)
+        private void QuickActionsTargetSelector_Load(object sender, EventArgs e)
         {
-            var config = settings.GetConfig();
+            var config = m_settings.GetConfig();
 
             UserSelection.Reset();
 

@@ -75,10 +75,10 @@ namespace Klipboard.Workers
                 var targetConfig =  sourceConfig with
                 {
                     DefaultClusterIndex = result.CurrentClusterIndex,
-                    ///KustoConnectionStrings = sourceConfig.KustoConnectionStrings with {  }
+                    ChosenCluster = sourceConfig.KustoConnectionStrings[result.CurrentClusterIndex] with { DatabaseName = result.CurrentDatabase}
                 };
 
-                m_settings.UpdateConfig(sourceConfig);
+                await m_settings.UpdateConfig(targetConfig);
             }
         }
 
