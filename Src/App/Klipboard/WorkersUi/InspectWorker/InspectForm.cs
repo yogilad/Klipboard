@@ -1,5 +1,3 @@
-using Klipboard.Utils.Interfaces;
-
 namespace Klipboard
 {
     public partial class InspectForm: Form

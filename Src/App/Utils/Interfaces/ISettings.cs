@@ -1,7 +1,8 @@
-﻿namespace Klipboard.Utils;
-
-public interface ISettings
+﻿namespace Klipboard.Utils
 {
-    AppConfig GetConfig();
-    Task UpdateConfig(AppConfig config);
+    public interface ISettings
+    {
+        AppConfig GetConfig();
+        Task UpdateConfig(AppConfig config);
+    }
 }

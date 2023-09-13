@@ -1,12 +1,6 @@
 ﻿using Klipboard.Utils;
 using Kusto.Cloud.Platform.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Klipboard.Workers
 {
@@ -48,7 +42,7 @@ namespace Klipboard.Workers
             }
 
             string targetStr = $"{clusterName}/{config.ChosenCluster.DatabaseName}";
-            var x = content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream);
+
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
             {
                 return $"Clipboard Table => {targetStr}";

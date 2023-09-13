@@ -1,5 +1,7 @@
-﻿using Klipboard.Utils;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+
+using Klipboard.Utils;
+
 
 namespace Klipboard.Workers
 {

@@ -1,10 +1,8 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
-
 using Microsoft.VisualBasic.FileIO;
-using System.Diagnostics;
-using System.Transactions;
+
 
 namespace Klipboard.Utils
 {

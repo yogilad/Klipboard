@@ -1,5 +1,4 @@
 using Klipboard.Utils;
-using Klipboard.Utils.Interfaces;
 using Klipboard.Workers;
 
 namespace Klipboard

@@ -1,16 +1,18 @@
-using Klipboard.Utils.Interfaces;
+using Klipboard.Utils;
 
-namespace Klipboard;
 
-public class InspectFormHandler : IWorkerUi
+namespace Klipboard
 {
-
-    public Task<object> ShowDialog(object arg)
+    public class InspectFormHandler : IWorkerUi
     {
-        var content = (string)arg;
-        var form = new InspectForm(content);
-        form.ShowDialog();
 
-        return Task.FromResult<object>(null);
+        public Task<object> ShowDialog(object arg)
+        {
+            var content = (string)arg;
+            var form = new InspectForm(content);
+            form.ShowDialog();
+
+            return Task.FromResult<object>(null);
+        }
     }
 }

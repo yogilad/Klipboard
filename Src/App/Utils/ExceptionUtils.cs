@@ -1,32 +1,34 @@
 ﻿using System.Diagnostics;
 
-namespace Klipboard.Utils;
 
-public static class ExceptionUtils
+namespace Klipboard.Utils
 {
-    public static void Protect(Action action)
+    public static class ExceptionUtils
     {
-        try
+        public static void Protect(Action action)
         {
-            action();
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
         }
-        catch (Exception ex)
+
+        public static async Task Protect(Func<Task> action)
         {
-            Debug.WriteLine(ex.ToString());
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            }
         }
+
+
     }
-
-    public static async Task Protect(Func<Task> action)
-    {
-        try
-        {
-            await action();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.ToString());
-        }
-    }
-
-
 }

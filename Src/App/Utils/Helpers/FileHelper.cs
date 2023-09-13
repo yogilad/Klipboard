@@ -1,6 +1,7 @@
-﻿using Kusto.Cloud.Platform.Utils;
+﻿using System.Text.RegularExpressions;
+using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Common;
-using System.Text.RegularExpressions;
+
 
 namespace Klipboard.Utils
 {

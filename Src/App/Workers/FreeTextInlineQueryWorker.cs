@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Klipboard.Utils;
 
-using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard.Workers
 {
