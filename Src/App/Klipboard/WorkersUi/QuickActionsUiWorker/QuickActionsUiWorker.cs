@@ -2,22 +2,25 @@ using Klipboard.Utils;
 using Klipboard.Workers;
 using Klipboard.WorkersUi.QuickActionsUiWorker;
 
-namespace Klipboard;
 
-public class QuickActionsUiWorker : QuickActionsWorker
+namespace Klipboard
 {
-    QuickActionsTargetSelector m_ui;
-
-    public QuickActionsUiWorker(WorkerCategory category, ISettings settings, object? icon = null)
-    : base(category, settings, icon)
+    public class QuickActionsUiWorker : QuickActionsWorker
     {
-        m_ui = new QuickActionsTargetSelector(settings);
-    }
+        QuickActionsTargetSelector m_ui;
 
-    public override Task<QuickActionsUserSelection> PromptUser()
-    {
-        m_ui.ShowDialog();
+        public QuickActionsUiWorker(WorkerCategory category, ISettings settings, object? icon = null)
+        : base(category, settings, icon)
+        {
+            m_ui = new QuickActionsTargetSelector(settings);
+        }
 
-        return Task.FromResult(m_ui.UserSelection);
+        public override Task<QuickActionsUserSelection> PromptUser()
+        {
+            m_ui.ShowDialog();
+
+            return Task.FromResult(m_ui.UserSelection);
+        }
     }
 }
+

@@ -1,8 +1,7 @@
-﻿using System.Collections.Specialized;
-using System.Text;
-using Kusto.Cloud.Platform.Utils;
+﻿using System.Text;
 
 using Klipboard.Utils;
+
 
 namespace Klipboard
 {
