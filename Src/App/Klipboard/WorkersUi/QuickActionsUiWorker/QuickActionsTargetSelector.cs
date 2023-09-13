@@ -29,6 +29,8 @@ namespace Klipboard.WorkersUi.QuickActionsUiWorker
         {
             var config = settings.GetConfig();
 
+            UserSelection.Reset();
+
             clusterComboBox.Items.Clear();
             m_clusterList = config.KustoConnectionStrings;
             m_clusterList.ForEach(c => clusterComboBox.Items.Add(c.ConnectionString));

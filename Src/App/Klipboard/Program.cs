@@ -68,6 +68,5 @@ namespace Klipboard
             workers.Add(new HelpWorker(WorkerCategory.Management, settings));
             return workers;
         }
-
     }
 }

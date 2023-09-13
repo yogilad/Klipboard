@@ -161,6 +161,13 @@ namespace Klipboard
 
         public AppConfig GetConfig() => m_config;
 
+        public async Task UpdateConfig(AppConfig config)
+        {
+            m_config = config;
+            DataToUi();
+            await SaveSettings();
+        }
+
         #endregion
 
 

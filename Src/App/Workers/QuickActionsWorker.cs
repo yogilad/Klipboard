@@ -14,9 +14,21 @@ namespace Klipboard.Workers
     {
         public class QuickActionsUserSelection
         {
-            public bool UserConfirmedSelection = false;
-            public int CurrentClusterIndex = -1;
-            public string CurrentDatabase = string.Empty;
+            public bool UserConfirmedSelection;
+            public int CurrentClusterIndex;
+            public string CurrentDatabase;
+
+            public QuickActionsUserSelection()
+            {
+                Reset();
+            }
+
+            public void Reset()
+            {
+                UserConfirmedSelection = false;
+                CurrentClusterIndex = -1;
+                CurrentDatabase = string.Empty;
+            }
         }
 
         public QuickActionsWorker(WorkerCategory category, ISettings settings, object? icon = null)
@@ -59,9 +71,14 @@ namespace Klipboard.Workers
 
             if (result.UserConfirmedSelection)
             {
-                // Do something with chosen cluster
-                // Do something with chosen DB
+                var sourceConfig = m_settings.GetConfig();
+                var targetConfig =  sourceConfig with
+                {
+                    DefaultClusterIndex = result.CurrentClusterIndex,
+                    ///KustoConnectionStrings = sourceConfig.KustoConnectionStrings with {  }
+                };
 
+                m_settings.UpdateConfig(sourceConfig);
             }
         }
 
