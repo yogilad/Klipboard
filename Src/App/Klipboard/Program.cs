@@ -31,12 +31,42 @@ namespace Klipboard
 
             var notifIcon = new NotificationIcon();
 
-            var workers = WorkerBase.CreateWorkers(settings, icons, workerUis).ToList();
+            var workers = CreateWorkers(settings, icons, workerUis).ToList();
             var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons, workers);
             notificationLogic.Init();
 
             Application.Run();
         }
 
+        public static IEnumerable<IWorker> CreateWorkers(ISettings settings, Dictionary<string, object> icons, Dictionary<string, IWorkerUi> workerUis)
+        {
+            var workers = new List<IWorker>();
+
+            // Quick Actions
+            if (!icons.TryGetValue("QuickActions", out var quickActionIcon))
+            {
+                throw new Exception("QuickActions icon not found");
+            }
+            if (!workerUis.TryGetValue("InspectData", out var inspectDataUi))
+            {
+                throw new Exception("InspectDataUi not found");
+            }
+
+            workers.Add(new QuickActionsUiWorker(WorkerCategory.QuickActions, settings, quickActionIcon));
+            workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new TempTableWorker(WorkerCategory.QuickActions, settings));
+            workers.Add(new InspectDataWorker(WorkerCategory.QuickActions, settings, inspectDataUi));
+
+            // Actions
+            workers.Add(new DirectIngestWorker(WorkerCategory.Actions, settings));
+            workers.Add(new QueueIngestWorker(WorkerCategory.Actions, settings));
+
+            // Management
+            workers.Add(new ShareWorker(WorkerCategory.Management, settings));
+            workers.Add(new HelpWorker(WorkerCategory.Management, settings));
+            return workers;
+        }
     }
 }

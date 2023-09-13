@@ -43,9 +43,9 @@ namespace Klipboard
             txtSettingsPath.Text = Properties.Settings.Default.SettingsPath;
         }
 
-        private ConfiguredTaskAwaitable<bool> SaveSettings()
+        private ConfiguredTaskAwaitable<bool> SaveSettings(AppConfig? config = null)
         {
-            m_config = UiToData();
+            m_config = config ?? UiToData();
             return m_appConfigFile.Write(m_config).ConfigureAwait(false);
         }
 
@@ -161,8 +161,12 @@ namespace Klipboard
 
         public AppConfig GetConfig() => m_config;
 
+        public async Task UpdateConfig(AppConfig config)
+        {
+            m_config = config;
+            await SaveSettings(config);
+        }
+
         #endregion
-
-
     }
 }

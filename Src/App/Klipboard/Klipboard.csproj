@@ -8,7 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources\adx_color.ico</ApplicationIcon>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
