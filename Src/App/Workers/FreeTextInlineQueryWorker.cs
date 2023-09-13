@@ -17,7 +17,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText(ClipboardContent content) => ToolTipText;
 
-        public override bool IsMenuVisible(ClipboardContent content) => true;
+        public override bool IsMenuVisible() => true;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

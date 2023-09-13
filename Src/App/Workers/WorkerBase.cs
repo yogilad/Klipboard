@@ -33,7 +33,7 @@ namespace Klipboard.Workers
 
         #region Overridable Menu Item APIs
 
-        public virtual bool IsMenuVisible(ClipboardContent content) => AppConstants.DevMode;
+        public virtual bool IsMenuVisible() => AppConstants.DevMode;
 
         public virtual bool IsMenuEnabled(ClipboardContent content) => (content & SupportedContent) != ClipboardContent.None;
 

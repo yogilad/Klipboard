@@ -15,7 +15,7 @@ namespace Klipboard.Utils
         ClipboardContent SupportedContent { get; }
         WorkerCategory Category { get; }
         object? Icon { get; }
-        bool IsMenuVisible(ClipboardContent content);
+        bool IsMenuVisible();
         bool IsMenuEnabled(ClipboardContent content);
         string GetMenuText(ClipboardContent content);
         string GetToolTipText(ClipboardContent content);

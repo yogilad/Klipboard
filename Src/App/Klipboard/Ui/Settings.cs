@@ -14,6 +14,7 @@ namespace Klipboard
         private Settings()
         {
             InitializeComponent();
+            StyleDesigner.SetFormDesign(this);
         }
 
         public static async Task<Settings> Init()
@@ -155,7 +156,6 @@ namespace Klipboard
 
         }
         #endregion
-
 
         #region ISettings
 

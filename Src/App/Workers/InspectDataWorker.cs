@@ -19,7 +19,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText(ClipboardContent content) => "Display a preview of Clipboard Data";
 
-        public override bool IsMenuVisible(ClipboardContent content) => AppConstants.DevMode;
+        public override bool IsMenuVisible() => AppConstants.DevMode;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

@@ -17,7 +17,7 @@ namespace Klipboard.Workers
 
         public override string GetMenuText(ClipboardContent content) => $"Paste to External Data Query";
 
-        public override bool IsMenuVisible(ClipboardContent content) => true;
+        public override bool IsMenuVisible() => true;
 
         public override string GetToolTipText(ClipboardContent content) => "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
 

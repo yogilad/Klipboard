@@ -72,7 +72,7 @@ namespace Klipboard
         public void UpdateWorker(object item, IWorker worker, ClipboardContent content)
         {
             var menuItem = item as ToolStripMenuItem;
-            menuItem.Visible = worker.IsMenuVisible(content);
+            menuItem.Visible = worker.IsMenuVisible();
             menuItem.Enabled = worker.IsMenuEnabled(content);
             menuItem.Text = worker.GetMenuText(content);
             menuItem.ToolTipText = worker.GetToolTipText(content);
