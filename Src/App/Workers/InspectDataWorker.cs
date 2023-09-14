@@ -5,14 +5,11 @@ using Klipboard.Utils;
 
 namespace Klipboard.Workers
 {
-    public class InspectDataWorker : WorkerBase
+    public abstract class InspectDataWorker : WorkerBase
     {
-        private readonly IWorkerUi m_ui;
-
-        public InspectDataWorker(ISettings settings, IWorkerUi ui)
+        public InspectDataWorker(ISettings settings)
             : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings)
         {
-            m_ui = ui;
         }
 
         public override string GetMenuText(ClipboardContent content) => "Inspect Clipboard Content";
@@ -33,7 +30,7 @@ namespace Klipboard.Workers
             contentBuilder.AppendLine();
             contentBuilder.AppendLine(csvData);
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
@@ -48,7 +45,7 @@ namespace Klipboard.Workers
             contentBuilder.AppendLine();
             contentBuilder.AppendLine(textData);
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
         public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification)
@@ -65,8 +62,9 @@ namespace Klipboard.Workers
                 contentBuilder.AppendLine(file ?? "file item is null");
             }
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
+        public abstract void ShowDialog(string content);
     }
 }

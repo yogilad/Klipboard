@@ -33,7 +33,7 @@ namespace Klipboard
             workers.Add(new WorkerUiConfig(new FreeTextInlineQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new ExternalDataQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new TempTableWorker(settings), WorkerCategory.QuickActions));
-            workers.Add(new WorkerUiConfig(new InspectDataWorker(settings, new InspectFormHandler()), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUiConfig(new InspectDataUiWorker(settings), WorkerCategory.QuickActions));
 
             // Actions
             workers.Add(new WorkerUiConfig(new DirectIngestWorker(settings), WorkerCategory.Actions));
