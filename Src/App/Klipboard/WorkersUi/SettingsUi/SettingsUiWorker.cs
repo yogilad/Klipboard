@@ -2,7 +2,7 @@
 using Klipboard.Workers;
 
 
-namespace Klipboard.WorkersUi.SettingsUi
+namespace Klipboard
 {
     internal class SettingsUiWorker : SettingsWorker
     {

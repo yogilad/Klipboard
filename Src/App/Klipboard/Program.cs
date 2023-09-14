@@ -1,6 +1,6 @@
 using Klipboard.Utils;
 using Klipboard.Workers;
-using Klipboard.WorkersUi.SettingsUi;
+
 
 namespace Klipboard
 {
