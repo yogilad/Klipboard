@@ -10,8 +10,8 @@ namespace Klipboard.Workers
     {
         private const string NotifcationTitle = "External Data Query";
 
-        public ExternalDataQueryWorker(WorkerCategory category, ISettings mSettings, object? icon = null)
-            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, mSettings, icon)
+        public ExternalDataQueryWorker(ISettings settings)
+            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings)
         {
         }
 
@@ -19,7 +19,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override string GetToolTipText(ClipboardContent content) => "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
+        public override string GetToolTipText() => "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
         {

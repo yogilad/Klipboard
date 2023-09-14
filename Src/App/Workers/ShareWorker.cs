@@ -7,14 +7,14 @@ namespace Klipboard.Workers
 {
     public class ShareWorker : WorkerBase
     {
-        public ShareWorker(WorkerCategory category, ISettings settings, object? icon = null)
-            : base(category, ClipboardContent.None, settings, icon)
+        public ShareWorker(ISettings settings)
+            : base(ClipboardContent.None, settings)
         {
         }
 
         public override string GetMenuText(ClipboardContent content) => "Share Klipboard";
 
-        public override string GetToolTipText(ClipboardContent content) => string.Empty;
+        public override string GetToolTipText() => string.Empty;
 
         public override bool IsMenuEnabled(ClipboardContent content) => true;
 

@@ -7,40 +7,40 @@ namespace Klipboard
 {
     public class ClipboardHelper : IClipboardHelper
     {
-        public Task<ClipboardContent> GetClipboardContent()
+        public ClipboardContent GetClipboardContent()
         {
             // TODO: Consider supporting extracting html tables from HTML drop content
 
             if (Clipboard.ContainsData(DataFormats.CommaSeparatedValue))
             {
-                return Task.FromResult(ClipboardContent.CSV | ClipboardContent.CSV_Stream);
+                return ClipboardContent.CSV | ClipboardContent.CSV_Stream;
             }
 
             // Keep this last on the text data list as many types are also text represented (CSV, HTML, etc.)
             if (Clipboard.ContainsText())
             {
-                return Task.FromResult(ClipboardContent.Text | ClipboardContent.Text_Stream);
+                return ClipboardContent.Text | ClipboardContent.Text_Stream;
             }
 
             if (Clipboard.ContainsFileDropList())
             {
-                return Task.FromResult(ClipboardContent.Files);
+                return ClipboardContent.Files; 
             }
 
-            return Task.FromResult(ClipboardContent.None);
+            return ClipboardContent.None;
         }
 
-        public async Task<string?> TryGetDataAsString()
+        public string? TryGetDataAsString()
         {
-            var content = await GetClipboardContent() & (ClipboardContent.CSV | ClipboardContent.Text);
+            var content = GetClipboardContent() & (ClipboardContent.CSV | ClipboardContent.Text);
 
             return content != ClipboardContent.None ? Clipboard.GetText() : null;
 
         }
 
-        public async Task<Stream?> TryGetDataAsMemoryStream()
+        public Stream? TryGetDataAsMemoryStream()
         {
-            var content = (await GetClipboardContent()) & (ClipboardContent.CSV_Stream | ClipboardContent.Text_Stream);
+            var content = (GetClipboardContent()) & (ClipboardContent.CSV_Stream | ClipboardContent.Text_Stream);
 
             return content switch
             {
@@ -50,9 +50,9 @@ namespace Klipboard
             };
         }
 
-        public async Task<List<string>?> TryGetFileDropList()
+        public List<string>? TryGetFileDropList()
         {
-            if ((await GetClipboardContent()) != ClipboardContent.Files)
+            if ((GetClipboardContent()) != ClipboardContent.Files)
             {
                 return null;
             }

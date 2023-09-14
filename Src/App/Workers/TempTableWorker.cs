@@ -10,14 +10,14 @@ namespace Klipboard.Workers
     {
         private const string NotifcationTitle = "Temp Table Query";
 
-        public TempTableWorker(WorkerCategory category, ISettings settings, object? icon = null)
-            : base(category, ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings, icon)
+        public TempTableWorker(ISettings settings)
+            : base(ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings)
         {
         }
 
         public override string GetMenuText(ClipboardContent content) => "Paste to Temporary Table";
 
-        public override string GetToolTipText(ClipboardContent content) => "Upload clipboard tabular data or up to 100 files to a temporary table and invoke a query on it";
+        public override string GetToolTipText() => "Upload clipboard tabular data or up to 100 files to a temporary table and invoke a query on it";
 
         public override bool IsMenuVisible() => true;
 

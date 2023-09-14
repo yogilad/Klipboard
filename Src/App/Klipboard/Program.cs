@@ -15,56 +15,33 @@ namespace Klipboard
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var icons = new Dictionary<string, object>()
-            {
-                { "QuickActions", ResourceLoader.GetIcon() }
-            };
-
-            var workerUis = new Dictionary<string, IWorkerUi>()
-            {
-                { "InspectData", new InspectFormHandler() }
-            };
-
             var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
             var clipboardHelper = new ClipboardHelper();
 
-            var notifIcon = new NotificationIcon();
-
-            var workers = CreateWorkers(settings, icons, workerUis).ToList();
-            var notificationLogic = new Notificationlogic(notifIcon, settings, clipboardHelper, icons, workers);
-            notificationLogic.Init();
+            var workers = CreateWorkers(settings);
+            var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
             Application.Run();
         }
 
-        public static IEnumerable<IWorker> CreateWorkers(ISettings settings, Dictionary<string, object> icons, Dictionary<string, IWorkerUi> workerUis)
+        public static List<WorkerUiConfig> CreateWorkers(ISettings settings)
         {
-            var workers = new List<IWorker>();
+            var workers = new List<WorkerUiConfig>();
 
-            // Quick Actions
-            if (!icons.TryGetValue("QuickActions", out var quickActionIcon))
-            {
-                throw new Exception("QuickActions icon not found");
-            }
-            if (!workerUis.TryGetValue("InspectData", out var inspectDataUi))
-            {
-                throw new Exception("InspectDataUi not found");
-            }
-
-            workers.Add(new QuickActionsUiWorker(WorkerCategory.QuickActions, settings, quickActionIcon));
-            workers.Add(new StructuredDataInlineQueryWorker(WorkerCategory.QuickActions, settings));
-            workers.Add(new FreeTextInlineQueryWorker(WorkerCategory.QuickActions, settings));
-            workers.Add(new ExternalDataQueryWorker(WorkerCategory.QuickActions, settings));
-            workers.Add(new TempTableWorker(WorkerCategory.QuickActions, settings));
-            workers.Add(new InspectDataWorker(WorkerCategory.QuickActions, settings, inspectDataUi));
+            workers.Add(new WorkerUiConfig(new QuickActionsUiWorker(settings), WorkerCategory.QuickActions, Icon: ResourceLoader.GetIcon()));
+            workers.Add(new WorkerUiConfig(new StructuredDataInlineQueryWorker(settings), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUiConfig(new FreeTextInlineQueryWorker(settings), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUiConfig(new ExternalDataQueryWorker(settings), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUiConfig(new TempTableWorker(settings), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUiConfig(new InspectDataWorker(settings, new InspectFormHandler()), WorkerCategory.QuickActions));
 
             // Actions
-            workers.Add(new DirectIngestWorker(WorkerCategory.Actions, settings));
-            workers.Add(new QueueIngestWorker(WorkerCategory.Actions, settings));
+            workers.Add(new WorkerUiConfig(new DirectIngestWorker(settings), WorkerCategory.Actions));
+            workers.Add(new WorkerUiConfig(new QueueIngestWorker(settings), WorkerCategory.Actions));
 
             // Management
-            workers.Add(new ShareWorker(WorkerCategory.Management, settings));
-            workers.Add(new HelpWorker(WorkerCategory.Management, settings));
+            workers.Add(new WorkerUiConfig(new ShareWorker(settings), WorkerCategory.Management));
+            workers.Add(new WorkerUiConfig(new HelpWorker(settings), WorkerCategory.Management));
             return workers;
         }
     }

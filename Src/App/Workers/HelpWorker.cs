@@ -7,8 +7,8 @@ namespace Klipboard.Workers
 {
     public class HelpWorker : WorkerBase
     {
-        public HelpWorker(WorkerCategory category, ISettings settings, object? icon = null)
-            : base(category, ClipboardContent.None, settings, icon)
+        public HelpWorker(ISettings settings)
+            : base(ClipboardContent.None, settings)
         {
         }
 

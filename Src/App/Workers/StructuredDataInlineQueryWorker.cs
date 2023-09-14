@@ -8,14 +8,14 @@ namespace Klipboard.Workers
         private static readonly string ToolTipText = $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         private static string NotifcationTitle => "Inline Query";
 
-        public StructuredDataInlineQueryWorker(WorkerCategory category, ISettings settings, object? icon = null)
-        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, icon) // Todo Support Text and File Data
+        public StructuredDataInlineQueryWorker(ISettings settings)
+        : base  (ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings) // Todo Support Text and File Data
         {
         }
 
         public override string GetMenuText(ClipboardContent content) => "Paste to Inline Query";
 
-        public override string GetToolTipText(ClipboardContent content) => ToolTipText;
+        public override string GetToolTipText() => ToolTipText;
 
         public override bool IsMenuVisible() => true;
 

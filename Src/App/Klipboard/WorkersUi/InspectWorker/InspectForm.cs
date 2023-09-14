@@ -5,7 +5,7 @@ namespace Klipboard
         public InspectForm(string content)
         {
             InitializeComponent();
-            StyleDesigner.SetFormDesign(this);
+            StyleDesigner.SetDialogDesign(this);
             textBox.Text = content;
         }
     }

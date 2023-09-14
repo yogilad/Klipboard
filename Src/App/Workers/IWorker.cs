@@ -1,4 +1,6 @@
-namespace Klipboard.Utils
+using Klipboard.Utils;
+
+namespace Klipboard.Workers
 {
     public enum WorkerCategory
     {
@@ -13,12 +15,10 @@ namespace Klipboard.Utils
     public interface IWorker
     {
         ClipboardContent SupportedContent { get; }
-        WorkerCategory Category { get; }
-        object? Icon { get; }
         bool IsMenuVisible();
         bool IsMenuEnabled(ClipboardContent content);
         string GetMenuText(ClipboardContent content);
-        string GetToolTipText(ClipboardContent content);
+        string GetToolTipText();
         Task HandleAsync(SendNotification sendNotification);
         Task HandleCsvAsync(string csvData, SendNotification sendNotification);
         Task HandleCsvStreamAsync(Stream csvData, SendNotification sendNotification);

@@ -10,23 +10,16 @@ namespace Klipboard.Workers
 
         protected readonly ClipboardContent m_supportedContent;
         protected readonly ISettings m_settings;
-        protected readonly WorkerCategory m_category;
-        protected readonly object? m_icon;
-
         public ClipboardContent SupportedContent => m_supportedContent;
-        public WorkerCategory Category => m_category;
-        public object? Icon => m_icon;
 
         #endregion
 
         #region Construction
 
-        protected WorkerBase(WorkerCategory category, ClipboardContent supportedContent, ISettings mSettings, object? icon = null)
+        protected WorkerBase(ClipboardContent supportedContent, ISettings mSettings)
         {
             m_supportedContent = supportedContent;
             m_settings = mSettings;
-            m_category = category;
-            m_icon = icon;
         }
 
         #endregion
@@ -39,7 +32,7 @@ namespace Klipboard.Workers
 
         public virtual string GetMenuText(ClipboardContent content) => this.GetType().ToString();
 
-        public virtual string GetToolTipText(ClipboardContent content) => string.Empty;
+        public virtual string GetToolTipText() => string.Empty;
 
         #endregion
 

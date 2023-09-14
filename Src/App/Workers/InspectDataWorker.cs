@@ -9,15 +9,15 @@ namespace Klipboard.Workers
     {
         private readonly IWorkerUi m_ui;
 
-        public InspectDataWorker(WorkerCategory category, ISettings settings, IWorkerUi ui, object? icon = null)
-            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files , settings, icon)
+        public InspectDataWorker(ISettings settings, IWorkerUi ui)
+            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings)
         {
             m_ui = ui;
         }
 
         public override string GetMenuText(ClipboardContent content) => "Inspect Clipboard Content";
 
-        public override string GetToolTipText(ClipboardContent content) => "Display a preview of Clipboard Data";
+        public override string GetToolTipText() => "Display a preview of Clipboard Data";
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
