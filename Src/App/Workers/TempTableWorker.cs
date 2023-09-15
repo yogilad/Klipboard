@@ -8,10 +8,13 @@ namespace Klipboard.Workers
 {
     public class TempTableWorker : WorkerBase
     {
-        private const string NotifcationTitle = "Temp Table Query";
+        private const string NotificationTitle = "Temp Table Query";
+        private const string FirstRowIsHeader = "First Row Is Header";
+        private const string NoHeaderRow = "No Header Row";
+
 
         public TempTableWorker(ISettings settings)
-            : base(ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings)
+            : base(ClipboardContent.Files | ClipboardContent.CSV | ClipboardContent.Text, settings, new List<string>() { FirstRowIsHeader, NoHeaderRow })
         {
         }
 
@@ -29,7 +32,7 @@ namespace Klipboard.Workers
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, "tsv", upstreamFileName, sendNotification))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, "tsv", upstreamFileName, sendNotification, chosenOptions))
             {
                 InvokeTempTableQuery(tempTableName, sendNotification);
             }
@@ -43,7 +46,7 @@ namespace Klipboard.Workers
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification, chosenOptions))
             {
                 InvokeTempTableQuery(tempTableName, sendNotification);
             }
@@ -56,6 +59,7 @@ namespace Klipboard.Workers
             var fileCount = 0;
             var target = GetQuickActionTarget();
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
+            var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
 
 
@@ -63,7 +67,7 @@ namespace Klipboard.Workers
             {
                 if(fileCount++ > 100)
                 {
-                    sendNotification(NotifcationTitle, "Limit of 100 files reached");
+                    sendNotification(NotificationTitle, "Limit of 100 files reached");
                     break;
                 }
 
@@ -79,7 +83,7 @@ namespace Klipboard.Workers
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, format, $"{fileInfo.Name}_{Guid.NewGuid()}", sendNotification);
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, format, $"{fileInfo.Name}_{Guid.NewGuid()}", sendNotification, chosenOption);
                     if (!success)
                     {
                         // A notification was sent from the failed function
@@ -97,13 +101,13 @@ namespace Klipboard.Workers
                     DatabaseName = target.DatabaseName,
                     TableName = tempTableName,
                     Format = FileHelper.GetFormatFromExtension(format),
-                    IgnoreFirstRecord = false, // TODO consider if there's a way to detect that
+                    IgnoreFirstRecord = firstRowIsHeader,
                 };
 
                 var res = await databaseHelper.TryDirectIngestStorageToTable(path, tempTableName, ingestionProperties, storageOptions);
                 if (!res.Success)
                 {
-                    sendNotification(NotifcationTitle, $"Failed to upload file '{path}' to temp table: {res.Error}");
+                    sendNotification(NotificationTitle, $"Failed to upload file '{path}' to temp table: {res.Error}");
                     continue;
                 }
 
@@ -116,13 +120,14 @@ namespace Klipboard.Workers
             }
         }
 
-        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, string tempTableName, Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification)
+        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, string tempTableName, Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
         {
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
+            var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)
             {
-                sendNotification(NotifcationTitle, $"Failed to upload file: {uploadRes.Error}");
+                sendNotification(NotificationTitle, $"Failed to upload file: {uploadRes.Error}");
                 return false;
             }
 
@@ -130,7 +135,7 @@ namespace Klipboard.Workers
 
             if (format == AppConstants.UnknownFormat)
             {
-                var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri);
+                var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri, firstRowIsHeader);
                 if (autoDetectRes.Success)
                 {
                     schemaStr = autoDetectRes.Schema.ToString();
@@ -138,19 +143,19 @@ namespace Klipboard.Workers
                 }
                 else
                 {
-                    sendNotification(NotifcationTitle, autoDetectRes.Error);
+                    sendNotification(NotificationTitle, autoDetectRes.Error);
                 }
             }
             else
             {
-                var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format);
+                var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format, firstRowIsHeader);
                 if (schemaRes.Success)
                 {
                     schemaStr = schemaRes.TableScheme.ToString();
                 }
                 else
                 {
-                    sendNotification(NotifcationTitle, schemaRes.Error);
+                    sendNotification(NotificationTitle, schemaRes.Error);
                 }
             }
 
@@ -158,7 +163,7 @@ namespace Klipboard.Workers
 
             if (!createTableRes.Success)
             {
-                sendNotification(NotifcationTitle, createTableRes.Error);
+                sendNotification(NotificationTitle, createTableRes.Error);
                 return false;
             }
 
@@ -174,7 +179,7 @@ namespace Klipboard.Workers
                 DatabaseName = appConfig.ChosenCluster.DatabaseName,
                 TableName = tempTableName,
                 Format = FileHelper.GetFormatFromExtension(format),
-                IgnoreFirstRecord = false, // TODO consider if there's a way to detect that
+                IgnoreFirstRecord = firstRowIsHeader,
             };
 
 
@@ -182,7 +187,7 @@ namespace Klipboard.Workers
 
             if (!uploadBlobRes.Success)
             {
-                sendNotification(NotifcationTitle, uploadBlobRes.Error);
+                sendNotification(NotificationTitle, uploadBlobRes.Error);
                 return false;
             }
 
@@ -196,7 +201,7 @@ namespace Klipboard.Workers
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
             {
-                sendNotification(NotifcationTitle, error ?? "Unknown error.");
+                sendNotification(NotificationTitle, error ?? "Unknown error.");
             }
         }
 
