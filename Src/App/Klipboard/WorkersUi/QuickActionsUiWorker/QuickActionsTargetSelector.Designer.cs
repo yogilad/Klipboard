@@ -56,7 +56,7 @@
             // 
             // cancelButton
             // 
-            cancelButton.Location = new Point(428, 75);
+            cancelButton.Location = new Point(459, 63);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(75, 23);
             cancelButton.TabIndex = 2;
@@ -66,7 +66,7 @@
             // 
             // selectButton
             // 
-            selectButton.Location = new Point(347, 75);
+            selectButton.Location = new Point(378, 63);
             selectButton.Name = "selectButton";
             selectButton.Size = new Size(75, 23);
             selectButton.TabIndex = 3;
@@ -78,7 +78,7 @@
             // 
             databaseTextBox.Location = new Point(93, 52);
             databaseTextBox.Name = "databaseTextBox";
-            databaseTextBox.Size = new Size(207, 23);
+            databaseTextBox.Size = new Size(262, 23);
             databaseTextBox.TabIndex = 4;
             databaseTextBox.TextChanged += databaseNameTextBox_TextChanged;
             // 
@@ -87,7 +87,7 @@
             clusterComboBox.FormattingEnabled = true;
             clusterComboBox.Location = new Point(93, 20);
             clusterComboBox.Name = "clusterComboBox";
-            clusterComboBox.Size = new Size(410, 23);
+            clusterComboBox.Size = new Size(441, 23);
             clusterComboBox.TabIndex = 5;
             clusterComboBox.SelectedIndexChanged += clusterComboBox_SelectedIndexChanged;
             // 
@@ -97,7 +97,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = cancelButton;
-            ClientSize = new Size(525, 110);
+            ClientSize = new Size(546, 98);
             Controls.Add(clusterComboBox);
             Controls.Add(databaseTextBox);
             Controls.Add(selectButton);

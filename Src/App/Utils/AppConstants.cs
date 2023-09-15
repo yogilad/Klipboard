@@ -5,10 +5,10 @@
     {
         // Debug Config
 #if DEBUG
-        public const bool DevMode = true;
+        public static bool DevMode = true;
         public const bool EnforceInlineQuerySizeLimits = true;
 #else
-        public const bool DevMode = false;
+        public static bool DevMode = false;
         public const bool EnforceInlineQuerySizeLimits = true;
 #endif
 
