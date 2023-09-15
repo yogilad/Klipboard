@@ -5,23 +5,20 @@ using Klipboard.Utils;
 
 namespace Klipboard.Workers
 {
-    public class InspectDataWorker : WorkerBase
+    public abstract class InspectDataWorker : WorkerBase
     {
-        private readonly IWorkerUi m_ui;
-
-        public InspectDataWorker(WorkerCategory category, ISettings settings, IWorkerUi ui, object? icon = null)
-            : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files , settings, icon)
+        public InspectDataWorker(ISettings settings)
+            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings)
         {
-            m_ui = ui;
         }
 
         public override string GetMenuText(ClipboardContent content) => "Inspect Clipboard Content";
 
-        public override string GetToolTipText(ClipboardContent content) => "Display a preview of Clipboard Data";
+        public override string GetToolTipText() => "Display a preview of Clipboard Data";
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
             var contentBuilder = new StringBuilder();
             int length = csvData.Length / 1024;
@@ -33,10 +30,10 @@ namespace Klipboard.Workers
             contentBuilder.AppendLine();
             contentBuilder.AppendLine(csvData);
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
             var contentBuilder = new StringBuilder();
             int length = textData.Length / 1024;
@@ -48,10 +45,10 @@ namespace Klipboard.Workers
             contentBuilder.AppendLine();
             contentBuilder.AppendLine(textData);
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
-        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
         {
             var contentBuilder = new StringBuilder();
 
@@ -65,8 +62,9 @@ namespace Klipboard.Workers
                 contentBuilder.AppendLine(file ?? "file item is null");
             }
 
-            await m_ui.ShowDialog(contentBuilder.ToString());
+            ShowDialog(contentBuilder.ToString());
         }
 
+        public abstract void ShowDialog(string content);
     }
 }

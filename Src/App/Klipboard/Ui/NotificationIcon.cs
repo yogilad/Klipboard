@@ -1,35 +1,84 @@
 ﻿using Klipboard.Utils;
-
+using Klipboard.Workers;
+using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard
 {
-    public class NotificationIcon : IDisposable, INotificationIcon
+    public record WorkerUiConfig(IWorker Worker, WorkerCategory Category, object? Icon = null);
+    public record MenuTag(IWorker Worker, string? chosenOption = null, bool hasSubOptions = false);
+
+
+    public class NotificationIcon : IDisposable
     {
         private System.ComponentModel.IContainer m_components;
-        private Icon m_appLogo;
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
+        private IClipboardHelper m_clipboardHelper;
 
-        public NotificationIcon()
+
+        public NotificationIcon(List<WorkerUiConfig> workerConfig, IClipboardHelper clipboardHelper)
         {
+            m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
 
             // Create the NotifyIcon.
             m_notifyIcon = new NotifyIcon(this.m_components);
-            m_appLogo = ResourceLoader.GetIcon();
-            m_notifyIcon.Icon = m_appLogo;
+            m_notifyIcon.Icon = ResourceLoader.KustoColorIcon;
+            m_notifyIcon.Text = "Klipboard";
 
             // Set the context menu
             m_contextMenuStrip = new ContextMenuStrip();
             m_notifyIcon.ContextMenuStrip = m_contextMenuStrip;
+            BuildMenu(workerConfig);
 
             // Handle the DoubleClick event to activate the form.
-            m_notifyIcon.Text = "Klipboard";
+            m_notifyIcon.Click += NotifyIcon_OnClick;
 
-            // Dispaly the notification icon
+            // Display the notification icon
             m_notifyIcon.Visible = true;
-
         }
+
+        private void BuildMenu(List<WorkerUiConfig> workerConfig)
+        {
+            WorkerUiConfig? previousWorker = null;
+
+            foreach (var config in workerConfig)
+            {
+                if (previousWorker != null && previousWorker.Category != config.Category)
+                {
+                    m_contextMenuStrip.Items.Add(new ToolStripSeparator());
+                }
+
+                var hasSubOptions = config.Worker.SubMenuOptions.SafeFastAny();
+                var item = new ToolStripMenuItem(config.Worker.GetMenuText(ClipboardContent.None), 
+                    image: (config.Icon as Icon)?.ToBitmap(), 
+                    onClick: (hasSubOptions)? null: MenuItem_OnClick)
+                {
+                    ToolTipText = config.Worker.GetToolTipText(),
+                    Tag = new MenuTag(config.Worker, hasSubOptions: hasSubOptions),
+                };
+
+                m_contextMenuStrip.Items.Add(item);
+
+                if (hasSubOptions)
+                {
+                    foreach (var subOption in config.Worker.SubMenuOptions)
+                    {
+                        var subItem = new ToolStripMenuItem(subOption, image: null, MenuItem_OnClick)
+                        {
+                            Tag = new MenuTag(config.Worker, chosenOption: subOption),
+                        };
+
+                        item.DropDownItems.Add(subItem);
+                    }
+                }
+
+                previousWorker = config;
+            }
+
+            m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
+        }
+
 
         public void Dispose() => Dispose(true);
 
@@ -41,6 +90,44 @@ namespace Klipboard
                     m_components.Dispose();
         }
 
+        private void NotifyIcon_OnClick(object? Sender, EventArgs e)
+        {
+            var content = m_clipboardHelper.GetClipboardContent();
+
+            for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
+            {
+                var menuItem = m_contextMenuStrip.Items[i];
+                var tag = menuItem.Tag as MenuTag;
+
+                if (tag == null) 
+                {
+                    continue;
+                }
+
+                menuItem.Visible = tag.Worker.IsMenuVisible();
+
+                if (menuItem.Visible)
+                {
+                    menuItem.Enabled = tag.Worker.IsMenuEnabled(content);
+                    menuItem.Text = tag.Worker.GetMenuText(content);
+                }
+            }
+        }
+
+        private void MenuItem_OnClick(object? Sender, EventArgs e)
+        {
+            var menuItem = Sender as ToolStripMenuItem;
+            var tag = menuItem?.Tag as MenuTag;
+
+            if (tag == null)
+            {
+                return;
+            }
+
+            tag.Worker.OnClick(m_clipboardHelper, SendNotification, tag.chosenOption);
+        }
+
+
         private void Exit_OnClick(object? Sender, EventArgs e)
         {
             Application.Exit();
@@ -49,44 +136,6 @@ namespace Klipboard
         public void SendNotification(string title, string message)
         {
             m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None);
-        }
-
-        public object AddWorker(IWorker worker, Func<IWorker?, Task> workerClick)
-        {
-            var item = new ToolStripMenuItem(worker.GetMenuText(ClipboardContent.None), (worker.Icon as Icon)?.ToBitmap(),
-                async (s, e) => await ExceptionUtils.Protect(() => workerClick(worker)))
-            {
-                ToolTipText = worker.GetToolTipText(ClipboardContent.None)
-            };
-
-            m_contextMenuStrip.Items.Add(item);
-
-            return item;
-        }
-
-        public void AddSeparator()
-        {
-            m_contextMenuStrip.Items.Add(new ToolStripSeparator());
-        }
-
-        public void UpdateWorker(object item, IWorker worker, ClipboardContent content)
-        {
-            var menuItem = item as ToolStripMenuItem;
-            menuItem.Visible = worker.IsMenuVisible();
-            menuItem.Enabled = worker.IsMenuEnabled(content);
-            menuItem.Text = worker.GetMenuText(content);
-            menuItem.ToolTipText = worker.GetToolTipText(content);
-        }
-
-        public void AddAdditionalItems(ISettings settings)
-        {
-            m_contextMenuStrip.Items.Add("Settings", null, (s, e) => ((Settings)settings).ShowDialog());
-            m_contextMenuStrip.Items.Add("Exit", null, Exit_OnClick);
-        }
-
-        public void SetOnClick(Func<Task> onClick)
-        {
-            m_notifyIcon.Click += async (_, _) => await ExceptionUtils.Protect(onClick);
         }
     }
 }

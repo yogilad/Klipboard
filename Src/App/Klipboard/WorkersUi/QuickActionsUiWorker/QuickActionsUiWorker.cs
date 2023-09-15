@@ -9,8 +9,8 @@ namespace Klipboard
     {
         QuickActionsTargetSelector m_ui;
 
-        public QuickActionsUiWorker(WorkerCategory category, ISettings settings, object? icon = null)
-        : base(category, settings, icon)
+        public QuickActionsUiWorker(ISettings settings)
+        : base(settings)
         {
             m_ui = new QuickActionsTargetSelector(settings);
         }

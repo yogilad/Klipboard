@@ -3,14 +3,14 @@
     public static class KustoDatabaseHelperExtended
     {
         // Set format to null or AppConstants.UnknownFormat to trigger auto detection of textual data
-        public static async Task<(bool Success, TableColumns? Schema, string? Format, string? Error)> TryAutoDetectTextBlobScheme(this KustoDatabaseHelper databaseHelper, string blobUri)
+        public static async Task<(bool Success, TableColumns? Schema, string? Format, string? Error)> TryAutoDetectTextBlobScheme(this KustoDatabaseHelper databaseHelper, string blobUri, bool firstRowIsHeader = false)
         {
             try
             {
-                var csvSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "csv");
-                var tsvSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "tsv");
-                var multiJsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "multijson");
-                var jsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "json");
+                var csvSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "csv", firstRowIsHeader);
+                var tsvSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "tsv", firstRowIsHeader);
+                var multiJsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "multijson", firstRowIsHeader);
+                var jsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "json", firstRowIsHeader);
 
                 var curScheme = csvSchemaRes;
                 if (tsvSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < tsvSchemaRes.TableScheme.Columns.Count))

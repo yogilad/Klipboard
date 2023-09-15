@@ -14,7 +14,7 @@ namespace Klipboard
         private Settings()
         {
             InitializeComponent();
-            StyleDesigner.SetFormDesign(this);
+            StyleDesigner.SetDialogDesign(this);
         }
 
         public static async Task<Settings> Init()

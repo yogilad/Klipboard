@@ -25,8 +25,8 @@ namespace Klipboard.Workers
             }
         }
 
-        public QuickActionsWorker(WorkerCategory category, ISettings settings, object? icon = null)
-            : base(category, ClipboardContent.None, settings, icon)
+        public QuickActionsWorker(ISettings settings)
+            : base(ClipboardContent.None, settings)
         {
         }
 
@@ -65,9 +65,9 @@ namespace Klipboard.Workers
 
         public override bool IsMenuEnabled(ClipboardContent content) => true;
 
-        public override string GetToolTipText(ClipboardContent content) => "Click to set the default cluster and database for Quick Actions";
+        public override string GetToolTipText() => "Click to set the default cluster and database for Quick Actions";
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
             var result = await PromptUser();
 

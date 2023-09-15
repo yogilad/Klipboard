@@ -55,7 +55,7 @@
             lstClusters.FullRowSelect = true;
             lstClusters.GridLines = true;
             lstClusters.Location = new Point(15, 45);
-            lstClusters.Margin = new Padding(2, 2, 2, 2);
+            lstClusters.Margin = new Padding(2);
             lstClusters.MultiSelect = false;
             lstClusters.Name = "lstClusters";
             lstClusters.Size = new Size(579, 231);
@@ -77,7 +77,7 @@
             // txtSettingsPath
             // 
             txtSettingsPath.Location = new Point(55, 7);
-            txtSettingsPath.Margin = new Padding(2, 2, 2, 2);
+            txtSettingsPath.Margin = new Padding(2);
             txtSettingsPath.Name = "txtSettingsPath";
             txtSettingsPath.Size = new Size(485, 23);
             txtSettingsPath.TabIndex = 1;
@@ -95,7 +95,7 @@
             // btnLoadSettings
             // 
             btnLoadSettings.Location = new Point(542, 6);
-            btnLoadSettings.Margin = new Padding(2, 2, 2, 2);
+            btnLoadSettings.Margin = new Padding(2);
             btnLoadSettings.Name = "btnLoadSettings";
             btnLoadSettings.Size = new Size(78, 20);
             btnLoadSettings.TabIndex = 3;
@@ -107,7 +107,7 @@
             // 
             chkStartWithWindows.AutoSize = true;
             chkStartWithWindows.Location = new Point(15, 364);
-            chkStartWithWindows.Margin = new Padding(2, 2, 2, 2);
+            chkStartWithWindows.Margin = new Padding(2);
             chkStartWithWindows.Name = "chkStartWithWindows";
             chkStartWithWindows.Size = new Size(130, 19);
             chkStartWithWindows.TabIndex = 6;
@@ -117,7 +117,7 @@
             // txtConnectionStr
             // 
             txtConnectionStr.Location = new Point(108, 291);
-            txtConnectionStr.Margin = new Padding(2, 2, 2, 2);
+            txtConnectionStr.Margin = new Padding(2);
             txtConnectionStr.Name = "txtConnectionStr";
             txtConnectionStr.Size = new Size(376, 23);
             txtConnectionStr.TabIndex = 7;
@@ -125,7 +125,7 @@
             // txtDatabase
             // 
             txtDatabase.Location = new Point(108, 320);
-            txtDatabase.Margin = new Padding(2, 2, 2, 2);
+            txtDatabase.Margin = new Padding(2);
             txtDatabase.Name = "txtDatabase";
             txtDatabase.Size = new Size(189, 23);
             txtDatabase.TabIndex = 8;
@@ -153,7 +153,7 @@
             // btUpdate
             // 
             btUpdate.Location = new Point(316, 319);
-            btUpdate.Margin = new Padding(2, 2, 2, 2);
+            btUpdate.Margin = new Padding(2);
             btUpdate.Name = "btUpdate";
             btUpdate.Size = new Size(78, 20);
             btUpdate.TabIndex = 11;
@@ -164,7 +164,7 @@
             // btnAdd
             // 
             btnAdd.Location = new Point(405, 318);
-            btnAdd.Margin = new Padding(2, 2, 2, 2);
+            btnAdd.Margin = new Padding(2);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(78, 20);
             btnAdd.TabIndex = 12;
@@ -176,7 +176,7 @@
             // 
             cmbApp.FormattingEnabled = true;
             cmbApp.Location = new Point(267, 363);
-            cmbApp.Margin = new Padding(2, 2, 2, 2);
+            cmbApp.Margin = new Padding(2);
             cmbApp.Name = "cmbApp";
             cmbApp.Size = new Size(129, 23);
             cmbApp.TabIndex = 13;
@@ -194,7 +194,7 @@
             // txtQuery
             // 
             txtQuery.Location = new Point(108, 413);
-            txtQuery.Margin = new Padding(2, 2, 2, 2);
+            txtQuery.Margin = new Padding(2);
             txtQuery.Multiline = true;
             txtQuery.Name = "txtQuery";
             txtQuery.Size = new Size(332, 137);
@@ -213,7 +213,7 @@
             // btnSave
             // 
             btnSave.Location = new Point(460, 367);
-            btnSave.Margin = new Padding(2, 2, 2, 2);
+            btnSave.Margin = new Padding(2);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(133, 56);
             btnSave.TabIndex = 17;
@@ -242,7 +242,7 @@
             Controls.Add(lblSettingsPath);
             Controls.Add(txtSettingsPath);
             Controls.Add(lstClusters);
-            Margin = new Padding(2, 2, 2, 2);
+            Margin = new Padding(2);
             Name = "Settings";
             Text = "Settings";
             ResumeLayout(false);

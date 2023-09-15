@@ -8,29 +8,29 @@ namespace Klipboard.Workers
         private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard contiainig unstructured text";
         private static readonly string NotifcationTitle = "Free Text Inline Query";
 
-        public FreeTextInlineQueryWorker(WorkerCategory category, ISettings settings, object? icon = null)
-        : base(category, ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, icon) // Todo Support Text and File Data
+        public FreeTextInlineQueryWorker(ISettings settings)
+        : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings) // Todo Support Text and File Data
         {
         }
 
         public override string GetMenuText(ClipboardContent content) => $"Paste to Free Text Inline Query";
 
-        public override string GetToolTipText(ClipboardContent content) => ToolTipText;
+        public override string GetToolTipText() => ToolTipText;
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
             await Task.Run(() => HandleFreeTextData(csvData, sendNotification));
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
             // a failed detection could simply mean a single column
             await Task.Run(() => HandleFreeTextData(textData, sendNotification));
         }
 
-        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification, string? chosenOption)
         {
             if (files.Count > 1)
             {

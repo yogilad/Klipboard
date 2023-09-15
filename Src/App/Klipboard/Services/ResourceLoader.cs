@@ -5,13 +5,13 @@ namespace Klipboard
 {
     class ResourceLoader
     {
-        static readonly Icon m_adxColorIcon;
-        static readonly Icon m_adxBlueIcon;
+        public static readonly Icon KustoColorIcon;
+        public static readonly Icon DownloadIcon;
 
         static ResourceLoader()
         {
-            m_adxColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
-            m_adxBlueIcon = new Icon(LoadResourceAsStream("adx_blue.ico", "Resources"));
+            KustoColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
+            DownloadIcon = new Icon(LoadResourceAsStream("download.ico", "Resources"));
         }
 
         private static Stream LoadResourceAsStream(string resourceName, string folder, string name_space = nameof(Klipboard))
@@ -26,11 +26,6 @@ namespace Klipboard
             }
 
             return stream;
-        }
-
-        public static Icon GetIcon()
-        {
-            return m_adxColorIcon;
         }
     }
 }
