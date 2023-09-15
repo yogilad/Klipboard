@@ -29,7 +29,7 @@ namespace Klipboard
         {
             var workers = new List<WorkerUiConfig>();
 
-            workers.Add(new WorkerUiConfig(new QuickActionsUiWorker(settings), WorkerCategory.QuickActions, Icon: ResourceLoader.GetIcon()));
+            workers.Add(new WorkerUiConfig(new QuickActionsUiWorker(settings), WorkerCategory.QuickActions, Icon: ResourceLoader.KustoColorIcon));
             workers.Add(new WorkerUiConfig(new StructuredDataInlineQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new FreeTextInlineQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new ExternalDataQueryWorker(settings), WorkerCategory.QuickActions));
@@ -44,6 +44,7 @@ namespace Klipboard
             workers.Add(new WorkerUiConfig(new SettingsUiWorker(settings), WorkerCategory.Management));
             workers.Add(new WorkerUiConfig(new ShareWorker(settings), WorkerCategory.Management));
             workers.Add(new WorkerUiConfig(new HelpWorker(settings), WorkerCategory.Management));
+            workers.Add(new WorkerUiConfig(new NewVersionWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
             return workers;
         }
     }

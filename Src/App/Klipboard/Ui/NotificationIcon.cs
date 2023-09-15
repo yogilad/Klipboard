@@ -20,7 +20,7 @@ namespace Klipboard
 
             // Create the NotifyIcon.
             m_notifyIcon = new NotifyIcon(this.m_components);
-            m_notifyIcon.Icon = ResourceLoader.GetIcon();
+            m_notifyIcon.Icon = ResourceLoader.KustoColorIcon;
             m_notifyIcon.Text = "Klipboard";
 
             // Set the context menu
@@ -41,11 +41,6 @@ namespace Klipboard
 
             foreach (var config in workerConfig)
             {
-                if (!config.Worker.IsMenuVisible())
-                {
-                    continue;
-                }
-
                 if (previousWorker != null && previousWorker.Category != config.Category)
                 {
                     m_contextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -91,8 +86,13 @@ namespace Klipboard
                     continue;
                 }
 
-                menuItem.Enabled = worker.IsMenuEnabled(content);
-                menuItem.Text = worker.GetMenuText(content);
+                menuItem.Visible = worker.IsMenuVisible();
+
+                if (menuItem.Visible)
+                {
+                    menuItem.Enabled = worker.IsMenuEnabled(content);
+                    menuItem.Text = worker.GetMenuText(content);
+                }
             }
         }
 

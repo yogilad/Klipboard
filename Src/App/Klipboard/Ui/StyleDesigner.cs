@@ -22,7 +22,7 @@ namespace Klipboard
 
         private static void SetBaseDesigner(Form form, bool appearInTaskbar, bool allowMinimize, bool allowClose)
         {
-            form.Icon = ResourceLoader.GetIcon();
+            form.Icon = ResourceLoader.KustoColorIcon;
             form.MaximizeBox = false;
             form.MinimizeBox = allowMinimize;
             form.ShowInTaskbar = appearInTaskbar;

@@ -16,15 +16,18 @@
   <ItemGroup>
     <None Remove="Resources\adx_blue.ico" />
     <None Remove="Resources\adx_color.ico" />
+    <None Remove="Resources\download.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\adx_color.ico" />
+    <EmbeddedResource Include="Resources\adx_color.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\adx_blue.ico" />
-    <EmbeddedResource Include="Resources\adx_color.ico" />
+    <EmbeddedResource Include="Resources\download.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
