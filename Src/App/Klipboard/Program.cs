@@ -41,10 +41,9 @@ namespace Klipboard
             workers.Add(new WorkerUiConfig(new QueueIngestWorker(settings), WorkerCategory.Actions));
 
             // Management
-            workers.Add(new WorkerUiConfig(new SettingsUiWorker(settings), WorkerCategory.Management));
-            workers.Add(new WorkerUiConfig(new ShareWorker(settings), WorkerCategory.Management));
-            workers.Add(new WorkerUiConfig(new HelpWorker(settings), WorkerCategory.Management));
             workers.Add(new WorkerUiConfig(new NewVersionWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
+            workers.Add(new WorkerUiConfig(new SettingsUiWorker(settings), WorkerCategory.Management));
+            workers.Add(new WorkerUiConfig(new HelpWorker(settings), WorkerCategory.Management));
             return workers;
         }
     }

@@ -7,8 +7,13 @@ namespace Klipboard.Workers
 {
     public class HelpWorker : WorkerBase
     {
+        private const string Help = "Help";
+        private const string Report = "Report in Issue";
+        private const string Share = "Share Klipboard";
+        private const string FreeCluster = "Try Kusto For Free";
+
         public HelpWorker(ISettings settings)
-            : base(ClipboardContent.None, settings)
+            : base(ClipboardContent.None, settings, new List<string> { Help, Share, FreeCluster, Report })
         {
         }
 
@@ -20,9 +25,47 @@ namespace Klipboard.Workers
 
         public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
+            switch(chosenOption)
+            {
+                case Help:
+                    InvokeLink("https://github.com/yogilad/Klipboard#readme");
+                    break;
+
+                case Report:
+                    InvokeLink("https://github.com/yogilad/Klipboard/issues");
+                    break;
+
+                case Share:
+                    ShareViaEmail();
+                    break;
+
+                case FreeCluster:
+                    InvokeLink("https://dataexplorer.azure.com/freecluster");
+                    break;
+            }
+
+            return;
+        }
+
+        public void ShareViaEmail()
+        {
+            var subject = "Have You Tried Klipboard for Kusto?";
+            var body =
+@"Hi, 
+
+I'm using Klipboard for Kusto, and I think you'd find it useful. 
+You can get it from https://github.com/yogilad/Klipboard/";
+
+            var link = $"mailto:?subject={subject}&body={Uri.EscapeUriString(body)}";
+
+            InvokeLink(link);
+        }
+
+        public void InvokeLink(string link)
+        {
             Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/yogilad/Klipboard/blob/main/README.md",
+                FileName = link,
                 UseShellExecute = true
             });
 
