@@ -7,21 +7,19 @@ namespace Klipboard.Workers
     {
 
         #region Members And Properties
+        public ClipboardContent SupportedContent { get; private set; }
+        public List<string>? SubMenuOptions { get; private set; }
 
-        protected readonly ClipboardContent m_supportedContent;
         protected readonly ISettings m_settings;
-        public ClipboardContent SupportedContent => m_supportedContent;
-
         #endregion
 
         #region Construction
-
-        protected WorkerBase(ClipboardContent supportedContent, ISettings mSettings)
+        protected WorkerBase(ClipboardContent supportedContent, ISettings mSettings, List<string> ? subMenuOptions = null)
         {
-            m_supportedContent = supportedContent;
+            SupportedContent = supportedContent;
+            SubMenuOptions = subMenuOptions;
             m_settings = mSettings;
         }
-
         #endregion
 
         #region Overridable Menu Item APIs
@@ -39,28 +37,28 @@ namespace Klipboard.Workers
         #region Overridable Data Handling APIs
 
         // Handle a click event that requires no data
-        public virtual async Task HandleAsync(SendNotification sendNotification) =>
+        public virtual async Task HandleAsync(SendNotification sendNotification, string? chosenOption) =>
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleAsync)}");
 
         // Handle a click event that requires CSV string data
-        public virtual async Task HandleCsvAsync(string csvData, SendNotification sendNotification) =>
+        public virtual async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOption) =>
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleCsvAsync)}");
+
+        // Handle a click event that requires Text string data
+        public virtual async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOption) =>
+            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextAsync)}");
+
+        // Handle a click ebent that requires File List data
+        public virtual async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? subMenuOption) =>
+            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleFilesAsync)}");
 
         // Handle a click event that requires CSV stream data
         public virtual async Task HandleCsvStreamAsync(Stream csvData, SendNotification sendNotification) =>
             sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleCsvStreamAsync)}");
 
-        // Handle a click event that requires Text string data
-        public virtual async Task HandleTextAsync(string textData, SendNotification sendNotification) =>
-            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextAsync)}");
-
         // Handle a click event that requires Text stream data
         public virtual async Task HandleTextStreamAsync(Stream textData, SendNotification sendNotification) => sendNotification("Not Implemented!",
             $"Worker '{this.GetType().ToString()}' has no implementation for handling {nameof(HandleTextStreamAsync)}");
-
-        // Handle a click ebent that requires File List data
-        public virtual async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification) =>
-            sendNotification("Not Implemented!", $"Worker '{this.GetType().ToString()}' has no implementation for {nameof(HandleFilesAsync)}");
 
         #endregion
     }

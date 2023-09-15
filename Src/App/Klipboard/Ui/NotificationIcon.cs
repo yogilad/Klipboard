@@ -1,10 +1,12 @@
 ﻿using Klipboard.Utils;
 using Klipboard.Workers;
-
+using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard
 {
-    public record WorkerUiConfig(IWorker Worker, WorkerCategory Category, object? Icon = null, List<WorkerUiConfig>? SubItems = null);
+    public record WorkerUiConfig(IWorker Worker, WorkerCategory Category, object? Icon = null);
+    public record MenuTag(IWorker Worker, string? chosenOption = null, bool hasSubOptions = false);
+
 
     public class NotificationIcon : IDisposable
     {
@@ -12,6 +14,7 @@ namespace Klipboard
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
         private IClipboardHelper m_clipboardHelper;
+
 
         public NotificationIcon(List<WorkerUiConfig> workerConfig, IClipboardHelper clipboardHelper)
         {
@@ -46,14 +49,29 @@ namespace Klipboard
                     m_contextMenuStrip.Items.Add(new ToolStripSeparator());
                 }
 
-                var item = new ToolStripMenuItem(config.Worker.GetMenuText(ClipboardContent.None), (config.Icon as Icon)?.ToBitmap(), MenuItem_OnClick)
+                var hasSubOptions = config.Worker.SubMenuOptions.SafeFastAny();
+                var item = new ToolStripMenuItem(config.Worker.GetMenuText(ClipboardContent.None), 
+                    image: (config.Icon as Icon)?.ToBitmap(), 
+                    onClick: (hasSubOptions)? null: MenuItem_OnClick)
                 {
                     ToolTipText = config.Worker.GetToolTipText(),
-                    Tag = config.Worker,
+                    Tag = new MenuTag(config.Worker, hasSubOptions: hasSubOptions),
                 };
 
                 m_contextMenuStrip.Items.Add(item);
 
+                if (hasSubOptions)
+                {
+                    foreach (var subOption in config.Worker.SubMenuOptions)
+                    {
+                        var subItem = new ToolStripMenuItem(subOption, image: null, MenuItem_OnClick)
+                        {
+                            Tag = new MenuTag(config.Worker, chosenOption: subOption),
+                        };
+
+                        item.DropDownItems.Add(subItem);
+                    }
+                }
 
                 previousWorker = config;
             }
@@ -79,19 +97,19 @@ namespace Klipboard
             for(int i = 0; i < m_contextMenuStrip.Items.Count; i++)
             {
                 var menuItem = m_contextMenuStrip.Items[i];
-                var worker = menuItem.Tag as IWorker;
+                var tag = menuItem.Tag as MenuTag;
 
-                if (worker == null) 
+                if (tag == null) 
                 {
                     continue;
                 }
 
-                menuItem.Visible = worker.IsMenuVisible();
+                menuItem.Visible = tag.Worker.IsMenuVisible();
 
                 if (menuItem.Visible)
                 {
-                    menuItem.Enabled = worker.IsMenuEnabled(content);
-                    menuItem.Text = worker.GetMenuText(content);
+                    menuItem.Enabled = tag.Worker.IsMenuEnabled(content);
+                    menuItem.Text = tag.Worker.GetMenuText(content);
                 }
             }
         }
@@ -99,14 +117,14 @@ namespace Klipboard
         private void MenuItem_OnClick(object? Sender, EventArgs e)
         {
             var menuItem = Sender as ToolStripMenuItem;
-            var worker = menuItem?.Tag as IWorker;
+            var tag = menuItem?.Tag as MenuTag;
 
-            if (worker == null)
+            if (tag == null)
             {
                 return;
             }
 
-            worker.OnClick(m_clipboardHelper, SendNotification);
+            tag.Worker.OnClick(m_clipboardHelper, SendNotification, tag.chosenOption);
         }
 
 

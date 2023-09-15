@@ -21,7 +21,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
@@ -35,7 +35,7 @@ namespace Klipboard.Workers
             }
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
@@ -49,7 +49,7 @@ namespace Klipboard.Workers
             }
         }
 
-        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
         {
             var firstFile = true;
             var successCount = 0;

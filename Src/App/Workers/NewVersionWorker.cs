@@ -17,7 +17,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
         }
     }

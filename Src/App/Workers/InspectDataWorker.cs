@@ -18,7 +18,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
             var contentBuilder = new StringBuilder();
             int length = csvData.Length / 1024;
@@ -33,7 +33,7 @@ namespace Klipboard.Workers
             ShowDialog(contentBuilder.ToString());
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
             var contentBuilder = new StringBuilder();
             int length = textData.Length / 1024;
@@ -48,7 +48,7 @@ namespace Klipboard.Workers
             ShowDialog(contentBuilder.ToString());
         }
 
-        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
         {
             var contentBuilder = new StringBuilder();
 

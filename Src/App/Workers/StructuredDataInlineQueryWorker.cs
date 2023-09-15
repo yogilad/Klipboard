@@ -19,12 +19,12 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification)
+        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
             await Task.Run(() => HandleCsvData(csvData, '\t', sendNotification));
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification)
+        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
             char? separator;
 
@@ -34,7 +34,7 @@ namespace Klipboard.Workers
             await Task.Run(() => HandleCsvData(textData, separator ?? ',', sendNotification));
         }
 
-        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification)
+        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification, string? chosenOption)
         {
             if (files.Count > 1)
             {

@@ -18,7 +18,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
             Process.Start(new ProcessStartInfo
             {

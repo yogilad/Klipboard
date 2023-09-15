@@ -67,7 +67,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Click to set the default cluster and database for Quick Actions";
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
             var result = await PromptUser();
 

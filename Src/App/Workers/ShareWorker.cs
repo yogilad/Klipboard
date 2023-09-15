@@ -20,7 +20,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
             var subject = "Have You Tried Klipboard for Kusto?";
             var body = 

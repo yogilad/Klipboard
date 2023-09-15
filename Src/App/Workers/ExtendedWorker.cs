@@ -5,7 +5,7 @@ namespace Klipboard.Workers
 {
     public static class ExtendedWorker
     {
-        public static void OnClick(this IWorker worker, IClipboardHelper clipboardHelper, SendNotification sendNotification)
+        public static void OnClick(this IWorker worker, IClipboardHelper clipboardHelper, SendNotification sendNotification, string? chosenOption)
         {
             if (worker == null)
             {
@@ -18,7 +18,7 @@ namespace Klipboard.Workers
             switch (contentToHandle)
             {
                 case ClipboardContent.None:
-                    worker.RunWorker(async (sendNotification) => await worker.HandleAsync(sendNotification), sendNotification);
+                    worker.RunWorker(async (sendNotification) => await worker.HandleAsync(sendNotification, chosenOption), sendNotification);
                     break;
 
                 case ClipboardContent.CSV:
@@ -30,7 +30,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async (sendNotification) => await worker.HandleCsvAsync(csvData, sendNotification), sendNotification);
+                    worker.RunWorker(async (sendNotification) => await worker.HandleCsvAsync(csvData, sendNotification, chosenOption), sendNotification);
                     break;
 
                 case ClipboardContent.CSV_Stream:
@@ -54,7 +54,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async (sendNotification) => await worker.HandleTextAsync(textData, sendNotification), sendNotification);
+                    worker.RunWorker(async (sendNotification) => await worker.HandleTextAsync(textData, sendNotification, chosenOption), sendNotification);
                     break;
 
                 case ClipboardContent.Text_Stream:
@@ -78,7 +78,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async (SendNotification) => await worker.HandleFilesAsync(filesAndFolders, sendNotification), sendNotification);
+                    worker.RunWorker(async (SendNotification) => await worker.HandleFilesAsync(filesAndFolders, sendNotification, chosenOption), sendNotification);
                     break;
             }
         }

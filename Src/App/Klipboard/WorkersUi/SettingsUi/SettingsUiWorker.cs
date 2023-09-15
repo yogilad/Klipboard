@@ -10,7 +10,7 @@ namespace Klipboard
         {
         }
 
-        public override async Task HandleAsync(SendNotification sendNotification)
+        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
             ((Settings) m_settings).ShowDialog();
         }
