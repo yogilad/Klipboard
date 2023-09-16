@@ -16,7 +16,12 @@
   <ItemGroup>
     <None Remove="Resources\adx_blue.ico" />
     <None Remove="Resources\adx_color.ico" />
+    <None Remove="Resources\direct-download.ico" />
+    <None Remove="Resources\download%281%29.ico" />
+    <None Remove="Resources\download-arrow.ico" />
     <None Remove="Resources\download.ico" />
+    <None Remove="Resources\footprint.ico" />
+    <None Remove="Resources\footprints.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,9 +30,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\adx_blue.ico" />
-    <EmbeddedResource Include="Resources\download.ico">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\download-arrow.ico" />
+    <EmbeddedResource Include="Resources\footprint.ico" />
   </ItemGroup>
 
   <ItemGroup>

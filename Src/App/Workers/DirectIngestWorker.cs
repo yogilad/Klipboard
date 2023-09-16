@@ -10,8 +10,10 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content) => "Paste Data to Table";
+        public override string GetMenuText(ClipboardContent content) => "Ingest Data to Table";
 
-        public override string GetToolTipText() => "Upload clipboard tabular data or up to 100 files to a table";
+        public override string GetToolTipText() => "Direct ingest clipboard tabular data or any number of files to a table";
+
+        public override bool IsMenuEnabled(ClipboardContent content) => true;
     }
 }
