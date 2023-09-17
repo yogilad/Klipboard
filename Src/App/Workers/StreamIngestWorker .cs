@@ -14,6 +14,6 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Stream clipboard tabular data or any number of files to a table";
 
-        public override bool IsMenuEnabled(ClipboardContent content) => true;
+        public override bool IsMenuEnabled(ClipboardContent content) => AppConstants.DevMode;
     }
 }

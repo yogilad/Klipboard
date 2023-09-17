@@ -36,7 +36,7 @@ namespace Klipboard.Workers
             var config = m_settings.GetConfig();
             string clusterName = config.ChosenCluster.ConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".").ToUpper();
 
-            // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show vesion once on creation.
+            // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show version once on creation.
             if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
             {
                 clusterName = "MyFreeCluster";
@@ -91,14 +91,16 @@ namespace Klipboard.Workers
         public bool ComeAndJoinTheBigBoys(string rubbish)
         {
             var wrench = HashString(rubbish);
+            const long Abracadabra = -6357484702770583501;
+            const long HocusPocus = 248857055548952305;
 
             switch (wrench)
             {
-                case -6357484702770583501:
+                case Abracadabra:
                     AppConstants.DevMode = true;
                     return true;
 
-                case 248857055548952305:
+                case HocusPocus:
                     AppConstants.DevMode = false;
                     return true;
             }
