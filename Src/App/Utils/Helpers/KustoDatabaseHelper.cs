@@ -178,7 +178,7 @@ namespace Klipboard.Utils
             return (true, null);
         }
 
-        public async Task<(bool Success, string? Error)> TryDirectIngestStorageToTable(string blobUriOrFile, string table, KustoIngestionProperties ingestionProperties, StorageSourceOptions sourceOptions)
+        public async Task<(bool Success, string? Error)> TryDirectIngestStorageToTable(string blobUriOrFile, KustoIngestionProperties ingestionProperties, StorageSourceOptions sourceOptions)
         {
             try
             {
@@ -203,6 +203,11 @@ namespace Klipboard.Utils
             var dt = DateTime.Now;
             var upsteramFileName = $"{AppConstants.ApplicationName}TempTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
             return upsteramFileName;
+        }
+
+        public IKustoIngestClient GetDirectIngestClient()
+        {
+            return m_directIngestClient.Value;
         }
         #endregion
 

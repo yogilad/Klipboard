@@ -61,7 +61,23 @@ namespace Klipboard.Workers
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
+            var m_ingestionRunner = new KustoIngestRunner(databaseHelper.GetDirectIngestClient(), degreeOfParallelism: 2);
 
+            m_ingestionRunner.TraceEvent += (level, message) => 
+            {
+                if (!level.Equals("Info", StringComparison.OrdinalIgnoreCase))
+                {
+                    sendNotification(NotificationTitle, $"{level}: {message}");
+                }
+            };
+
+            m_ingestionRunner.ReportProgress += (workItem, success) =>
+            {
+                if (success)
+                {
+                    Interlocked.Increment(ref successCount);
+                }
+            };
 
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders)) 
             {
@@ -104,15 +120,10 @@ namespace Klipboard.Workers
                     IgnoreFirstRecord = firstRowIsHeader,
                 };
 
-                var res = await databaseHelper.TryDirectIngestStorageToTable(path, tempTableName, ingestionProperties, storageOptions);
-                if (!res.Success)
-                {
-                    sendNotification(NotificationTitle, $"Failed to upload file '{path}' to temp table: {res.Error}");
-                    continue;
-                }
-
-                successCount++;
+                await m_ingestionRunner.QueueWorkItemAsync(new IngestFileWorkItem(path, ingestionProperties, storageOptions));
             }
+
+            await m_ingestionRunner.CloseAndWaitForCompletionAsync();
 
             if (successCount > 0) 
             {
@@ -183,7 +194,7 @@ namespace Klipboard.Workers
             };
 
 
-            var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, tempTableName, ingestionProperties, storageOptions);
+            var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, ingestionProperties, storageOptions);
 
             if (!uploadBlobRes.Success)
             {
