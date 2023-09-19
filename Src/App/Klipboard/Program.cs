@@ -22,9 +22,6 @@ namespace Klipboard
             var workers = CreateWorkers(settings);
             var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
-            var x = new IngestForm();
-
-            x.ShowDialog();
             Application.Run();
         }
 

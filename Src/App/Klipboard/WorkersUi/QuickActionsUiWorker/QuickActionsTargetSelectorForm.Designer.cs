@@ -84,6 +84,7 @@
             // 
             // clusterComboBox
             // 
+            clusterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             clusterComboBox.FormattingEnabled = true;
             clusterComboBox.Location = new Point(93, 20);
             clusterComboBox.Name = "clusterComboBox";
@@ -91,7 +92,7 @@
             clusterComboBox.TabIndex = 5;
             clusterComboBox.SelectedIndexChanged += clusterComboBox_SelectedIndexChanged;
             // 
-            // QuickActionsTargetSelector
+            // QuickActionsTargetSelectorForm
             // 
             AcceptButton = selectButton;
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -107,7 +108,7 @@
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
-            Name = "QuickActionsTargetSelector";
+            Name = "QuickActionsTargetSelectorForm";
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "Select Default Cluster and Database for Quick Actions";
