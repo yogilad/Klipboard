@@ -15,13 +15,13 @@ using static Klipboard.Workers.QuickActionsWorker;
 
 namespace Klipboard.WorkersUi.QuickActionsUiWorker
 {
-    public partial class QuickActionsTargetSelector : Form
+    public partial class QuickActionsTargetSelectorForm : Form
     {
         public QuickActionsWorker.QuickActionsUserSelection UserSelection;
         private ISettings m_settings;
         private List<Cluster> m_clusterList;
 
-        public QuickActionsTargetSelector(ISettings settings)
+        public QuickActionsTargetSelectorForm(ISettings settings)
         {
             m_settings = settings;
             UserSelection = new QuickActionsUserSelection();

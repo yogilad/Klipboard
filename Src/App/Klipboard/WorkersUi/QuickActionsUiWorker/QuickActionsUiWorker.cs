@@ -7,12 +7,12 @@ namespace Klipboard
 {
     public class QuickActionsUiWorker : QuickActionsWorker
     {
-        QuickActionsTargetSelector m_ui;
+        QuickActionsTargetSelectorForm m_ui;
 
         public QuickActionsUiWorker(ISettings settings)
         : base(settings)
         {
-            m_ui = new QuickActionsTargetSelector(settings);
+            m_ui = new QuickActionsTargetSelectorForm(settings);
         }
 
         public override Task<QuickActionsUserSelection> PromptUser()
