@@ -20,15 +20,12 @@ namespace Klipboard
             var clipboardHelper = new ClipboardHelper();
 
             var workers = CreateWorkers(settings);
-            var notificationIcon = new NotificationIcon(workers, clipboardHelper);
-
-            var x = new IngestForm("Queue Data For Ingestion", true);
-            x.ShowDialog();
+            using var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
             Application.Run();
         }
 
-        public static List<WorkerUxConfig> CreateWorkers(ISettings settings)
+        private static List<WorkerUxConfig> CreateWorkers(ISettings settings)
         {
             var workers = new List<WorkerUxConfig>();
 
