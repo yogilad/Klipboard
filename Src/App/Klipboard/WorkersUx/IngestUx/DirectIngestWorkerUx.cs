@@ -3,9 +3,9 @@
 
 namespace Klipboard
 {
-    public class DirectIngestWorkerUi : IngestWorkerUiBase
+    public class DirectIngestWorkerUx : IngestWorkerUxBase
     {
-        public DirectIngestWorkerUi(ISettings settings) 
+        public DirectIngestWorkerUx(ISettings settings) 
             : base(settings)
         {
         }

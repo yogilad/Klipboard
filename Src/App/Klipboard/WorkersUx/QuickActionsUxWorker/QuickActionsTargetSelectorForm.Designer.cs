@@ -1,4 +1,4 @@
-﻿namespace Klipboard.WorkersUi.QuickActionsUiWorker
+﻿namespace Klipboard
 {
     partial class QuickActionsTargetSelectorForm
     {

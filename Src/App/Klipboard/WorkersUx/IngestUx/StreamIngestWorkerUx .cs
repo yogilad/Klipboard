@@ -3,9 +3,9 @@
 
 namespace Klipboard.Workers
 {
-    public class StreamIngestWorkerUi : IngestWorkerUiBase
+    public class StreamIngestWorkerUx : IngestWorkerUxBase
     {
-        public StreamIngestWorkerUi(ISettings settings) 
+        public StreamIngestWorkerUx(ISettings settings) 
             : base(settings)
         {
         }

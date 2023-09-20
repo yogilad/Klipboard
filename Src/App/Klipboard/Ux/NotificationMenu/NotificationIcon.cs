@@ -4,7 +4,7 @@ using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard
 {
-    public record WorkerUiConfig(IWorker Worker, WorkerCategory Category, object? Icon = null);
+    public record WorkerUxConfig(IWorker Worker, WorkerCategory Category, object? Icon = null);
     public record MenuTag(IWorker Worker, string? chosenOption = null, bool hasSubOptions = false);
 
 
@@ -16,7 +16,7 @@ namespace Klipboard
         private IClipboardHelper m_clipboardHelper;
 
 
-        public NotificationIcon(List<WorkerUiConfig> workerConfig, IClipboardHelper clipboardHelper)
+        public NotificationIcon(List<WorkerUxConfig> workerConfig, IClipboardHelper clipboardHelper)
         {
             m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
@@ -38,9 +38,9 @@ namespace Klipboard
             m_notifyIcon.Visible = true;
         }
 
-        private void BuildMenu(List<WorkerUiConfig> workerConfig)
+        private void BuildMenu(List<WorkerUxConfig> workerConfig)
         {
-            WorkerUiConfig? previousWorker = null;
+            WorkerUxConfig? previousWorker = null;
 
             foreach (var config in workerConfig)
             {

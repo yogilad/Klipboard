@@ -3,9 +3,9 @@
 
 namespace Klipboard.Workers
 {
-    public class QueueIngestWorkerUi : IngestWorkerUiBase
+    public class QueueIngestWorkerUx : IngestWorkerUxBase
     {
-        public QueueIngestWorkerUi(ISettings settings)
+        public QueueIngestWorkerUx(ISettings settings)
             : base(settings)
         {
         }

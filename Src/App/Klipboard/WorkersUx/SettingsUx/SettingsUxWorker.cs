@@ -4,9 +4,9 @@ using Klipboard.Workers;
 
 namespace Klipboard
 {
-    internal class SettingsUiWorker : SettingsWorker
+    internal class SettingsUxWorker : SettingsWorker
     {
-        public SettingsUiWorker(ISettings settings) : base(settings)
+        public SettingsUxWorker(ISettings settings) : base(settings)
         {
         }
 
