@@ -48,22 +48,26 @@
             label3 = new Label();
             CancelButton = new Button();
             IngestButton = new Button();
+            ParallelismTrackBar = new TrackBar();
+            ParallelismLabel = new Label();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)ParallelismTrackBar).BeginInit();
             SuspendLayout();
             // 
             // ClusterComboBox
             // 
+            ClusterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             ClusterComboBox.FormattingEnabled = true;
             ClusterComboBox.Location = new Point(98, 20);
             ClusterComboBox.Name = "ClusterComboBox";
-            ClusterComboBox.Size = new Size(121, 23);
+            ClusterComboBox.Size = new Size(609, 23);
             ClusterComboBox.TabIndex = 0;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(44, 23);
+            label1.Location = new Point(44, 20);
             label1.Name = "label1";
             label1.Size = new Size(44, 15);
             label1.TabIndex = 1;
@@ -72,7 +76,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(33, 52);
+            label2.Location = new Point(33, 49);
             label2.Name = "label2";
             label2.Size = new Size(55, 15);
             label2.TabIndex = 2;
@@ -80,10 +84,11 @@
             // 
             // DatabaseComboBox
             // 
+            DatabaseComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             DatabaseComboBox.FormattingEnabled = true;
             DatabaseComboBox.Location = new Point(98, 49);
             DatabaseComboBox.Name = "DatabaseComboBox";
-            DatabaseComboBox.Size = new Size(121, 23);
+            DatabaseComboBox.Size = new Size(250, 23);
             DatabaseComboBox.TabIndex = 3;
             // 
             // ExitingTableRadio
@@ -99,10 +104,11 @@
             // 
             // TableComboBox
             // 
+            TableComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             TableComboBox.FormattingEnabled = true;
             TableComboBox.Location = new Point(98, 106);
             TableComboBox.Name = "TableComboBox";
-            TableComboBox.Size = new Size(121, 23);
+            TableComboBox.Size = new Size(250, 23);
             TableComboBox.TabIndex = 5;
             // 
             // NewTableRadio
@@ -119,7 +125,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(33, 171);
+            label4.Location = new Point(33, 164);
             label4.Name = "label4";
             label4.Size = new Size(55, 15);
             label4.TabIndex = 8;
@@ -128,7 +134,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(13, 141);
+            label5.Location = new Point(13, 138);
             label5.Name = "label5";
             label5.Size = new Size(79, 15);
             label5.TabIndex = 9;
@@ -136,9 +142,9 @@
             // 
             // TableTextBox
             // 
-            TableTextBox.Location = new Point(225, 106);
+            TableTextBox.Location = new Point(98, 106);
             TableTextBox.Name = "TableTextBox";
-            TableTextBox.Size = new Size(123, 23);
+            TableTextBox.Size = new Size(250, 23);
             TableTextBox.TabIndex = 10;
             // 
             // TableSchemaTextBox
@@ -194,7 +200,7 @@
             panel1.Controls.Add(NewTableRadio);
             panel1.Location = new Point(98, 78);
             panel1.Name = "panel1";
-            panel1.Size = new Size(189, 20);
+            panel1.Size = new Size(189, 22);
             panel1.TabIndex = 16;
             // 
             // panel2
@@ -210,7 +216,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(54, 83);
+            label3.Location = new Point(54, 81);
             label3.Name = "label3";
             label3.Size = new Size(34, 15);
             label3.TabIndex = 18;
@@ -236,11 +242,32 @@
             IngestButton.Text = "Ingest";
             IngestButton.UseVisualStyleBackColor = true;
             // 
+            // ParallelismTrackBar
+            // 
+            ParallelismTrackBar.Location = new Point(98, 274);
+            ParallelismTrackBar.Minimum = 1;
+            ParallelismTrackBar.Name = "ParallelismTrackBar";
+            ParallelismTrackBar.Size = new Size(250, 45);
+            ParallelismTrackBar.TabIndex = 21;
+            ParallelismTrackBar.TickStyle = TickStyle.TopLeft;
+            ParallelismTrackBar.Value = 2;
+            // 
+            // ParallelismLabel
+            // 
+            ParallelismLabel.AutoSize = true;
+            ParallelismLabel.Location = new Point(24, 274);
+            ParallelismLabel.Name = "ParallelismLabel";
+            ParallelismLabel.Size = new Size(64, 15);
+            ParallelismLabel.TabIndex = 22;
+            ParallelismLabel.Text = "Parallelism";
+            // 
             // IngestForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(729, 321);
+            Controls.Add(ParallelismLabel);
+            Controls.Add(ParallelismTrackBar);
             Controls.Add(IngestButton);
             Controls.Add(CancelButton);
             Controls.Add(label3);
@@ -262,6 +289,7 @@
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)ParallelismTrackBar).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -288,5 +316,7 @@
         private Label label3;
         private Button CancelButton;
         private Button IngestButton;
+        private TrackBar ParallelismTrackBar;
+        private Label ParallelismLabel;
     }
 }
