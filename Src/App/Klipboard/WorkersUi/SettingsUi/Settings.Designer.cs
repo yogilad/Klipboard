@@ -34,7 +34,7 @@
             txtSettingsPath = new TextBox();
             lblSettingsPath = new Label();
             btnLoadSettings = new Button();
-            chkStartWithWindows = new CheckBox();
+            chkAutoStart = new CheckBox();
             txtConnectionStr = new TextBox();
             txtDatabase = new TextBox();
             label1 = new Label();
@@ -105,14 +105,14 @@
             // 
             // chkStartWithWindows
             // 
-            chkStartWithWindows.AutoSize = true;
-            chkStartWithWindows.Location = new Point(108, 372);
-            chkStartWithWindows.Margin = new Padding(2);
-            chkStartWithWindows.Name = "chkStartWithWindows";
-            chkStartWithWindows.Size = new Size(130, 19);
-            chkStartWithWindows.TabIndex = 6;
-            chkStartWithWindows.Text = "Start With Windows";
-            chkStartWithWindows.UseVisualStyleBackColor = true;
+            chkAutoStart.AutoSize = true;
+            chkAutoStart.Location = new Point(108, 372);
+            chkAutoStart.Margin = new Padding(2);
+            chkAutoStart.Name = "chkStartWithWindows";
+            chkAutoStart.Size = new Size(130, 19);
+            chkAutoStart.TabIndex = 6;
+            chkAutoStart.Text = "Start With Windows";
+            chkAutoStart.UseVisualStyleBackColor = true;
             // 
             // txtConnectionStr
             // 
@@ -237,7 +237,7 @@
             Controls.Add(label1);
             Controls.Add(txtDatabase);
             Controls.Add(txtConnectionStr);
-            Controls.Add(chkStartWithWindows);
+            Controls.Add(chkAutoStart);
             Controls.Add(btnLoadSettings);
             Controls.Add(lblSettingsPath);
             Controls.Add(txtSettingsPath);
@@ -257,7 +257,7 @@
         private TextBox txtSettingsPath;
         private Label lblSettingsPath;
         private Button btnLoadSettings;
-        private CheckBox chkStartWithWindows;
+        private CheckBox chkAutoStart;
         private TextBox txtConnectionStr;
         private TextBox txtDatabase;
         private Label label1;
