@@ -58,7 +58,7 @@
             lstClusters.Margin = new Padding(2);
             lstClusters.MultiSelect = false;
             lstClusters.Name = "lstClusters";
-            lstClusters.Size = new Size(579, 231);
+            lstClusters.Size = new Size(598, 231);
             lstClusters.TabIndex = 0;
             lstClusters.UseCompatibleStateImageBehavior = false;
             lstClusters.View = View.Details;
@@ -97,7 +97,7 @@
             btnLoadSettings.Location = new Point(542, 6);
             btnLoadSettings.Margin = new Padding(2);
             btnLoadSettings.Name = "btnLoadSettings";
-            btnLoadSettings.Size = new Size(78, 20);
+            btnLoadSettings.Size = new Size(78, 24);
             btnLoadSettings.TabIndex = 3;
             btnLoadSettings.Text = "Load";
             btnLoadSettings.UseVisualStyleBackColor = true;
@@ -106,7 +106,7 @@
             // chkStartWithWindows
             // 
             chkStartWithWindows.AutoSize = true;
-            chkStartWithWindows.Location = new Point(15, 364);
+            chkStartWithWindows.Location = new Point(108, 372);
             chkStartWithWindows.Margin = new Padding(2);
             chkStartWithWindows.Name = "chkStartWithWindows";
             chkStartWithWindows.Size = new Size(130, 19);
@@ -119,12 +119,12 @@
             txtConnectionStr.Location = new Point(108, 291);
             txtConnectionStr.Margin = new Padding(2);
             txtConnectionStr.Name = "txtConnectionStr";
-            txtConnectionStr.Size = new Size(376, 23);
+            txtConnectionStr.Size = new Size(505, 23);
             txtConnectionStr.TabIndex = 7;
             // 
             // txtDatabase
             // 
-            txtDatabase.Location = new Point(108, 320);
+            txtDatabase.Location = new Point(108, 318);
             txtDatabase.Margin = new Padding(2);
             txtDatabase.Name = "txtDatabase";
             txtDatabase.Size = new Size(189, 23);
@@ -133,7 +133,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 293);
+            label1.Location = new Point(15, 294);
             label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
             label1.Size = new Size(89, 15);
@@ -143,7 +143,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(12, 322);
+            label2.Location = new Point(46, 318);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(58, 15);
@@ -152,10 +152,10 @@
             // 
             // btUpdate
             // 
-            btUpdate.Location = new Point(316, 319);
+            btUpdate.Location = new Point(453, 318);
             btUpdate.Margin = new Padding(2);
             btUpdate.Name = "btUpdate";
-            btUpdate.Size = new Size(78, 20);
+            btUpdate.Size = new Size(78, 25);
             btUpdate.TabIndex = 11;
             btUpdate.Text = "Update";
             btUpdate.UseVisualStyleBackColor = true;
@@ -163,10 +163,10 @@
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(405, 318);
+            btnAdd.Location = new Point(535, 318);
             btnAdd.Margin = new Padding(2);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(78, 20);
+            btnAdd.Size = new Size(78, 25);
             btnAdd.TabIndex = 12;
             btnAdd.Text = "Add";
             btnAdd.UseVisualStyleBackColor = true;
@@ -175,7 +175,7 @@
             // cmbApp
             // 
             cmbApp.FormattingEnabled = true;
-            cmbApp.Location = new Point(267, 363);
+            cmbApp.Location = new Point(108, 345);
             cmbApp.Margin = new Padding(2);
             cmbApp.Name = "cmbApp";
             cmbApp.Size = new Size(129, 23);
@@ -184,38 +184,38 @@
             // lblOpenWith
             // 
             lblOpenWith.AutoSize = true;
-            lblOpenWith.Location = new Point(191, 367);
+            lblOpenWith.Location = new Point(28, 345);
             lblOpenWith.Margin = new Padding(2, 0, 2, 0);
             lblOpenWith.Name = "lblOpenWith";
-            lblOpenWith.Size = new Size(67, 15);
+            lblOpenWith.Size = new Size(76, 15);
             lblOpenWith.TabIndex = 14;
-            lblOpenWith.Text = "Open With:";
+            lblOpenWith.Text = "Query Editor:";
             // 
             // txtQuery
             // 
-            txtQuery.Location = new Point(108, 413);
+            txtQuery.Location = new Point(15, 419);
             txtQuery.Margin = new Padding(2);
             txtQuery.Multiline = true;
             txtQuery.Name = "txtQuery";
-            txtQuery.Size = new Size(332, 137);
+            txtQuery.Size = new Size(598, 137);
             txtQuery.TabIndex = 15;
             // 
             // lblPrepend
             // 
             lblPrepend.AutoSize = true;
-            lblPrepend.Location = new Point(15, 415);
+            lblPrepend.Location = new Point(15, 402);
             lblPrepend.Margin = new Padding(2, 0, 2, 0);
             lblPrepend.Name = "lblPrepend";
-            lblPrepend.Size = new Size(79, 15);
+            lblPrepend.Size = new Size(183, 15);
             lblPrepend.TabIndex = 16;
-            lblPrepend.Text = "Prepend KQL:";
+            lblPrepend.Text = "Append KQL to Free Text Queries:";
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(460, 367);
+            btnSave.Location = new Point(480, 571);
             btnSave.Margin = new Padding(2);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(133, 56);
+            btnSave.Size = new Size(133, 34);
             btnSave.TabIndex = 17;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
