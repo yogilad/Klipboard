@@ -3,10 +3,10 @@
 
 namespace Klipboard.Workers
 {
-    public class QueueIngestWorker : WorkerBase
+    public class QueueIngestWorkerUi : IngestWorkerUiBase
     {
-        public QueueIngestWorker(ISettings settings)
-            : base(ClipboardContent.None, settings)
+        public QueueIngestWorkerUi(ISettings settings)
+            : base(settings)
         {
         }
 

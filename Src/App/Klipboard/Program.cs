@@ -22,6 +22,9 @@ namespace Klipboard
             var workers = CreateWorkers(settings);
             var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
+            var x = new IngestForm("Queue Data For Ingestion", true);
+            x.ShowDialog();
+
             Application.Run();
         }
 
@@ -36,9 +39,9 @@ namespace Klipboard
             workers.Add(new WorkerUiConfig(new TempTableWorker(settings), WorkerCategory.QuickActions));
 
             // Actions
-            workers.Add(new WorkerUiConfig(new QueueIngestWorker(settings), WorkerCategory.Actions));
-            workers.Add(new WorkerUiConfig(new StreamIngestWorker(settings), WorkerCategory.Actions));
-            workers.Add(new WorkerUiConfig(new DirectIngestWorker(settings), WorkerCategory.Actions, Icon: ResourceLoader.PrintIcon));
+            workers.Add(new WorkerUiConfig(new QueueIngestWorkerUi(settings), WorkerCategory.Actions));
+            workers.Add(new WorkerUiConfig(new StreamIngestWorkerUi(settings), WorkerCategory.Actions));
+            workers.Add(new WorkerUiConfig(new DirectIngestWorkerUi(settings), WorkerCategory.Actions, Icon: ResourceLoader.PrintIcon));
             workers.Add(new WorkerUiConfig(new InspectDataUiWorker(settings), WorkerCategory.Actions, Icon: ResourceLoader.PrintIcon));
 
             // Management

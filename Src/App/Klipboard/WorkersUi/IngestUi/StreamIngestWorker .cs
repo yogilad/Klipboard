@@ -3,10 +3,10 @@
 
 namespace Klipboard.Workers
 {
-    public class StreamIngestWorker : WorkerBase
+    public class StreamIngestWorkerUi : IngestWorkerUiBase
     {
-        public StreamIngestWorker(ISettings settings) 
-            : base(ClipboardContent.None, settings)
+        public StreamIngestWorkerUi(ISettings settings) 
+            : base(settings)
         {
         }
 
