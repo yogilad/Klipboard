@@ -39,7 +39,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(32, 23);
+            label1.Location = new Point(43, 23);
             label1.Name = "label1";
             label1.Size = new Size(44, 15);
             label1.TabIndex = 0;
@@ -48,7 +48,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(32, 60);
+            label2.Location = new Point(32, 52);
             label2.Name = "label2";
             label2.Size = new Size(55, 15);
             label2.TabIndex = 1;
@@ -76,7 +76,7 @@
             // 
             // databaseTextBox
             // 
-            databaseTextBox.Location = new Point(93, 52);
+            databaseTextBox.Location = new Point(93, 49);
             databaseTextBox.Name = "databaseTextBox";
             databaseTextBox.Size = new Size(262, 23);
             databaseTextBox.TabIndex = 4;
@@ -111,7 +111,7 @@
             Name = "QuickActionsTargetSelectorForm";
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Hide;
-            Text = "Select Default Cluster and Database for Quick Actions";
+            Text = "Select Cluster and Database for Quick Actions";
             Load += QuickActionsTargetSelector_Load;
             ResumeLayout(false);
             PerformLayout();
