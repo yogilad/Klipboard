@@ -12,7 +12,7 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content) => "Inspect Clipboard Content";
+        public override string GetMenuText(ClipboardContent content) => "Preview Clipboard Content";
 
         public override string GetToolTipText() => "Display a preview of Clipboard Data";
 

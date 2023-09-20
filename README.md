@@ -1,9 +1,11 @@
 # Klipboard - Query Anything With Kusto 
 
 ## A Clipboard Companion for Kusto
-Kilpboard aims to provide a  simple and intuitive way for people to get insights on their data using KQL. Simply copy text, tables or files in windows, then use the Klipboard to unleash KQL's power on your data.
+Kilpboard aims to provide a simple and intuitive way for people to get insights on their data using KQL. Simply copy text, tables or files in windows, then use the Klipboard to unleash KQL's power on your data.
 
 Klipboard will run in the System Tray. When clicked it will display a menu of actions that can be done with thec ontent that is currently found in the clipboard.
+
+**[Download Klipboard](https://github.com/yogilad/Klipboard/releases)**
 
 ### Query Anything With Ease 
 Klipboard Quick Actions helps you run queries on **structured and unstructured** data without having to go through the trouble of creating tables and uploading data to them.

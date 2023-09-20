@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Klipboard.Utils;
 
@@ -10,6 +9,7 @@ namespace Klipboard
         // These are guaranteed to be initialized in the Init method, and the constructor is private
         private AppConfigFile m_appConfigFile = null!;
         private AppConfig m_config = null!;
+
 
         private Settings()
         {
@@ -66,7 +66,9 @@ namespace Klipboard
                 lstClusters.Items[m_config.DefaultClusterIndex].Selected = true;
             }
 
-            chkStartWithWindows.Checked = m_config.StartAutomatically;
+            var success = AutoStartHelper.TryGetAutoStartEnabled(out var autoStratEnabled);
+
+            chkAutoStart.Checked = success && autoStratEnabled;
             cmbApp.Items.Clear();
             string[] strings = Enum.GetNames(typeof(QueryApp));
             cmbApp.Items.AddRange(strings);
@@ -78,11 +80,19 @@ namespace Klipboard
         {
             var clusters = lstClusters.Items.Cast<ListViewItem>().Select(item => new Cluster(item.SubItems[clmConnectionString.Index].Text, item.SubItems[clmDb.Index].Text)).ToList();
             var defaultClusterIndex = lstClusters.SelectedItems.Count > 0 ? lstClusters.SelectedItems[0].Index : 0;
-            var startAutomatically = chkStartWithWindows.Checked;
+            var startAutomatically = chkAutoStart.Checked;
             var defaultQueryApp = (QueryApp)cmbApp.SelectedIndex;
             var prependFreeTextQueriesWithKql = txtQuery.Text;
 
-            return new AppConfig(clusters, defaultClusterIndex, defaultQueryApp, startAutomatically, prependFreeTextQueriesWithKql);
+            if (AutoStartHelper.TryGetAutoStartEnabled(out var autoStratEnabled) && autoStratEnabled != startAutomatically)
+            {
+                if (!AutoStartHelper.TrySetAutoStart(startAutomatically))
+                {
+                    // TODO: Send a notification of this failure
+                }
+            }
+
+            return new AppConfig(clusters, defaultClusterIndex, defaultQueryApp, prependFreeTextQueriesWithKql);
         }
 
         #region Events

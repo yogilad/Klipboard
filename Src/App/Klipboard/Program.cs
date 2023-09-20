@@ -34,7 +34,6 @@ namespace Klipboard
             workers.Add(new WorkerUiConfig(new FreeTextInlineQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new ExternalDataQueryWorker(settings), WorkerCategory.QuickActions));
             workers.Add(new WorkerUiConfig(new TempTableWorker(settings), WorkerCategory.QuickActions));
-            workers.Add(new WorkerUiConfig(new InspectDataUiWorker(settings), WorkerCategory.QuickActions));
 
             // Actions
             workers.Add(new WorkerUiConfig(new QueueIngestWorker(settings), WorkerCategory.Actions));
@@ -43,6 +42,7 @@ namespace Klipboard
 
             // Management
             workers.Add(new WorkerUiConfig(new NewVersionWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
+            workers.Add(new WorkerUiConfig(new InspectDataUiWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.PrintIcon));
             workers.Add(new WorkerUiConfig(new SettingsUiWorker(settings), WorkerCategory.Management));
             workers.Add(new WorkerUiConfig(new HelpWorker(settings), WorkerCategory.Management));
             return workers;

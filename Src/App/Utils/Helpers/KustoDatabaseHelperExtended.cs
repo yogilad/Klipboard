@@ -1,4 +1,6 @@
-﻿namespace Klipboard.Utils
+﻿using Kusto.Cloud.Platform.Utils;
+
+namespace Klipboard.Utils
 {
     public static class KustoDatabaseHelperExtended
     {
