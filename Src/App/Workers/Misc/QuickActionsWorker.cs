@@ -39,24 +39,25 @@ namespace Klipboard.Workers
             // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show version once on creation.
             if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
             {
-                clusterName = "MyFreeCluster";
+                var tempName = clusterName.ToLower();
+                clusterName = $"MyFreeCluster [{tempName.Substring(0, 3)} {tempName.Substring(3, 5)}]";
             }
 
-            string targetStr = $"{clusterName}/{config.ChosenCluster.DatabaseName}";
+            string targetStr = $"{clusterName} / {config.ChosenCluster.DatabaseName}";
 
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
             {
-                return $"Clipboard Table => {targetStr}";
+                return $"Clipboard Table ➜ {targetStr}";
             }
 
             if ((content & (ClipboardContent.Text | ClipboardContent.Text_Stream)) != ClipboardContent.None)
             {
-                return $"Clipboard Text => {targetStr}";
+                return $"Clipboard Text ➜ {targetStr}";
             }
 
             if ((content & ClipboardContent.Files) != ClipboardContent.None)
             {
-                return $"Clipboard Files => {targetStr}";
+                return $"Clipboard Files ➜ {targetStr}";
             }
 
             return targetStr;

@@ -26,7 +26,8 @@ namespace Klipboard.Utils
             s_monthStrToInt.Add("nov", 11);
             s_monthStrToInt.Add("dec", 12);
         }
-        
+
+        #region Path Utils
         /// <summary>
         /// Extracts the file extension. 
         /// If the file ends with .zip or .gz, extract the precceding token as the file extension. 
@@ -271,20 +272,6 @@ namespace Klipboard.Utils
             return false;
         }
 
-        public static string CreateUploadFileName(string filename)
-        {
-            var file = filename.SplitLast(".", out var extension);
-
-            return CreateUploadFileName(file, extension);
-        }
-
-        public static string CreateUploadFileName(string filename, string extension)
-        {
-            var dt = DateTime.Now;
-            var upsteramFileName = $"{AppConstants.ApplicationName}_{filename}_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.{extension}";
-            return upsteramFileName;
-        }
-
         public static DataSourceFormat GetFormatFromExtension(string extension)
         {
             extension = extension.TrimStart('.').ToLower();
@@ -358,5 +345,31 @@ namespace Klipboard.Utils
 
             yield break;
         }
+        #endregion
+
+        #region Temp Names
+        public static string CreateUploadFileName(string filename)
+        {
+            var file = filename.SplitLast(".", out var extension);
+
+            return CreateUploadFileName(file, extension);
+        }
+
+        public static string CreateUploadFileName(string filename, string extension)
+        {
+            var stamp = GenerateUniqueStamp();
+            var upsteramFileName = string.IsNullOrWhiteSpace(extension)? $"{AppConstants.ApplicationName}_{stamp}" : $"{AppConstants.ApplicationName}_{stamp}.{extension}";
+            return upsteramFileName;
+        }
+
+        public static string GenerateUniqueStamp()
+        {
+            var dt = DateTime.Now;
+            var shortGuid = Guid.NewGuid().ToString().SplitFirst("-");
+            var stamp = $"{dt.Year:D4}{dt.Month:D2}{dt.Day:D2}_{dt.Hour:D2}{dt.Minute:D2}{dt.Second:D2}_{shortGuid}";
+
+            return stamp;
+        }
+        #endregion
     }
 }

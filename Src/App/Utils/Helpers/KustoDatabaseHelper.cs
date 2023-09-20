@@ -134,7 +134,7 @@ namespace Klipboard.Utils
                 var tableExpiryDate = DateTime.Today.AddDays(tableLifetimeDays.Value + 1); // Round up to midnight the next day
                 docstring = $"Temporary table created by klipboard on {dt.ToShortDateString()} {dt.ToShortTimeString()}, and is set for deletion on {tableExpiryDate.ToShortDateString()} {tableExpiryDate.ToShortTimeString()}";
 
-                setTableLifetimeCommand = $".alter table [\"{tableName}\"] policy auto_delete @'{{ \"ExpiryDate\" : \"{tableExpiryDate.Year}-{tableExpiryDate.Month}-{tableExpiryDate.Day}\", \"DeleteIfNotEmpty\": true }}'";
+                setTableLifetimeCommand = $".alter table [\"{tableName}\"] policy auto_delete @'{{ \"ExpiryDate\" : \"{tableExpiryDate.Year:D4}-{tableExpiryDate.Month:D2}-{tableExpiryDate.Day:D2}\", \"DeleteIfNotEmpty\": true }}'";
             }
 
             createTableCommand = $".create table [\"{tableName}\"] {tableSchemeStr} with (docstring = \"{docstring}\")";
@@ -200,8 +200,8 @@ namespace Klipboard.Utils
 
         public static string CreateTempTableName()
         {
-            var dt = DateTime.Now;
-            var upsteramFileName = $"{AppConstants.ApplicationName}TempTable_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}";
+            var stamp = FileHelper.GenerateUniqueStamp();
+            var upsteramFileName = $"{AppConstants.ApplicationName}TempTable_{stamp}";
             return upsteramFileName;
         }
 
