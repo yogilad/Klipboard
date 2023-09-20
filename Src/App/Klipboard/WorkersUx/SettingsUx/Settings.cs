@@ -20,15 +20,15 @@ namespace Klipboard
         public static async Task<Settings> Init()
         {
             var settings = new Settings();
-            await settings.LoadSettingsToUi().ConfigureAwait(false);
+            await settings.LoadSettingsToUx().ConfigureAwait(false);
             return settings;
         }
 
-        private async Task LoadSettingsToUi()
+        private async Task LoadSettingsToUx()
         {
             UpdateConfigPath();
             await ReadConfigFromPath().ConfigureAwait(false);
-            DataToUi();
+            DataToUx();
         }
 
         private async Task ReadConfigFromPath()
@@ -46,11 +46,11 @@ namespace Klipboard
 
         private ConfiguredTaskAwaitable<bool> SaveSettings(AppConfig? config = null)
         {
-            m_config = config ?? UiToData();
+            m_config = config ?? UxToData();
             return m_appConfigFile.Write(m_config).ConfigureAwait(false);
         }
 
-        private void DataToUi()
+        private void DataToUx()
         {
             lstClusters.Items.Clear();
             foreach (var cluster in m_config.KustoConnectionStrings)
@@ -76,7 +76,7 @@ namespace Klipboard
             txtQuery.Text = m_config.PrependFreeTextQueriesWithKql;
         }
 
-        private AppConfig UiToData()
+        private AppConfig UxToData()
         {
             var clusters = lstClusters.Items.Cast<ListViewItem>().Select(item => new Cluster(item.SubItems[clmConnectionString.Index].Text, item.SubItems[clmDb.Index].Text)).ToList();
             var defaultClusterIndex = lstClusters.SelectedItems.Count > 0 ? lstClusters.SelectedItems[0].Index : 0;
@@ -98,7 +98,7 @@ namespace Klipboard
         #region Events
         private async void btnLoadSettings_Click(object sender, EventArgs e)
         {
-            await ExceptionUtils.Protect(async () => await LoadSettingsToUi()).ConfigureAwait(false);
+            await ExceptionUtils.Protect(async () => await LoadSettingsToUx()).ConfigureAwait(false);
         }
 
         private void lstClusters_SelectedIndexChanged(object sender, EventArgs e)

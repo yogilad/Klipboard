@@ -3,10 +3,10 @@
 
 namespace Klipboard.Workers
 {
-    public class StreamIngestWorker : WorkerBase
+    public class StreamIngestWorkerUx : IngestWorkerUxBase
     {
-        public StreamIngestWorker(ISettings settings) 
-            : base(ClipboardContent.None, settings)
+        public StreamIngestWorkerUx(ISettings settings) 
+            : base(settings)
         {
         }
 
@@ -14,6 +14,8 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Stream clipboard tabular data or any number of files to a table";
 
-        public override bool IsMenuEnabled(ClipboardContent content) => AppConstants.DevMode;
+        public override bool IsMenuVisible() => true;
+
+        public override bool IsMenuEnabled(ClipboardContent content) => content != ClipboardContent.None;
     }
 }

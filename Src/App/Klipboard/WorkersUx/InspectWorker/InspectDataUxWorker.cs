@@ -3,9 +3,9 @@ using Klipboard.Workers;
 
 namespace Klipboard
 {
-    public class InspectDataUiWorker : InspectDataWorker
+    public class InspectDataUxWorker : InspectDataWorker
     {
-        public InspectDataUiWorker(ISettings settings) 
+        public InspectDataUxWorker(ISettings settings) 
             : base(settings)
         {
         }

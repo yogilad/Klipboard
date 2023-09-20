@@ -1,30 +1,19 @@
 ﻿using Klipboard.Utils;
 using Klipboard.Workers;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics.Metrics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static Klipboard.Workers.QuickActionsWorker;
 
-namespace Klipboard.WorkersUi.QuickActionsUiWorker
+
+namespace Klipboard
 {
-    public partial class QuickActionsTargetSelector : Form
+    public partial class QuickActionsTargetSelectorForm : Form
     {
         public QuickActionsWorker.QuickActionsUserSelection UserSelection;
         private ISettings m_settings;
         private List<Cluster> m_clusterList;
 
-        public QuickActionsTargetSelector(ISettings settings)
+        public QuickActionsTargetSelectorForm(ISettings settings)
         {
             m_settings = settings;
-            UserSelection = new QuickActionsUserSelection();
+            UserSelection = new QuickActionsWorker.QuickActionsUserSelection();
 
             InitializeComponent();
             StyleDesigner.SetDialogDesign(this);

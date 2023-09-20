@@ -1,12 +1,12 @@
 ﻿using Klipboard.Utils;
 
 
-namespace Klipboard.Workers
+namespace Klipboard
 {
-    public class DirectIngestWorker : WorkerBase
+    public class DirectIngestWorkerUx : IngestWorkerUxBase
     {
-        public DirectIngestWorker(ISettings settings) 
-            : base(ClipboardContent.None, settings)
+        public DirectIngestWorkerUx(ISettings settings) 
+            : base(settings)
         {
         }
 

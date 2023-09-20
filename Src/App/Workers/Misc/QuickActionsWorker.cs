@@ -1,7 +1,7 @@
 ﻿using Kusto.Cloud.Platform.Utils;
 
 using Klipboard.Utils;
-using System.Windows.Markup;
+
 
 namespace Klipboard.Workers
 {
