@@ -208,7 +208,22 @@ namespace Klipboard.Workers
         private void InvokeTempTableQuery(string tempTableName, SendNotification sendNotification)
         {
             var target = GetQuickActionTarget();
-            var query = $"['{tempTableName}']\n| take 100";
+            var query = new StringBuilder()
+                .Append("['")
+                .Append(tempTableName)
+                .AppendLine("']")
+                .AppendLine("| take 100")
+                .AppendLine()
+                .AppendLine("//Rename the table if needed")
+                .Append(".rename table ['")
+                .Append(tempTableName)
+                .AppendLine("'] to '<new name>'")
+                .AppendLine()
+                .AppendLine("// Cancel auto deletion")
+                .Append(".delete table ['")
+                .Append(tempTableName)
+                .AppendLine("']  policy auto_delete")
+                .ToString();
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
             {
