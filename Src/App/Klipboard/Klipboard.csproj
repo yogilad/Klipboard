@@ -22,6 +22,7 @@
     <None Remove="Resources\download.ico" />
     <None Remove="Resources\footprint.ico" />
     <None Remove="Resources\footprints.ico" />
+    <None Remove="Resources\letter-k.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <EmbeddedResource Include="Resources\adx_blue.ico" />
     <EmbeddedResource Include="Resources\download-arrow.ico" />
     <EmbeddedResource Include="Resources\footprint.ico" />
+    <EmbeddedResource Include="Resources\letter-k.ico" />
   </ItemGroup>
 
   <ItemGroup>

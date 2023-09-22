@@ -11,7 +11,7 @@ namespace Klipboard
 
         static ResourceLoader()
         {
-            KustoColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
+            KustoColorIcon = new Icon(LoadResourceAsStream("letter-k.ico", "Resources"));
             DownloadIcon = new Icon(LoadResourceAsStream("download-arrow.ico", "Resources"));
             PrintIcon = new Icon(LoadResourceAsStream("footprint.ico", "Resources"));
         }
