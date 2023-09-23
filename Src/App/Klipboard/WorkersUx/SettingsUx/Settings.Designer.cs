@@ -46,6 +46,8 @@
             txtQuery = new TextBox();
             lblPrepend = new Label();
             btnSave = new Button();
+            CancelButton = new Button();
+            DeleteButton = new Button();
             SuspendLayout();
             // 
             // lstClusters
@@ -103,12 +105,12 @@
             btnLoadSettings.UseVisualStyleBackColor = true;
             btnLoadSettings.Click += btnLoadSettings_Click;
             // 
-            // chkStartWithWindows
+            // chkAutoStart
             // 
             chkAutoStart.AutoSize = true;
             chkAutoStart.Location = new Point(108, 372);
             chkAutoStart.Margin = new Padding(2);
-            chkAutoStart.Name = "chkStartWithWindows";
+            chkAutoStart.Name = "chkAutoStart";
             chkAutoStart.Size = new Size(130, 19);
             chkAutoStart.TabIndex = 6;
             chkAutoStart.Text = "Start With Windows";
@@ -163,7 +165,7 @@
             // 
             // btnAdd
             // 
-            btnAdd.Location = new Point(535, 318);
+            btnAdd.Location = new Point(371, 318);
             btnAdd.Margin = new Padding(2);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(78, 25);
@@ -212,20 +214,42 @@
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(480, 571);
+            btnSave.Location = new Point(453, 582);
             btnSave.Margin = new Padding(2);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(133, 34);
+            btnSave.Size = new Size(76, 23);
             btnSave.TabIndex = 17;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
             btnSave.Click += btnSave_Click;
+            // 
+            // CancelButton
+            // 
+            CancelButton.Location = new Point(538, 582);
+            CancelButton.Name = "CancelButton";
+            CancelButton.Size = new Size(75, 23);
+            CancelButton.TabIndex = 18;
+            CancelButton.Text = "Cancel";
+            CancelButton.UseVisualStyleBackColor = true;
+            CancelButton.Click += CancelButton_Click;
+            // 
+            // DeleteButton
+            // 
+            DeleteButton.Location = new Point(536, 320);
+            DeleteButton.Name = "DeleteButton";
+            DeleteButton.Size = new Size(75, 23);
+            DeleteButton.TabIndex = 19;
+            DeleteButton.Text = "Delete";
+            DeleteButton.UseVisualStyleBackColor = true;
+            DeleteButton.Click += DeleteButton_Click;
             // 
             // Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 616);
+            Controls.Add(DeleteButton);
+            Controls.Add(CancelButton);
             Controls.Add(btnSave);
             Controls.Add(lblPrepend);
             Controls.Add(txtQuery);
@@ -269,5 +293,7 @@
         private TextBox txtQuery;
         private Label lblPrepend;
         private Button btnSave;
+        private Button CancelButton;
+        private Button DeleteButton;
     }
 }
