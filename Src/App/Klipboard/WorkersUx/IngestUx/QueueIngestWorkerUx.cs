@@ -1,4 +1,7 @@
-﻿using Klipboard.Utils;
+﻿using Kusto.Data;
+using Kusto.Ingest;
+using Klipboard.Utils;
+
 
 
 namespace Klipboard.Workers
@@ -16,6 +19,13 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
-        public override bool IsMenuEnabled(ClipboardContent content) => false;
+        public override bool IsMenuEnabled(ClipboardContent content) => content == ClipboardContent.Files;
+
+        public override IKustoIngestClient CreateIngestClient(KustoConnectionStringBuilder ClusterUri)
+        {
+            var client = KustoIngestFactory.CreateQueuedIngestClient(ClusterUri);
+
+            return client;
+        }
     }
 }

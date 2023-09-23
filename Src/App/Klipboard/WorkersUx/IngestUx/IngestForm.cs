@@ -7,11 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Klipboard.Workers;
 
 namespace Klipboard
 {
     public partial class IngestForm : Form
     {
+        public IngestWorkerBase.IngestUserSelection UserSelection = new IngestWorkerBase.IngestUserSelection();
+
         public IngestForm(string title, bool devMode)
         {
             InitializeComponent();

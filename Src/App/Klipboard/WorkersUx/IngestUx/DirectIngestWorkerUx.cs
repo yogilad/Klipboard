@@ -1,4 +1,6 @@
-﻿using Klipboard.Utils;
+﻿using Kusto.Data;
+using Kusto.Ingest;
+using Klipboard.Utils;
 
 
 namespace Klipboard
@@ -14,8 +16,13 @@ namespace Klipboard
 
         public override string GetToolTipText() => "Direct ingest clipboard tabular data or any number of files to a table";
 
-        public override bool IsMenuVisible() => AppConstants.DevMode;
+        public override bool IsMenuEnabled(ClipboardContent content) => AppConstants.DevMode && content == ClipboardContent.Files;
 
-        public override bool IsMenuEnabled(ClipboardContent content) => false;
+        public override IKustoIngestClient CreateIngestClient(KustoConnectionStringBuilder ClusterUri)
+        {
+            var client = KustoIngestFactory.CreateDirectIngestClient(ClusterUri);
+
+            return client;
+        }
     }
 }

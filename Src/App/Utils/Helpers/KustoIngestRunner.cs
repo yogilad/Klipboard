@@ -5,13 +5,13 @@ using Kusto.Ingest;
 
 namespace Klipboard.Utils
 {
-    public record IngestFileWorkItem(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
-    public delegate void Trace(string level, string message);
-    public delegate void ProgressReport(IngestFileWorkItem item, bool success);
-    public delegate Task<(bool Success, string? Error)> IngestFunc(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
-
     public class KustoIngestRunner
     {
+        public record IngestFileWorkItem(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
+        public delegate void Trace(string level, string message);
+        public delegate void ProgressReport(IngestFileWorkItem item, bool success);
+    public delegate Task<(bool Success, string? Error)> IngestFunc(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
+
         private IngestFunc m_ingestFunc = null;
         private IKustoIngestClient m_ingestClient = null;
         private ActionBlock<IngestFileWorkItem> m_ingestBlock;

@@ -139,7 +139,7 @@ namespace Klipboard.Workers
                     IgnoreFirstRecord = firstRowIsHeader,
                 };
 
-                await m_ingestionRunner.QueueWorkItemAsync(new IngestFileWorkItem(path, ingestionProperties, storageOptions));
+                await m_ingestionRunner.QueueWorkItemAsync(new KustoIngestRunner.IngestFileWorkItem(path, ingestionProperties, storageOptions));
             }
 
             await m_ingestionRunner.CloseAndWaitForCompletionAsync();
