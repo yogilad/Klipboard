@@ -38,7 +38,12 @@ namespace Klipboard.Workers
                     break;
 
                 case SignOut:
-                    // TODO where's the AAD sign out 
+                    var tokenCacheInstance = Kusto.Data.Security.UserTokenFileCache.Instance;
+
+                    if (tokenCacheInstance != null && tokenCacheInstance.IsInitialized)
+                    {
+                        tokenCacheInstance.Clear();
+                    }
                     break;
 
                 case Report:
