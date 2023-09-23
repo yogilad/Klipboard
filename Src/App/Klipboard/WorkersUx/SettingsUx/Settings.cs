@@ -15,6 +15,12 @@ namespace Klipboard
         private Settings()
         {
             InitializeComponent();
+            
+            foreach (ColumnHeader c in lstClusters.Columns)
+            {
+                c.Width = -2;
+            }
+
             StyleDesigner.SetDialogDesign(this);
         }
 

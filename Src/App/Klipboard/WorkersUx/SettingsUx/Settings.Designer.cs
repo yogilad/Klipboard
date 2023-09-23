@@ -53,6 +53,7 @@
             // lstClusters
             // 
             lstClusters.AllowColumnReorder = true;
+            lstClusters.BorderStyle = BorderStyle.FixedSingle;
             lstClusters.Columns.AddRange(new ColumnHeader[] { clmConnectionString, clmDb });
             lstClusters.FullRowSelect = true;
             lstClusters.GridLines = true;
