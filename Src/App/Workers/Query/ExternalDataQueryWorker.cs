@@ -62,7 +62,7 @@ namespace Klipboard.Workers
 
             var dt = DateTime.Now;
             var upsteramFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
-            var dataStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+            using var dataStream = new FileStream(file, FileMode.Open, FileAccess.Read);
 
             await HandleStreamAsync(dataStream, fileInfo.Extension, upsteramFileName, sendNotification, chosenOption);
         }

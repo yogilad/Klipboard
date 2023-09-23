@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Klipboard.Properties;
 using Klipboard.Utils;
 
 namespace Klipboard
@@ -14,6 +15,12 @@ namespace Klipboard
         private Settings()
         {
             InitializeComponent();
+            
+            foreach (ColumnHeader c in lstClusters.Columns)
+            {
+                c.Width = -2;
+            }
+
             StyleDesigner.SetDialogDesign(this);
         }
 
@@ -24,10 +31,10 @@ namespace Klipboard
             return settings;
         }
 
-        private async Task LoadSettingsToUx()
+        private async Task LoadSettingsToUx(bool configureAwait = false)
         {
             UpdateConfigPath();
-            await ReadConfigFromPath().ConfigureAwait(false);
+            await ReadConfigFromPath().ConfigureAwait(configureAwait);
             DataToUx();
         }
 
@@ -78,7 +85,9 @@ namespace Klipboard
 
         private AppConfig UxToData()
         {
-            var clusters = lstClusters.Items.Cast<ListViewItem>().Select(item => new Cluster(item.SubItems[clmConnectionString.Index].Text, item.SubItems[clmDb.Index].Text)).ToList();
+            var clusters = lstClusters.Items.Cast<ListViewItem>()
+                .Where(item => !string.IsNullOrWhiteSpace(item.SubItems[clmConnectionString.Index].Text) && !string.IsNullOrWhiteSpace(item.SubItems[clmDb.Index].Text))
+                .Select(item => new Cluster(item.SubItems[clmConnectionString.Index].Text, item.SubItems[clmDb.Index].Text)).ToList();
             var defaultClusterIndex = lstClusters.SelectedItems.Count > 0 ? lstClusters.SelectedItems[0].Index : 0;
             var startAutomatically = chkAutoStart.Checked;
             var defaultQueryApp = (QueryApp)cmbApp.SelectedIndex;
@@ -148,22 +157,31 @@ namespace Klipboard
             });
         }
 
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            ExceptionUtils.Protect(() =>
+            {
+                if (lstClusters.SelectedItems.Count != 1)
+                {
+                    return;
+                }
+
+                var index = lstClusters.SelectedItems[0].Index;
+                lstClusters.Items.RemoveAt(index);
+            });
+        }
+
         private async void btnSave_Click(object sender, EventArgs e)
         {
             await ExceptionUtils.Protect(async () => await SaveSettings());
+            Close();
         }
-        protected override async void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-            await ExceptionUtils.Protect(async () =>
-            {
-                // Show a message box asking users if they want to save
-                if (MessageBox.Show(@"Do you want to save your changes?", @"Save changes", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    await SaveSettings();
-                }
-            }).ConfigureAwait(false);
 
+
+        private async void CancelButton_Click(object sender, EventArgs e)
+        {
+            await ExceptionUtils.Protect(async () => await LoadSettingsToUx(configureAwait: true));
+            Close();
         }
         #endregion
 

@@ -136,7 +136,5 @@ namespace Klipboard.Utils
             }
         }
     }
-
     #endregion
-
 }
