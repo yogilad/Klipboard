@@ -214,7 +214,7 @@ namespace Klipboard.Workers
                 .AppendLine("']")
                 .AppendLine("| take 100")
                 .AppendLine()
-                .AppendLine("//Rename the table if needed")
+                .AppendLine("// Rename the table if needed")
                 .Append(".rename table ['")
                 .Append(tempTableName)
                 .AppendLine("'] to '<new name>'")
@@ -222,7 +222,12 @@ namespace Klipboard.Workers
                 .AppendLine("// Cancel auto deletion")
                 .Append(".delete table ['")
                 .Append(tempTableName)
-                .AppendLine("']  policy auto_delete")
+                .AppendLine("'] policy auto_delete")
+                .AppendLine()
+                .AppendLine("// Manually delete the table")
+                .Append(".drop table ['")
+                .Append(tempTableName)
+                .AppendLine("']")
                 .ToString();
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
