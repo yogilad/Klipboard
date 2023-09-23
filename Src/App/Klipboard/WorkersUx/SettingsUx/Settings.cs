@@ -25,10 +25,10 @@ namespace Klipboard
             return settings;
         }
 
-        private async Task LoadSettingsToUx()
+        private async Task LoadSettingsToUx(bool configureAwait = false)
         {
             UpdateConfigPath();
-            await ReadConfigFromPath().ConfigureAwait(false);
+            await ReadConfigFromPath().ConfigureAwait(configureAwait);
             DataToUx();
         }
 
@@ -174,7 +174,7 @@ namespace Klipboard
 
         private async void CancelButton_Click(object sender, EventArgs e)
         {
-            await ExceptionUtils.Protect(async () => await LoadSettingsToUx());
+            await ExceptionUtils.Protect(async () => await LoadSettingsToUx(configureAwait: true));
             Close();
         }
         #endregion
