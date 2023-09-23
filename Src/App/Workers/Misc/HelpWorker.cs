@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Klipboard.Utils;
 
 
@@ -9,12 +8,13 @@ namespace Klipboard.Workers
     {
         private const string Help = "Help";
         private const string About = "About";
+        private const string SignOut = "Sign Out of AAD";
         private const string Report = "Report in Issue";
         private const string Share = "Share Klipboard";
         private const string FreeCluster = "Try Kusto For Free";
 
         public HelpWorker(ISettings settings)
-            : base(ClipboardContent.None, settings, new List<string> { Help, About, Report, Share, FreeCluster })
+            : base(ClipboardContent.None, settings, new List<string> { Help, About, SignOut, Report, Share, FreeCluster })
         {
         }
 
@@ -35,6 +35,10 @@ namespace Klipboard.Workers
                 case About:
                     var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/";
                     sendNotification(AppConstants.ApplicationName, msg);
+                    break;
+
+                case SignOut:
+                    // TODO where's the AAD sign out 
                     break;
 
                 case Report:
