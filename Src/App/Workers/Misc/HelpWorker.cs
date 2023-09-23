@@ -9,7 +9,7 @@ namespace Klipboard.Workers
         private const string Help = "Help";
         private const string About = "About";
         private const string SignOut = "Sign Out of AAD";
-        private const string Report = "Report in Issue";
+        private const string Report = "Report an Issue";
         private const string Share = "Share Klipboard";
         private const string FreeCluster = "Try Kusto For Free";
 
