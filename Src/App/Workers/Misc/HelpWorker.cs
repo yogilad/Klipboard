@@ -8,12 +8,13 @@ namespace Klipboard.Workers
     public class HelpWorker : WorkerBase
     {
         private const string Help = "Help";
+        private const string About = "About";
         private const string Report = "Report in Issue";
         private const string Share = "Share Klipboard";
         private const string FreeCluster = "Try Kusto For Free";
 
         public HelpWorker(ISettings settings)
-            : base(ClipboardContent.None, settings, new List<string> { Help, Share, FreeCluster, Report })
+            : base(ClipboardContent.None, settings, new List<string> { Help, About, Report, Share, FreeCluster })
         {
         }
 
@@ -29,6 +30,11 @@ namespace Klipboard.Workers
             {
                 case Help:
                     InvokeLink("https://github.com/yogilad/Klipboard#readme");
+                    break;
+
+                case About:
+                    var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/";
+                    sendNotification(AppConstants.ApplicationName, msg);
                     break;
 
                 case Report:

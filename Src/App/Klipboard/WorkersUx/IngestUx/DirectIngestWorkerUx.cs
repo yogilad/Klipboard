@@ -14,6 +14,8 @@ namespace Klipboard
 
         public override string GetToolTipText() => "Direct ingest clipboard tabular data or any number of files to a table";
 
+        public override bool IsMenuVisible() => AppConstants.DevMode;
+
         public override bool IsMenuEnabled(ClipboardContent content) => AppConstants.DevMode;
     }
 }
