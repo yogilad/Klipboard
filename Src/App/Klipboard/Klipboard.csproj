@@ -23,6 +23,11 @@
     <None Remove="Resources\footprint.ico" />
     <None Remove="Resources\footprints.ico" />
     <None Remove="Resources\letter-k.ico" />
+    <None Remove="Resources\magic-tool.ico" />
+    <None Remove="Resources\magic-wand%281%29.ico" />
+    <None Remove="Resources\magic-wand.ico" />
+    <None Remove="Resources\wand.ico" />
+    <None Remove="Resources\wand_2.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,8 +37,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\adx_blue.ico" />
     <EmbeddedResource Include="Resources\download-arrow.ico" />
-    <EmbeddedResource Include="Resources\footprint.ico" />
     <EmbeddedResource Include="Resources\letter-k.ico" />
+    <EmbeddedResource Include="Resources\wand.ico" />
   </ItemGroup>
 
   <ItemGroup>

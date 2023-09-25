@@ -7,13 +7,13 @@ namespace Klipboard
     {
         public static readonly Icon KustoColorIcon;
         public static readonly Icon DownloadIcon;
-        public static readonly Icon PrintIcon;
+        public static readonly Icon DevModeIcon;
 
         static ResourceLoader()
         {
             KustoColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
             DownloadIcon = new Icon(LoadResourceAsStream("download-arrow.ico", "Resources"));
-            PrintIcon = new Icon(LoadResourceAsStream("footprint.ico", "Resources"));
+            DevModeIcon = new Icon(LoadResourceAsStream("wand.ico", "Resources"));
         }
 
         private static Stream LoadResourceAsStream(string resourceName, string folder, string name_space = nameof(Klipboard))

@@ -38,8 +38,8 @@ namespace Klipboard
             // Actions
             workers.Add(new WorkerUxConfig(new QueueIngestWorkerUx(settings), WorkerCategory.Actions));
             workers.Add(new WorkerUxConfig(new StreamIngestWorkerUx(settings), WorkerCategory.Actions));
-            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings), WorkerCategory.Actions, Icon: ResourceLoader.PrintIcon));
-            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings), WorkerCategory.Actions, Icon: ResourceLoader.PrintIcon));
+            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
+            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
 
             // Management
             workers.Add(new WorkerUxConfig(new NewVersionWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
