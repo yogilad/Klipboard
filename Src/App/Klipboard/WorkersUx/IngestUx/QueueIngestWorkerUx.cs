@@ -16,6 +16,6 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => AppConstants.DevMode;
 
-        public override bool IsMenuEnabled(ClipboardContent content) => content != ClipboardContent.None;
+        public override bool IsMenuEnabled(ClipboardContent content) => false;
     }
 }
