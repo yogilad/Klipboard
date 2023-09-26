@@ -126,7 +126,12 @@ namespace Klipboard.Utils
 
         public void AnalyzeField(string field)
         {
-            for(int i = 0; i < m_matchers.Count; i++)
+            if(string.IsNullOrEmpty(field))
+            {
+                return;
+            }
+
+            for (int i = 0; i < m_matchers.Count; i++)
             {
                 if (m_matchers[i].KqlTypeDef.IsMatch(field))
                 {
@@ -360,7 +365,7 @@ namespace Klipboard.Utils
             var rowNum = 0;
 
             var cols = new List<ColumnFindings>(firstRowfields.Length);
-            while (rowNum < 20)
+            while (rowNum < 100)
             {
                 var fields = parser.ReadFields();
 
