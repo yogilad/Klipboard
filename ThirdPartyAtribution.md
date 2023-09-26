@@ -6,6 +6,6 @@
 * [Azure.Storage.Blobs](https://www.nuget.org/packages/Azure.Storage.Blobs) by Microsoft
 ## Resources
 * Kusto Icon created by Microsoft
-* (Letter-k icons)[https://www.flaticon.com/free-icons/letter-k] created by Md Tanvirul Haque - Flaticon
-* [Foot print](https://www.flaticon.com/free-icons/foot-print) icons created by Icon.verse - Flaticon
+* [Letter-k icons](https://www.flaticon.com/free-icons/letter-k) created by Md Tanvirul Haque - Flaticon
+* [Magic wand](https://www.flaticon.com/free-icons/magic-wand) icons created by deemakdaksina - Flaticon
 * [Download icons](https://www.flaticon.com/free-icons/download) created by Freepik - Flaticon
