@@ -64,7 +64,9 @@ namespace Klipboard.Utils
         internal class ColumnFinding
         {
             public KqlTypeDefinition KqlTypeDef { get; }
-            public int Count;
+            public int MatchCount;
+            public int MismatchCount;
+
 
             public ColumnFinding(KqlTypeDefinition kqlType)
             {
@@ -89,17 +91,17 @@ namespace Klipboard.Utils
                 // We do not check strings since everything is essentialy a string 
             };
 
-        public bool HasFindings => m_matchers.Sum(x => x.Count) > 0;
+        public bool HasFindings => m_matchers.Sum(x => x.MatchCount) > 0;
         
         public KqlTypeDefinition GetBestMatchColumnType()
         {
-            var categories = m_matchers.Where(x => x.Count > 0).Select(x => x.KqlTypeDef.Type).ToList();
-            var max = m_matchers.MaxBy(x => x.Count);
+            var categories = m_matchers.Where(x => x.MatchCount > 0 && x.MismatchCount == 0).Select(x => x.KqlTypeDef.Type).ToList();
+            var max = m_matchers.Where(x => x.MatchCount > 0 && x.MismatchCount == 0).MaxBy(x => x.MatchCount);
 
             switch (categories.Count)
             {
                 case 1:
-                    return (max == null || max.Count == 0) ? s_stringDefinition : max.KqlTypeDef;
+                    return max.KqlTypeDef;
 
                 case 2:
                     if (categories.Contains(KqlDataType.LongType) && categories.Contains(KqlDataType.RealType))
@@ -109,9 +111,9 @@ namespace Klipboard.Utils
 
                     if (categories.Contains(KqlDataType.TimeSpanType) && categories.Contains(KqlDataType.DateTimeType))
                     {
-                        var nonZeroMatchers = m_matchers.Where(x => x.Count > 0).ToList();
+                        var nonZeroMatchers = m_matchers.Where(x => x.MatchCount > 0).ToList();
 
-                        if (nonZeroMatchers[0].Count == nonZeroMatchers[1].Count)
+                        if (nonZeroMatchers[0].MatchCount == nonZeroMatchers[1].MatchCount)
                         {
                             return KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType);
                         }
@@ -135,7 +137,11 @@ namespace Klipboard.Utils
             {
                 if (m_matchers[i].KqlTypeDef.IsMatch(field))
                 {
-                    m_matchers[i].Count++;
+                    m_matchers[i].MatchCount++;
+                }
+                else
+                {
+                    m_matchers[i].MismatchCount++;
                 }
             }
         }
