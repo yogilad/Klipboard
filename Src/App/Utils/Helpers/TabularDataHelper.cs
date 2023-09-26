@@ -124,30 +124,14 @@ namespace Klipboard.Utils
         
         public KqlTypeDefinition GetBestMatchColumnType()
         {
-            var foundCategories = m_matchers.Where(x => x.MismatchCount == 0).Select(x => x.KqlTypeDef.Type).ToList();
             var foundMatchers = m_matchers.Where(x => x.MismatchCount == 0).ToList();
 
-            switch (foundCategories.Count)
+            if (foundMatchers.Count > 0)
             {
-                case 1:
-                    return foundMatchers[0].KqlTypeDef;
-
-                case 2:
-                    if (foundCategories.Contains(KqlDataType.LongType) && foundCategories.Contains(KqlDataType.RealType))
-                    {
-                        return KqlTypeHelper.GetTypeDedfinition(KqlDataType.RealType);
-                    }
-
-                    if (foundCategories.Contains(KqlDataType.TimeSpanType) && foundCategories.Contains(KqlDataType.DateTimeType))
-                    {
-                        return KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType);
-                    }
-
-                    return s_stringDefinition;
-
-                default:
-                    return s_stringDefinition;
+                return foundMatchers[0].KqlTypeDef;
             }
+
+            return s_stringDefinition;
         }
 
         public void AnalyzeField(string field)
