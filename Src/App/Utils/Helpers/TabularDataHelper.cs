@@ -26,8 +26,11 @@ namespace Klipboard.Utils
             //var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
 
             schemaBuilder.Append("(");
-            foreach(var column in Columns)
+            for (int i = 0; i < Columns.Count; i++)
             {
+                var columnName = string.IsNullOrWhiteSpace(Columns[i].Name)? $"Column_{i}" : Columns[i].Name;
+                var columnType = Columns[i].Type;
+
                 if (notFirstCol)
                 {
                     schemaBuilder.Append(", ");
@@ -35,17 +38,17 @@ namespace Klipboard.Utils
 
                 if(m_disableNameEscaping)
                 {
-                    schemaBuilder.Append(column.Name);
+                    schemaBuilder.Append(columnName);
                 }
                 else
                 {
                     schemaBuilder.Append("['");
-                    schemaBuilder.Append(column.Name.Replace("'", "\\'"));
+                    schemaBuilder.Append(columnName.Replace("'", "\\'"));
                     schemaBuilder.Append("']");
                 }
 
                 schemaBuilder.Append(":");
-                schemaBuilder.Append(column.Type.Name);
+                schemaBuilder.Append(columnType.Name);
                 notFirstCol = true;
             }
 
@@ -90,9 +93,35 @@ namespace Klipboard.Utils
         
         public KqlTypeDefinition GetBestMatchColumnType()
         {
+            var categories = m_matchers.Where(x => x.Count > 0).Select(x => x.KqlTypeDef.Type).ToList();
             var max = m_matchers.MaxBy(x => x.Count);
 
-            return (max == null || max.Count == 0) ?  s_stringDefinition : max.KqlTypeDef;
+            switch (categories.Count)
+            {
+                case 1:
+                    return (max == null || max.Count == 0) ? s_stringDefinition : max.KqlTypeDef;
+
+                case 2:
+                    if (categories.Contains(KqlDataType.LongType) && categories.Contains(KqlDataType.RealType))
+                    {
+                        return KqlTypeHelper.GetTypeDedfinition(KqlDataType.RealType);
+                    }
+
+                    if (categories.Contains(KqlDataType.TimeSpanType) && categories.Contains(KqlDataType.DateTimeType))
+                    {
+                        var nonZeroMatchers = m_matchers.Where(x => x.Count > 0).ToList();
+
+                        if (nonZeroMatchers[0].Count == nonZeroMatchers[1].Count)
+                        {
+                            return KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType);
+                        }
+                    }
+
+                    return s_stringDefinition;
+
+                default:
+                    return s_stringDefinition;
+            }
         }
 
         public void AnalyzeField(string field)
