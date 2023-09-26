@@ -2,14 +2,16 @@
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
-
+using System.Net.Http.Headers;
 
 namespace Klipboard.Utils
 {
     #region Table Scheme Config
     public class TableColumns
     {
-        public bool m_disableNameEscaping;
+        private static char[] s_allowedSigns = { ' ', '-', '_', '.'};
+        private bool m_disableNameEscaping;
+        public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
         public TableColumns(bool disableNameEscaping = false)
         {
@@ -17,7 +19,35 @@ namespace Klipboard.Utils
         }
 
 
-        public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
+        public static string NormalizeColumnName(string columnName, int columnIndex = 0)
+        {
+            columnName = columnName.Trim();
+
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                return $"Column_{columnIndex}";
+            }
+
+            var nameBuilder = new StringBuilder();
+            
+            foreach(var c in  columnName) 
+            {
+                if ((((int) c) > 127) ||
+                    (c >= 'a' && c <= 'z') ||
+                    (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9') ||
+                    s_allowedSigns.Contains(c))
+                {
+                    nameBuilder.Append(c);
+                }
+                else 
+                {
+                    nameBuilder.Append('_');
+                }
+            }
+
+            return nameBuilder.ToString();
+        }
 
         public override string ToString()
         {
@@ -28,7 +58,7 @@ namespace Klipboard.Utils
             schemaBuilder.Append("(");
             for (int i = 0; i < Columns.Count; i++)
             {
-                var columnName = string.IsNullOrWhiteSpace(Columns[i].Name)? $"Column_{i}" : Columns[i].Name;
+                var columnName = NormalizeColumnName(Columns[i].Name, i);
                 var columnType = Columns[i].Type;
 
                 if (notFirstCol)
