@@ -37,6 +37,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\adx_blue.ico" />
     <EmbeddedResource Include="Resources\download-arrow.ico" />
+    <EmbeddedResource Include="Resources\download.ico" />
     <EmbeddedResource Include="Resources\letter-k.ico" />
     <EmbeddedResource Include="Resources\wand.ico" />
   </ItemGroup>
