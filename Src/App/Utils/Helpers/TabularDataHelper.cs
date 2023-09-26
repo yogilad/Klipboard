@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
-using System.Net.Http.Headers;
 
 namespace Klipboard.Utils
 {
@@ -94,6 +93,7 @@ namespace Klipboard.Utils
         internal class ColumnFinding
         {
             public KqlTypeDefinition KqlTypeDef { get; }
+            public int MatchCount;
             public int MismatchCount;
 
 
@@ -120,11 +120,11 @@ namespace Klipboard.Utils
                 // We do not check strings since everything is essentialy a string 
             };
 
-        public bool HasFindings => m_matchers.Any(x => x.MismatchCount == 0);
+        public bool HasFindings => m_matchers.Any(x => x.MismatchCount == 0 && x.MatchCount > 0);
         
         public KqlTypeDefinition GetBestMatchColumnType()
         {
-            var foundMatchers = m_matchers.Where(x => x.MismatchCount == 0).ToList();
+            var foundMatchers = m_matchers.Where(x => x.MismatchCount == 0 && x.MatchCount > 0).ToList();
 
             if (foundMatchers.Count > 0)
             {
@@ -143,7 +143,11 @@ namespace Klipboard.Utils
 
             for (int i = 0; i < m_matchers.Count; i++)
             {
-                if (!m_matchers[i].KqlTypeDef.IsMatch(field))
+                if (m_matchers[i].KqlTypeDef.IsMatch(field))
+                {
+                    m_matchers[i].MatchCount++;
+                }
+                else
                 {
                     m_matchers[i].MismatchCount++;
                 }
