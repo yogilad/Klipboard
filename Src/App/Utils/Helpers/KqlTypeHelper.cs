@@ -60,7 +60,7 @@ namespace Klipboard.Utils
                 { KqlDataType.DateTimeType, new KqlTypeDefinition("datetime",   KqlDataType.DateTimeType,   "datetime(null)",   s => DateTime.TryParse(s, out _))},
                 { KqlDataType.DynamicType,  new KqlTypeDefinition("dynamic",    KqlDataType.DynamicType,    "dynamic(null)",    s => IsMatchDynamic(s))},
                 { KqlDataType.GuidType,     new KqlTypeDefinition("guid",       KqlDataType.GuidType,       "guid(null)",       s => Guid.TryParse(s, out _))},
-                { KqlDataType.StringType,   new KqlTypeDefinition("string",     KqlDataType.StringType,     "\"\"",                 s => true)},
+                { KqlDataType.StringType,   new KqlTypeDefinition("string",     KqlDataType.StringType,     "\"\"",             s => true)},
             };
 
         private static readonly Dictionary<KqlDataType, Func<string, string>> s_inlineSerializersInternal = new Dictionary<KqlDataType, Func<string, string>>()

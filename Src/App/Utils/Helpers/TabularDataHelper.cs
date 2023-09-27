@@ -3,13 +3,14 @@ using System.Text.RegularExpressions;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
 
-
 namespace Klipboard.Utils
 {
     #region Table Scheme Config
     public class TableColumns
     {
-        public bool m_disableNameEscaping;
+        private static char[] s_allowedSigns = { ' ', '-', '_', '.'};
+        private bool m_disableNameEscaping;
+        public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
         public TableColumns(bool disableNameEscaping = false)
         {
@@ -17,7 +18,35 @@ namespace Klipboard.Utils
         }
 
 
-        public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
+        public static string NormalizeColumnName(string columnName, int columnIndex = 0)
+        {
+            columnName = columnName.Trim();
+
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                return $"Column_{columnIndex}";
+            }
+
+            var nameBuilder = new StringBuilder();
+            
+            foreach(var c in  columnName) 
+            {
+                if ((((int) c) > 127) ||
+                    (c >= 'a' && c <= 'z') ||
+                    (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9') ||
+                    s_allowedSigns.Contains(c))
+                {
+                    nameBuilder.Append(c);
+                }
+                else 
+                {
+                    nameBuilder.Append('_');
+                }
+            }
+
+            return nameBuilder.ToString();
+        }
 
         public override string ToString()
         {
@@ -26,8 +55,11 @@ namespace Klipboard.Utils
             //var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
 
             schemaBuilder.Append("(");
-            foreach(var column in Columns)
+            for (int i = 0; i < Columns.Count; i++)
             {
+                var columnName = NormalizeColumnName(Columns[i].Name, i);
+                var columnType = Columns[i].Type;
+
                 if (notFirstCol)
                 {
                     schemaBuilder.Append(", ");
@@ -35,17 +67,17 @@ namespace Klipboard.Utils
 
                 if(m_disableNameEscaping)
                 {
-                    schemaBuilder.Append(column.Name);
+                    schemaBuilder.Append(columnName);
                 }
                 else
                 {
                     schemaBuilder.Append("['");
-                    schemaBuilder.Append(column.Name.Replace("'", "\\'"));
+                    schemaBuilder.Append(columnName.Replace("'", "\\'"));
                     schemaBuilder.Append("']");
                 }
 
                 schemaBuilder.Append(":");
-                schemaBuilder.Append(column.Type.Name);
+                schemaBuilder.Append(columnType.Name);
                 notFirstCol = true;
             }
 
@@ -61,7 +93,9 @@ namespace Klipboard.Utils
         internal class ColumnFinding
         {
             public KqlTypeDefinition KqlTypeDef { get; }
-            public int Count;
+            public int MatchCount;
+            public int MismatchCount;
+
 
             public ColumnFinding(KqlTypeDefinition kqlType)
             {
@@ -86,22 +120,36 @@ namespace Klipboard.Utils
                 // We do not check strings since everything is essentialy a string 
             };
 
-        public bool HasFindings => m_matchers.Sum(x => x.Count) > 0;
+        public bool HasFindings => m_matchers.Any(x => x.MismatchCount == 0 && x.MatchCount > 0);
         
         public KqlTypeDefinition GetBestMatchColumnType()
         {
-            var max = m_matchers.MaxBy(x => x.Count);
+            var foundMatchers = m_matchers.Where(x => x.MismatchCount == 0 && x.MatchCount > 0).ToList();
 
-            return (max == null || max.Count == 0) ?  s_stringDefinition : max.KqlTypeDef;
+            if (foundMatchers.Count > 0)
+            {
+                return foundMatchers[0].KqlTypeDef;
+            }
+
+            return s_stringDefinition;
         }
 
         public void AnalyzeField(string field)
         {
-            for(int i = 0; i < m_matchers.Count; i++)
+            if(string.IsNullOrEmpty(field))
+            {
+                return;
+            }
+
+            for (int i = 0; i < m_matchers.Count; i++)
             {
                 if (m_matchers[i].KqlTypeDef.IsMatch(field))
                 {
-                    m_matchers[i].Count++;
+                    m_matchers[i].MatchCount++;
+                }
+                else
+                {
+                    m_matchers[i].MismatchCount++;
                 }
             }
         }
@@ -331,7 +379,7 @@ namespace Klipboard.Utils
             var rowNum = 0;
 
             var cols = new List<ColumnFindings>(firstRowfields.Length);
-            while (rowNum < 20)
+            while (rowNum < 100)
             {
                 var fields = parser.ReadFields();
 
