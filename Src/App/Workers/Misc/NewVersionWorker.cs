@@ -20,18 +20,7 @@ namespace Klipboard.Workers
 
         public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
         {
-            InvokeLink("https://github.com/yogilad/Klipboard/releases");
-        }
-
-        public void InvokeLink(string link)
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = link,
-                UseShellExecute = true
-            });
-
-            return;
+            OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/releases");
         }
     }
 }

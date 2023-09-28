@@ -31,7 +31,7 @@ namespace Klipboard.Workers
             switch(chosenOption)
             {
                 case Help:
-                    InvokeLink("https://github.com/yogilad/Klipboard#readme");
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard#readme");
                     break;
 
                 case About:
@@ -49,7 +49,7 @@ namespace Klipboard.Workers
                     break;
 
                 case Report:
-                    InvokeLink("https://github.com/yogilad/Klipboard/issues");
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/issues");
                     break;
 
                 case Share:
@@ -57,7 +57,7 @@ namespace Klipboard.Workers
                     break;
 
                 case FreeCluster:
-                    InvokeLink("https://dataexplorer.azure.com/freecluster");
+                    OpSysHelper.InvokeLink("https://dataexplorer.azure.com/freecluster");
                     break;
 
                 case Updates:
@@ -79,18 +79,7 @@ You can get it from https://github.com/yogilad/Klipboard/";
 
             var link = $"mailto:?subject={subject}&body={Uri.EscapeUriString(body)}";
 
-            InvokeLink(link);
-        }
-
-        public void InvokeLink(string link)
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = link,
-                UseShellExecute = true
-            });
-
-            return;
+            OpSysHelper.InvokeLink(link);
         }
     }
 }
