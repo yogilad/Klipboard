@@ -1,12 +1,8 @@
-﻿using Azure.Core;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Kusto.Cloud.Platform.Utils;
+
 
 namespace Klipboard.Utils
 {
@@ -25,21 +21,22 @@ namespace Klipboard.Utils
             Set(major, minor, build);
         }
 
-        public Version(string version)
+        public static bool TryParse(string versionStr, out Version? version)
         {
-            int major = 0;
-            int minor = 0;
-            int build = 0;
-            var match = m_parser.Match(version);
-            
-            if (match.Success)
+            var match = m_parser.Match(versionStr);
+
+            if (!match.Success)
             {
-                int.TryParse(match.Groups["major"].Value, out major);
-                int.TryParse(match.Groups["minor"].Value, out minor);
-                int.TryParse(match.Groups["build"].Value, out build);
+                version = null;
+                return false;
             }
 
-            Set(major, minor, build);
+            int.TryParse(match.Groups["major"].Value, out var major);
+            int.TryParse(match.Groups["minor"].Value, out var minor);
+            int.TryParse(match.Groups["build"].Value, out var build);
+
+            version = new Version(major, minor, build);
+            return true;
         }
 
         public string ToString(bool vPrefix=true)
@@ -50,8 +47,8 @@ namespace Klipboard.Utils
         public static bool operator<(Version left, Version right)
         {
             if (left.Major < right.Major) return true;
-            if (left.Minor< right.Minor) return true;
-            if (left.Build< right.Build) return true;
+            if (left.Minor < right.Minor) return true;
+            if (left.Build < right.Build) return true;
             return false;
         }
 
@@ -80,7 +77,7 @@ namespace Klipboard.Utils
         public static bool HasNewVersion { get; private set; }
         public static Version LatestVersion { get; private set; }
 
-        private static Timer m_timer;
+        private static Timer? m_timer;
 
         static VersionHelper()
         {
@@ -112,9 +109,48 @@ namespace Klipboard.Utils
             return HasNewVersion;
         }
 
-        private static async Task<Version> TryGetLatestVersion()
+        private static async Task<Version?> TryGetLatestVersion()
         {
-            return new Version("0.1.1");
+            var redirectUri = await TryGetRedirectedUri("https://github.com/yogilad/Klipboard/releases/latest");
+            
+            if (redirectUri == null)
+            {
+                return null;
+            }
+
+            redirectUri.SplitLast("/", out var versionStr);
+            
+            if (Version.TryParse(versionStr, out var onlineVersion))
+            {
+                return onlineVersion;
+            }
+
+            return null;
+        }
+
+        public static async Task<string?> TryGetRedirectedUri(string url)
+        {
+            var handler = new HttpClientHandler() 
+            {
+                AllowAutoRedirect = false
+            };
+
+            try
+            {
+                using (var client = new HttpClient(handler))
+                using (var response = await client.GetAsync(url))
+                {
+                    if (response.StatusCode == HttpStatusCode.Found)
+                    {
+                        return response.Headers?.Location?.AbsoluteUri;
+                    }
+                }
+            }
+            catch (Exception) 
+            { 
+            }
+
+            return null;
         }
     }
     #endregion
