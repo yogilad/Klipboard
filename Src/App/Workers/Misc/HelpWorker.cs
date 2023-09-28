@@ -61,6 +61,7 @@ namespace Klipboard.Workers
                     break;
 
                 case Updates:
+                    await VersionHelper.CheckForNewVersion();
                     break;
             }
 
