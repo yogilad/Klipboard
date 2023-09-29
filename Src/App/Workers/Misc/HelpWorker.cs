@@ -31,7 +31,7 @@ namespace Klipboard.Workers
             switch(chosenOption)
             {
                 case Help:
-                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki/Welcome-to-Klipboard");
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki");
                     break;
 
                 case About:
