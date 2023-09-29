@@ -5,7 +5,10 @@ Kilpboard aims to provide a simple and intuitive way for people to get insights 
 
 Klipboard runs in the System Tray. When clicked it will display a menu of actions that can be done with the content that is currently placed in the operating system clipboard.
 
-**[Click Here to Download Klipboard](https://github.com/yogilad/Klipboard/releases)**
+**[Installation and Quick Start Guide](https://github.com/yogilad/Klipboard/wiki/Quick-Start-Guide)**
+
+**[Read the Wiki For Instructions and Help](https://github.com/yogilad/Klipboard/wiki)**
+
 
 ### Query Anything With Ease 
 Klipboard Quick Actions helps you run queries on **structured and unstructured** data without having to go through the trouble of creating tables and uploading data to them.
