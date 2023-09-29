@@ -26,5 +26,6 @@ When setting the ClickOnce version, use the following format _[Major].[Minor].\[
 ## Create a New Release
 1. Go to release and create a new release.
 1. Set the release name to _v[Major].[Minor].\[Build\]_
+1. Set the release to create a tag with the value of _v[Major].[Minor].\[Build\]_
 1. Set the release notes including major changes included in the version
 1. Upload the two zip files 
