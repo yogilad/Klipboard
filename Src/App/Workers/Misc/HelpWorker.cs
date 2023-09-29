@@ -49,7 +49,7 @@ namespace Klipboard.Workers
                     break;
 
                 case Report:
-                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/issues");
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki/Reporting-Issues");
                     break;
 
                 case Share:
