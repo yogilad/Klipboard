@@ -29,11 +29,14 @@ if %errorlevel% neq 0 ( goto BuildFailed)
 tar -acf Klipboard_Setup.zip "Klipboard_Setup"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
+REM * Announce Success
 echo Build Succeeded!
 goto End
 
+REM * Announce Failure
 :BuildFailed
 echo Build Failed!
 
+REM * Go back to Src dir
 :End
 cd ..\..\..\..
