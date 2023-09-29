@@ -22,7 +22,11 @@ namespace Klipboard
             var workers = CreateWorkers(settings);
             using var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
+            VersionHelper.StartPolling();
+
             Application.Run();
+
+            VersionHelper.StopPolling();
         }
 
         private static List<WorkerUxConfig> CreateWorkers(ISettings settings)

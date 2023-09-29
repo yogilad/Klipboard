@@ -32,7 +32,7 @@ namespace Klipboard.Utils
         {
             // TODO: This needs to be UX driven
             var engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
-            engineKcsb.SetConnectorDetails(AppConstants.ApplicationName, AppConstants.ApplicationVersion, sendUser: false);
+            engineKcsb.SetConnectorDetails(AppConstants.ApplicationName, AppConstants.ApplicationVersion.ToString(), sendUser: false);
 
             m_engineAdminClient = new Lazy<ICslAdminProvider>(() => KustoClientFactory.CreateCslAdminProvider(engineKcsb));
             m_engineQueryClient = new Lazy<ICslQueryProvider>(() => KustoClientFactory.CreateCslQueryProvider(engineKcsb));

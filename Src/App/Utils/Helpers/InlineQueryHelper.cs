@@ -39,14 +39,8 @@ namespace Klipboard.Utils
             {
                 queryLink = $"https://dataexplorer.azure.com/clusters/{clusterHost}/databases/{databaseName}?query={query}";
             }
-            Debug.WriteLine(queryLink);
 
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = queryLink,
-                UseShellExecute = true
-            });
-
+            OpSysHelper.InvokeLink(queryLink);
             return true;
         }
     }
