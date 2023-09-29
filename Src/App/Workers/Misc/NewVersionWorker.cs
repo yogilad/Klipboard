@@ -10,7 +10,7 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content) => $"Version {VersionHelper.LatestVersion.ToString()} Available For Download!";
+        public override string GetMenuText(ClipboardContent content) => $"Version {VersionHelper.LatestVersion} Available For Download!";
 
         public override string GetToolTipText() => string.Empty;
 

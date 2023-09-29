@@ -15,7 +15,7 @@ if %errorlevel% neq 0 ( goto BuildFailed)
 if %errorlevel% neq 0 ( goto BuildFailed)
 
 REM * Publish
-%MSBUILD% /t:publish /p:PublishProfile=ClickOnce -p:PublishDir="bin\Publish\Klipboard_ClickOnce"
+%MSBUILD% /t:publish /p:PublishProfile=ClickOnce -p:PublishDir="bin\Publish\Klipboard_Setup"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
 %MSBUILD% /t:publish /p:PublishProfile=SingleFile -p:PublishDir="bin\Publish\Klipboard"
@@ -26,7 +26,7 @@ cd App\Klipboard\bin\Publish\
 tar -acf Klipboard.zip "Klipboard\Klipboard.pdb" "Klipboard\Klipboard.exe"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
-tar -acf Klipboard_ClickOnce.zip "Klipboard_ClickOnce"
+tar -acf Klipboard_Setup.zip "Klipboard_Setup"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
 echo Build Succeeded!

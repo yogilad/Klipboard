@@ -9,7 +9,7 @@ namespace Klipboard.Utils
     public class Version
     {
         private static readonly Regex m_parser = new Regex("\\s*[vV]?(?<major>[\\d]+)\\.(?<minor>[\\d]+)\\.(?<build>[\\d]+)\\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private string m_versionStr;
+        private string m_versionStr = string.Empty;
 
         public int Major { get; private set; }
         public int Minor { get; private set; }
@@ -38,7 +38,7 @@ namespace Klipboard.Utils
             return true;
         }
 
-        public string ToString(bool vPrefix=true)
+        public override string ToString()
         {
             return m_versionStr;
         }
