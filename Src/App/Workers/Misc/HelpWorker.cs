@@ -61,7 +61,14 @@ namespace Klipboard.Workers
                     break;
 
                 case Updates:
-                    await VersionHelper.CheckForNewVersion();
+                    if (await VersionHelper.CheckForNewVersion())
+                    {
+                        sendNotification(AppConstants.ApplicationName, $"Version {VersionHelper.LatestVersion} is available for download");
+                    }
+                    else 
+                    {
+                        sendNotification(AppConstants.ApplicationName, "You are running the latest version.");
+                    }
                     break;
             }
 
