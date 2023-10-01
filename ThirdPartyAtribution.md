@@ -10,3 +10,7 @@
 * [Letter-k icons](https://www.flaticon.com/free-icons/letter-k) created by Md Tanvirul Haque - Flaticon
 * [Magic wand](https://www.flaticon.com/free-icon/wand_1626598) icons created by deemakdaksina - Flaticon
 * [Download file icons](https://www.flaticon.com/free-icon/apps_9147708) created by Radhe Icon - Flaticon
+
+## Sample Data
+* [Kusto Help Cluster](https://help.kusto.windows.net)
+* [LogApi/LogHub on Github](https://github.com/logpai/loghub)

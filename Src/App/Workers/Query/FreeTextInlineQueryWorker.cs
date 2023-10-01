@@ -5,7 +5,7 @@ namespace Klipboard.Workers
 {
     public class FreeTextInlineQueryWorker : WorkerBase
     {
-        private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard contiainig unstructured text";
+        private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard containing unstructured text";
         private static readonly string NotifcationTitle = "Free Text Inline Query";
 
         public FreeTextInlineQueryWorker(ISettings settings)
