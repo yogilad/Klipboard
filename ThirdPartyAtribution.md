@@ -14,3 +14,5 @@
 ## Sample Data
 * [Kusto Help Cluster](https://help.kusto.windows.net)
 * [LogApi/LogHub on Github](https://github.com/logpai/loghub)
+* [TLC Trip Record Data on NYC.Gov](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+* [HepC Immunization Data on WHO.Int](https://apps.who.int/gho/data/node.main.A824?lang=en)
