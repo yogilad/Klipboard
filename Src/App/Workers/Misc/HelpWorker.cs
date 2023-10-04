@@ -31,11 +31,11 @@ namespace Klipboard.Workers
             switch(chosenOption)
             {
                 case Help:
-                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki/Welcome-to-Klipboard");
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki");
                     break;
 
                 case About:
-                    var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/";
+                    var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/Wiki";
                     sendNotification(AppConstants.ApplicationName, msg);
                     break;
 
@@ -82,7 +82,7 @@ namespace Klipboard.Workers
 @"Hi, 
 
 I'm using Klipboard for Kusto, and I think you'd find it useful. 
-You can get it from https://github.com/yogilad/Klipboard/";
+https://github.com/yogilad/Klipboard/Wiki";
 
             var link = $"mailto:?subject={subject}&body={Uri.EscapeUriString(body)}";
 
