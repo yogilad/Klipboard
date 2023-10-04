@@ -88,7 +88,7 @@ namespace Klipboard.Workers
                 }
 
                 var fileInfo = new FileInfo(path);
-                var formatResult = FileHelper.GetFormatFromExtension(fileInfo.Name);
+                var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
                 var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
 
                 if (firstFile)
@@ -180,19 +180,16 @@ namespace Klipboard.Workers
 
             var storageOptions = new StorageSourceOptions()
             {
-                CompressionType = Kusto.Data.Common.DataSourceCompressionType.GZip,
+                Compress = !formatDefinition.DoNotCompress,
             };
-
-            var appConfig = m_settings.GetConfig();
 
             var ingestionProperties = new KustoIngestionProperties()
             {
-                DatabaseName = appConfig.ChosenCluster.DatabaseName,
+                DatabaseName = GetQuickActionTarget().DatabaseName,
                 TableName = tempTableName,
                 Format = formatDefinition.Format,
                 IgnoreFirstRecord = firstRowIsHeader,
             };
-
 
             var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, ingestionProperties, storageOptions);
 
@@ -217,7 +214,7 @@ namespace Klipboard.Workers
                 .AppendLine("// Rename the table if needed")
                 .Append(".rename table ['")
                 .Append(tempTableName)
-                .AppendLine("'] to '<new name>'")
+                .AppendLine("'] to ['<new name>']")
                 .AppendLine()
                 .AppendLine("// Cancel auto deletion")
                 .Append(".delete table ['")

@@ -7,7 +7,9 @@ namespace Klipboard.Utils
     public enum KqlDataType
     {
         BoolType,
+        IntType,
         LongType,
+        DecimalType,
         RealType,
         TimeSpanType,
         DateTimeType,
@@ -36,13 +38,17 @@ namespace Klipboard.Utils
     {
         private static readonly Regex s_timespanRegex1 = new Regex("^[0-9]+[smhd]$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex s_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UnwantedRegex = new Regex("[\\s\"]", RegexOptions.Compiled);
 
-        private static readonly Dictionary<string, KqlDataType> s_typeNames = new Dictionary<string, KqlDataType>()
+
+        private static readonly Dictionary<string, KqlDataType> s_typeNames = new Dictionary<string, KqlDataType>(StringComparer.OrdinalIgnoreCase)
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { "bool",     KqlDataType.BoolType },
+                { "int",      KqlDataType.IntType },
                 { "long",     KqlDataType.LongType },
-                { "real",     KqlDataType.RealType },
+                { "decimal",  KqlDataType.DecimalType },
+                { "real",     KqlDataType.RealType},
                 { "timespan", KqlDataType.TimeSpanType },
                 { "datetime", KqlDataType.DateTimeType },
                 { "dynamic",  KqlDataType.DynamicType },
@@ -54,7 +60,9 @@ namespace Klipboard.Utils
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { KqlDataType.BoolType,     new KqlTypeDefinition("bool",       KqlDataType.BoolType,       "bool(null)",       s => bool.TryParse(s, out _))},
+                { KqlDataType.IntType,      new KqlTypeDefinition("int",        KqlDataType.IntType,        "int(null)",        s => int.TryParse(s, out _))},
                 { KqlDataType.LongType,     new KqlTypeDefinition("long",       KqlDataType.LongType,       "long(null)",       s => long.TryParse(s, out _))},
+                { KqlDataType.DecimalType,  new KqlTypeDefinition("decimal",    KqlDataType.DecimalType,    "decimal(null)",    s => decimal.TryParse(s, out _))},
                 { KqlDataType.RealType,     new KqlTypeDefinition("real",       KqlDataType.RealType,       "real(null)",       s => double.TryParse(s, out _))},
                 { KqlDataType.TimeSpanType, new KqlTypeDefinition("timespan",   KqlDataType.TimeSpanType,   "timespan(null)",   s => IsMatchTimeSpan(s))},
                 { KqlDataType.DateTimeType, new KqlTypeDefinition("datetime",   KqlDataType.DateTimeType,   "datetime(null)",   s => DateTime.TryParse(s, out _))},
@@ -67,7 +75,9 @@ namespace Klipboard.Utils
             {
                 // Order is important - if a value is equally matched by multiple entries the first one wins
                 { KqlDataType.BoolType,    s => s},
+                { KqlDataType.IntType,     SerializeInt},
                 { KqlDataType.LongType,    SerializeLong},
+                { KqlDataType.DecimalType, SerializeDecimal},
                 { KqlDataType.RealType,    SerializeReal},
                 { KqlDataType.TimeSpanType,SerializeTimeSpan},
                 { KqlDataType.DateTimeType,SerializeDatetime},
@@ -174,8 +184,6 @@ namespace Klipboard.Utils
             return $"\"{field}\"";
         }
 
-        private static readonly Regex UnwantedRegex = new Regex("[^0-9.]", RegexOptions.Compiled);
-
         public static string SerializeReal(string field)
         {
             field = UnwantedRegex.Replace(field, "");
@@ -189,6 +197,19 @@ namespace Klipboard.Utils
             return field;
         }
 
+        public static string SerializeInt(string field)
+        {
+            field = UnwantedRegex.Replace(field, "");
+
+            if (int.TryParse(field, out var i))
+            {
+                // Hoping this will not fail in wierd locales
+                return i.ToString();
+            }
+
+            return field;
+        }
+
         public static string SerializeLong(string field)
         {
             field = UnwantedRegex.Replace(field, "");
@@ -197,6 +218,19 @@ namespace Klipboard.Utils
             {
                 // Hoping this will not fail in wierd locales
                 return l.ToString();
+            }
+
+            return field;
+        }
+
+        public static string SerializeDecimal(string field)
+        {
+            field = UnwantedRegex.Replace(field, "");
+
+            if (decimal.TryParse(field, out var d))
+            {
+                // Hoping this will not fail in wierd locales
+                return d.ToString();
             }
 
             return field;
