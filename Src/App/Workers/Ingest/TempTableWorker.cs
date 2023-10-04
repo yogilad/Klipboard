@@ -2,7 +2,7 @@
 using Kusto.Ingest;
 
 using Klipboard.Utils;
-
+using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard.Workers
 {
@@ -32,7 +32,7 @@ namespace Klipboard.Workers
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, "tsv", upstreamFileName, sendNotification, chosenOptions))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, sendNotification, chosenOptions))
             {
                 InvokeTempTableQuery(tempTableName, sendNotification);
             }
@@ -46,7 +46,7 @@ namespace Klipboard.Workers
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification, chosenOptions))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, sendNotification, chosenOptions))
             {
                 InvokeTempTableQuery(tempTableName, sendNotification);
             }
@@ -87,19 +87,15 @@ namespace Klipboard.Workers
                     break;
                 }
 
-                var format = AppConstants.UnknownFormat;
                 var fileInfo = new FileInfo(path);
-
-                if (!string.IsNullOrWhiteSpace(fileInfo.Extension))
-                {
-                    format = fileInfo.Extension.TrimStart('.');
-                }
+                var formatResult = FileHelper.GetFormatFromExtension(fileInfo.Name);
+                var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
 
                 if (firstFile)
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, format, $"{fileInfo.Name}_{Guid.NewGuid()}", sendNotification, chosenOption);
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, sendNotification, chosenOption);
                     if (!success)
                     {
                         // A notification was sent from the failed function
@@ -111,12 +107,16 @@ namespace Klipboard.Workers
                     continue;
                 }
 
-                var storageOptions = new StorageSourceOptions();
+                var storageOptions = new StorageSourceOptions()
+                {
+                    Compress = !formatResult.DoNotCompress,
+                };
+
                 var ingestionProperties = new KustoIngestionProperties()
                 {
                     DatabaseName = target.DatabaseName,
                     TableName = tempTableName,
-                    Format = FileHelper.GetFormatFromExtension(format),
+                    Format = formatResult.Format,
                     IgnoreFirstRecord = firstRowIsHeader,
                 };
 
@@ -131,9 +131,9 @@ namespace Klipboard.Workers
             }
         }
 
-        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, string tempTableName, Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
+        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, string tempTableName, Stream dataStream, FileFormatDefiniton formatDefinition, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
         {
-            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
+            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefinition);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)
@@ -144,13 +144,13 @@ namespace Klipboard.Workers
 
             string schemaStr = AppConstants.TextLinesSchemaStr;
 
-            if (format == AppConstants.UnknownFormat)
+            if (formatDefinition.Extension == AppConstants.UnknownFormat)
             {
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri, firstRowIsHeader);
                 if (autoDetectRes.Success)
                 {
                     schemaStr = autoDetectRes.Schema.ToString();
-                    format = autoDetectRes.Format;
+                    formatDefinition = FileHelper.GetFormatFromExtension(autoDetectRes.Format);
                 }
                 else
                 {
@@ -159,7 +159,7 @@ namespace Klipboard.Workers
             }
             else
             {
-                var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format, firstRowIsHeader);
+                var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, formatDefinition.Extension, firstRowIsHeader);
                 if (schemaRes.Success)
                 {
                     schemaStr = schemaRes.TableScheme.ToString();
@@ -189,7 +189,7 @@ namespace Klipboard.Workers
             {
                 DatabaseName = appConfig.ChosenCluster.DatabaseName,
                 TableName = tempTableName,
-                Format = FileHelper.GetFormatFromExtension(format),
+                Format = formatDefinition.Format,
                 IgnoreFirstRecord = firstRowIsHeader,
             };
 
