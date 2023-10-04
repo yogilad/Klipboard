@@ -77,7 +77,7 @@ namespace Klipboard.Utils
             try
             {
                 using var res = await m_engineQueryClient.Value.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
-                var tableScheme = new TableColumns(disableNameEscaping: true);
+                var tableScheme = new TableColumns();
                 var nameCol = res.GetOrdinal("ColumnName");
                 var typeCol = res.GetOrdinal("ColumnType");
 

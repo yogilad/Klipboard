@@ -22,14 +22,22 @@ namespace Klipboard.Utils
         {
             columnName = columnName.Trim();
 
+            if ((columnName.StartsWith("['") || columnName.StartsWith("[\"")) &&
+                (columnName.EndsWith("']") || columnName.EndsWith("\"]")))
+            {
+                columnName = columnName.Substring(2, columnName.Length - 4);
+            }
+
             if (string.IsNullOrWhiteSpace(columnName))
             {
                 return $"Column_{columnIndex}";
             }
 
             var nameBuilder = new StringBuilder();
-            
-            foreach(var c in  columnName) 
+
+            nameBuilder.Append("['");
+
+            foreach (var c in  columnName) 
             {
                 if ((((int) c) > 127) ||
                     (c >= 'a' && c <= 'z') ||
@@ -44,6 +52,7 @@ namespace Klipboard.Utils
                     nameBuilder.Append('_');
                 }
             }
+            nameBuilder.Append("']");
 
             return nameBuilder.ToString();
         }
@@ -57,7 +66,7 @@ namespace Klipboard.Utils
             schemaBuilder.Append("(");
             for (int i = 0; i < Columns.Count; i++)
             {
-                var columnName = NormalizeColumnName(Columns[i].Name, i);
+                var columnName = Columns[i].Name;
                 var columnType = Columns[i].Type;
 
                 if (notFirstCol)
@@ -65,16 +74,12 @@ namespace Klipboard.Utils
                     schemaBuilder.Append(", ");
                 }
 
-                if(m_disableNameEscaping)
+                if(!m_disableNameEscaping)
                 {
-                    schemaBuilder.Append(columnName);
+                    columnName = NormalizeColumnName(Columns[i].Name, i);
                 }
-                else
-                {
-                    schemaBuilder.Append("['");
-                    schemaBuilder.Append(columnName.Replace("'", "\\'"));
-                    schemaBuilder.Append("']");
-                }
+
+                schemaBuilder.Append(columnName);
 
                 schemaBuilder.Append(":");
                 schemaBuilder.Append(columnType.Name);
