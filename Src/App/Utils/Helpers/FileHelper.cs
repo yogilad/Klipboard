@@ -380,7 +380,7 @@ namespace Klipboard.Utils
         public static string CreateUploadFileName(string filename, string extension)
         {
             var stamp = GenerateUniqueStamp();
-            var upsteramFileName = string.IsNullOrWhiteSpace(extension)? $"{AppConstants.ApplicationName}_{stamp}" : $"{AppConstants.ApplicationName}_{stamp}.{extension}";
+            var upsteramFileName = string.IsNullOrWhiteSpace(extension)? $"{AppConstants.ApplicationName}_{filename}_{stamp}" : $"{AppConstants.ApplicationName}_{filename}_{stamp}.{extension}";
             return upsteramFileName;
         }
 
