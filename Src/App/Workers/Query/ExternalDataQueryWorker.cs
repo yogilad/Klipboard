@@ -28,7 +28,7 @@ namespace Klipboard.Workers
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            await HandleStreamAsync(csvStream, "tsv", upstreamFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, sendNotification, chosenOption);
         }
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOption)
@@ -36,7 +36,7 @@ namespace Klipboard.Workers
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            await HandleStreamAsync(textStream, AppConstants.UnknownFormat, upstreamFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, sendNotification, chosenOption);
         }
 
         public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification, string? chosenOption)
@@ -62,15 +62,16 @@ namespace Klipboard.Workers
 
             var dt = DateTime.Now;
             var upsteramFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
-            using var dataStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+            var formatDefintion = FileHelper.GetFormatFromFileName(fileInfo.Name);
+            using var dataStream = File.OpenRead(file);
 
-            await HandleStreamAsync(dataStream, fileInfo.Extension, upsteramFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, sendNotification, chosenOption);
         }
 
-        private async Task HandleStreamAsync(Stream dataStream, string format, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
+        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
-            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName);
+            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion);
             var firstrowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)
@@ -81,7 +82,7 @@ namespace Klipboard.Workers
 
             string schemaStr = AppConstants.TextLinesSchemaStr;
 
-            format = format.ToLower().TrimStart(".");
+            var format = formatDefintion.Extension;
             switch (format)
             {
                 case AppConstants.UnknownFormat:
@@ -99,7 +100,10 @@ namespace Klipboard.Workers
                     break;
 
                 case "csv":
+                case "psv":
                 case "tsv":
+                case "scsv":
+                case "sohsv":
                 case "tsve":
                 case "json":
                 case "multijson":

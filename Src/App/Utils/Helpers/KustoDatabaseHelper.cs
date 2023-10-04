@@ -50,7 +50,7 @@ namespace Klipboard.Utils
         #endregion
 
         #region Public APIs
-        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName)
+        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefintion)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace Klipboard.Utils
                 res.Read();
 
                 var tempStorage = res.GetString(0);
-                var resp = await TryUploadStreamAync(tempStorage, dataStream, upstreamFileName);
+                var resp = await TryUploadStreamAync(tempStorage, dataStream, upstreamFileName, formatDefintion);
 
                 return resp;
             }
@@ -77,7 +77,7 @@ namespace Klipboard.Utils
             try
             {
                 using var res = await m_engineQueryClient.Value.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
-                var tableScheme = new TableColumns(disableNameEscaping: true);
+                var tableScheme = new TableColumns();
                 var nameCol = res.GetOrdinal("ColumnName");
                 var typeCol = res.GetOrdinal("ColumnType");
 
@@ -212,22 +212,29 @@ namespace Klipboard.Utils
         #endregion
 
         #region Private APIs
-        private static async Task<(bool Success, string? BlobUri, string? Error)> TryUploadStreamAync(string blobContainerUriStr, Stream dataStream, string upstreamFileName)
+        private static async Task<(bool Success, string? BlobUri, string? Error)> TryUploadStreamAync(string blobContainerUriStr, Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefiniton)
         {
-            var compRes = await TryCreateZipStreamAsync(dataStream, upstreamFileName);
-            if (!compRes.Success)
+            var disposeOfStream = false;
+
+            if (!formatDefiniton.DoNotCompress)
             {
-                return (false, null, compRes.Error);
+                var compRes = await TryCreateZipStreamAsync(dataStream, upstreamFileName);
+                if (!compRes.Success)
+                {
+                    return (false, null, compRes.Error);
+                }
+
+                dataStream = compRes.MemoryStream;
+                disposeOfStream = true;
+                upstreamFileName += ".zip";
             }
 
-            upstreamFileName += ".zip";
-
-            using (compRes.MemoryStream)
+            try
             {
                 var blobContainerUri = new Uri(blobContainerUriStr);
                 var containerClient = new BlobContainerClient(blobContainerUri);
                 var blobClient = containerClient.GetBlobClient(upstreamFileName);
-                var blobRes = await blobClient.UploadAsync(compRes.MemoryStream, false);
+                var blobRes = await blobClient.UploadAsync(dataStream, false);
                 var blobResp = blobRes.GetRawResponse();
 
                 if (blobResp.IsError)
@@ -237,6 +244,13 @@ namespace Klipboard.Utils
 
                 var blobUri = blobContainerUriStr.Replace("?", $"/{upstreamFileName}?");
                 return (true, blobUri, null);
+            }
+            finally
+            {
+                if (disposeOfStream)
+                {
+                    dataStream.Dispose();
+                }
             }
         }
 

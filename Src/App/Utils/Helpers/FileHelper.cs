@@ -5,11 +5,18 @@ using Kusto.Data.Common;
 
 namespace Klipboard.Utils
 {
+    public record FileFormatDefiniton(DataSourceFormat Format, string Extension, bool DoNotCompress);
+
     public static class FileHelper
     {
+        public static readonly FileFormatDefiniton UnknownFormatDefinition = new FileFormatDefiniton(DataSourceFormat.txt, AppConstants.UnknownFormat, DoNotCompress: false);
+        public static readonly FileFormatDefiniton TsvFormatDefinition = new FileFormatDefiniton(DataSourceFormat.tsv, "tsv", DoNotCompress: false);
+
         private static readonly char[] s_pathSeperators = new char[] { '\\', '/'};
-        private static Dictionary<string, int> s_monthStrToInt;
-        
+        private static readonly Dictionary<string, int> s_monthStrToInt;
+        private static readonly Dictionary<string, FileFormatDefiniton> s_fileFormatDefinition;
+
+
         static FileHelper()
         {
             s_monthStrToInt = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -25,6 +32,21 @@ namespace Klipboard.Utils
             s_monthStrToInt.Add("oct", 10);
             s_monthStrToInt.Add("nov", 11);
             s_monthStrToInt.Add("dec", 12);
+
+            s_fileFormatDefinition = new Dictionary<string, FileFormatDefiniton>(StringComparer.OrdinalIgnoreCase);
+            s_fileFormatDefinition.Add("avro", new FileFormatDefiniton(DataSourceFormat.avro, "avro", DoNotCompress: true));
+            s_fileFormatDefinition.Add("csv", new FileFormatDefiniton(DataSourceFormat.csv, "csv", DoNotCompress: false));
+            s_fileFormatDefinition.Add("json", new FileFormatDefiniton(DataSourceFormat.multijson, "json", DoNotCompress: false));
+            s_fileFormatDefinition.Add("multijson", new FileFormatDefiniton(DataSourceFormat.multijson, "multijson", DoNotCompress: false));
+            s_fileFormatDefinition.Add("orc", new FileFormatDefiniton(DataSourceFormat.orc, "orc", DoNotCompress: true));
+            s_fileFormatDefinition.Add("parquet", new FileFormatDefiniton(DataSourceFormat.parquet, "parquet", DoNotCompress: true));
+            s_fileFormatDefinition.Add("psv", new FileFormatDefiniton(DataSourceFormat.psv, "psv", DoNotCompress: false));
+            s_fileFormatDefinition.Add("raw", new FileFormatDefiniton(DataSourceFormat.raw, "raw", DoNotCompress: false));
+            s_fileFormatDefinition.Add("scsv", new FileFormatDefiniton(DataSourceFormat.scsv, "scsv", DoNotCompress: false));
+            s_fileFormatDefinition.Add("sohsv", new FileFormatDefiniton(DataSourceFormat.sohsv, "sohsv", DoNotCompress: false));
+            s_fileFormatDefinition.Add("tsv", new FileFormatDefiniton(DataSourceFormat.tsv, "tsv", DoNotCompress: false));
+            s_fileFormatDefinition.Add("txt", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
+            s_fileFormatDefinition.Add("log", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
         }
 
         #region Path Utils
@@ -272,33 +294,33 @@ namespace Klipboard.Utils
             return false;
         }
 
-        public static DataSourceFormat GetFormatFromExtension(string extension)
+        public static FileFormatDefiniton GetFormatFromFileName(string fileName)
         {
-            extension = extension.TrimStart('.').ToLower();
-
-            switch(extension)
+            if (!fileName.Contains("."))
             {
-                case "csv":
-                    return DataSourceFormat.csv;
-
-                case "tsv":
-                    return DataSourceFormat.tsv;
-
-                case "json":
-                    return DataSourceFormat.multijson;
-
-                case "avro":
-                    return DataSourceFormat.avro;
-
-                case "parquet":
-                    return DataSourceFormat.parquet;
-                
-                case "orc":
-                    return DataSourceFormat.orc;
-
-                default:
-                    return DataSourceFormat.txt;
+                return UnknownFormatDefinition;
             }
+
+            var namePart = fileName.SplitLast(".", out var extension);
+
+            if (extension.Equals("zip", StringComparison.OrdinalIgnoreCase) || extension.Equals("gz", StringComparison.OrdinalIgnoreCase))
+            {
+                var result = GetFormatFromFileName(namePart);
+
+                return new FileFormatDefiniton(result.Format, result.Extension, DoNotCompress: true);
+            }
+
+            return GetFormatFromExtension(extension);
+        }
+
+        public static FileFormatDefiniton GetFormatFromExtension(string extension)
+        {
+            if (s_fileFormatDefinition.TryGetValue(extension, out var defintion))
+            {
+                return defintion;
+            }
+
+            return UnknownFormatDefinition;
         }
 
         public static IEnumerable<string> ExpandDropFileList(List<string> dropFiles, string? extension = null)
@@ -358,7 +380,7 @@ namespace Klipboard.Utils
         public static string CreateUploadFileName(string filename, string extension)
         {
             var stamp = GenerateUniqueStamp();
-            var upsteramFileName = string.IsNullOrWhiteSpace(extension)? $"{AppConstants.ApplicationName}_{stamp}" : $"{AppConstants.ApplicationName}_{stamp}.{extension}";
+            var upsteramFileName = string.IsNullOrWhiteSpace(extension)? $"{AppConstants.ApplicationName}_{filename}_{stamp}" : $"{AppConstants.ApplicationName}_{filename}_{stamp}.{extension}";
             return upsteramFileName;
         }
 

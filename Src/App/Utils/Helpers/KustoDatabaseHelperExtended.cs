@@ -13,21 +13,26 @@ namespace Klipboard.Utils
                 var tsvSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "tsv", firstRowIsHeader);
                 var multiJsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "multijson", firstRowIsHeader);
                 var jsonSchemaRes = await databaseHelper.TryGetBlobSchemeAsync(blobUri, format: "json", firstRowIsHeader);
-
-                var curScheme = csvSchemaRes;
-                if (tsvSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < tsvSchemaRes.TableScheme.Columns.Count))
-                {
-                    curScheme = tsvSchemaRes;
-                }
-
-                if (multiJsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < multiJsonSchemaRes.TableScheme.Columns.Count))
-                {
-                    curScheme = multiJsonSchemaRes;
-                }
+                
+                var curScheme = multiJsonSchemaRes;
 
                 if (jsonSchemaRes.Success && (!curScheme.Success || curScheme.TableScheme.Columns.Count < jsonSchemaRes.TableScheme.Columns.Count))
                 {
                     curScheme = jsonSchemaRes;
+                }
+
+                if (tsvSchemaRes.Success && 
+                    tsvSchemaRes.TableScheme.Columns.Count > 1 && 
+                    (!curScheme.Success || curScheme.TableScheme.Columns.Count < tsvSchemaRes.TableScheme.Columns.Count))
+                {
+                    curScheme = tsvSchemaRes;
+                }
+
+                if (csvSchemaRes.Success &&
+                    csvSchemaRes.TableScheme.Columns.Count > 1 &&
+                    (!curScheme.Success || curScheme.TableScheme.Columns.Count < csvSchemaRes.TableScheme.Columns.Count))
+                {
+                    curScheme = csvSchemaRes;
                 }
 
                 if (curScheme.Success)
