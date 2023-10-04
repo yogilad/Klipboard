@@ -301,7 +301,7 @@ namespace Klipboard.Utils
                 return UnknownFormatDefinition;
             }
 
-            var extension = fileName.SplitLast(".", out var namePart);
+            var namePart = fileName.SplitLast(".", out var extension);
 
             if (extension.Equals("zip", StringComparison.OrdinalIgnoreCase) || extension.Equals("gz", StringComparison.OrdinalIgnoreCase))
             {
