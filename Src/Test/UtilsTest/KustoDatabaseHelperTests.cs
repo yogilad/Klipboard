@@ -52,7 +52,7 @@ namespace Klipboard.Utils.Test
             var dt = DateTime.Now;
             var upsteramFileName = $"TestFile_{dt.Year}{dt.Month}{dt.Day}_{dt.Hour}{dt.Minute}{dt.Second}_{Guid.NewGuid().ToString()}.csv";
             var dataStream = new FileStream("C:\\Users\\yocha\\Desktop\\Klipboard Test Data\\snp.csv", FileMode.Open, FileAccess.Read);
-            var res = m_kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upsteramFileName).ConfigureAwait(false).ResultEx();
+            var res = m_kustoHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upsteramFileName, FileHelper.UnknownFormatDefinition).ConfigureAwait(false).ResultEx();
 
             blobUri = res.BlobUri;
             errorMsg = res.Error;
