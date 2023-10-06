@@ -24,7 +24,7 @@
 
         // App Name and Version
         public const string ApplicationName = "Klipboard";
-        public static readonly Version ApplicationVersion = new Version(0, 1, 0);
+        public static readonly Version ApplicationVersion = new Version(0, 1, 1);
 
         static AppConstants()
         {

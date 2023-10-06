@@ -122,6 +122,8 @@ namespace Klipboard.Utils
                 new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DateTimeType)),
                 new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DynamicType)),
                 new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.GuidType)),
+                // We do not check int due to duplication with long
+                // We do not check decimal due to duplication with real (even though it's range is higher)
                 // We do not check strings since everything is essentialy a string 
             };
 

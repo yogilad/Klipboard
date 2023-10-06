@@ -11,7 +11,10 @@
 ## Before Publishing a New Release
 1. Create a new PR named _v[Major].[Minor].\[Build\]_
 1. Update the version in `Src\App\Utils\Common\AppConstants.cs_` to _v[Major].[Minor].\[Build\]_
-1. In Visual Studio, click on the _Setup_ project and set the version in the properties pane to _v[Major].[Minor].\[Build\]_
+1. In Visual Studio, 
+	1. Select the _Setup_ project 
+	1. Set the version in the properties pane to _v[Major].[Minor].\[Build\]_
+	1. Confirm the dialog requesting _ProductCode_ change
 
 ## Build
 1. Run `publish.bat`
