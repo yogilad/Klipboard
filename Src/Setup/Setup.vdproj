@@ -37,14 +37,6 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
-            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
-            {
-            "Enabled" = "11:TRUE"
-            "PromptEnabled" = "11:TRUE"
-            "PrerequisitesLocation" = "2:1"
-            "Url" = "8:"
-            "ComponentsUrl" = "8:"
-            }
         }
         "Release"
         {
@@ -164,15 +156,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Klipborad"
-        "ProductCode" = "8:{E7710BB3-6260-4A19-9AC3-79E946786456}"
-        "PackageCode" = "8:{0CD72698-3C34-4BA6-AEA1-A77FCB72F26A}"
+        "ProductCode" = "8:{BC8672C4-4A15-4EA8-B05F-DC37846EF1EB}"
+        "PackageCode" = "8:{DC5EFBCC-9FBE-49FC-9DD9-97C36F364632}"
         "UpgradeCode" = "8:{BFC47E8D-EFD9-4D89-BD1C-114FD68478A6}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.1.1"
+        "ProductVersion" = "8:0.1.0"
         "Manufacturer" = "8:YochaiSoft"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/yogilad/Klipboard/wiki"
