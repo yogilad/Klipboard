@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Klipboard.Workers.Test", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Utils", "Test\TestUtils\Test.Utils.csproj", "{D2621805-9F4F-4343-A131-71AA7A386DEF}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{517FD98E-4126-4666-9701-9EA230EF4431}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,8 @@ Global
 		{D2621805-9F4F-4343-A131-71AA7A386DEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2621805-9F4F-4343-A131-71AA7A386DEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2621805-9F4F-4343-A131-71AA7A386DEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{517FD98E-4126-4666-9701-9EA230EF4431}.Debug|Any CPU.ActiveCfg = Debug
+		{517FD98E-4126-4666-9701-9EA230EF4431}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
