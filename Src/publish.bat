@@ -1,35 +1,28 @@
 echo off
 
-REM * Where is MSBUILD 
-set MSBUILD=msbuild.exe
-where msbuild.exe 
-if %errorlevel% equ 1 ( set MSBUILD="C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" )
-
 REM * Clean
 rmdir App\Klipboard\bin\Release /s /q
 rmdir App\Klipboard\bin\Publish /s /q
 
 REM * Build 
-%MSBUILD% -p:configuration=Release -t:restore
+dotnet restore -p:configuration=Release
 if %errorlevel% neq 0 ( goto BuildFailed)
 
-%MSBUILD% -p:configuration=Release -t:build
+dotnet build -p:configuration=Release
 if %errorlevel% neq 0 ( goto BuildFailed)
 
 REM * Publish
-%MSBUILD% /t:publish -p:configuration=Release /p:PublishProfile=ClickOnce -p:PublishDir="bin\Publish\Klipboard_Setup"
+dotnet publish -p:configuration=Release /p:PublishProfile=SetupProfile -p:PublishDir="bin\Publish\KlipboardSetup"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
-%MSBUILD% /t:publish -p:configuration=Release /p:PublishProfile=SingleFile -p:PublishDir="bin\Publish\Klipboard"
+dotnet publish -p:configuration=Release /p:PublishProfile=SingleFile -p:PublishDir="bin\Publish\Klipboard"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
 REM * Zip results
 cd App\Klipboard\bin\Publish\
-tar -acf Klipboard.zip "Klipboard\Klipboard.pdb" "Klipboard\Klipboard.exe"
+tar -acf Klipboard.zip Klipboard
 if %errorlevel% neq 0 ( goto BuildFailed)
-
-tar -acf Klipboard_Setup.zip "Klipboard_Setup"
-if %errorlevel% neq 0 ( goto BuildFailed)
+cd ..\..\..\..
 
 REM * Announce Success
 echo ****************
@@ -45,4 +38,3 @@ echo *************
 
 REM * Go back to Src dir
 :End
-cd ..\..\..\..
