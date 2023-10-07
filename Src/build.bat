@@ -18,12 +18,6 @@ if %errorlevel% neq 0 ( goto BuildFailed)
 dotnet publish -p:configuration=Release /p:PublishProfile=SingleFile -p:PublishDir="bin\Publish\Klipboard"
 if %errorlevel% neq 0 ( goto BuildFailed)
 
-REM * Zip results
-cd App\Klipboard\bin\Publish\
-tar -acf Klipboard.zip Klipboard
-if %errorlevel% neq 0 ( goto BuildFailed)
-cd ..\..\..\..
-
 REM * Announce Success
 echo ****************
 echo Build Succeeded!

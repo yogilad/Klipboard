@@ -17,13 +17,20 @@
 	1. Confirm the dialog requesting _ProductCode_ change
 
 ## Build
-1. Run `publish.bat`
+1. Run `build.bat` and confirm it ended sucessfully
 1. In Visual Studio, build the _Setup_ project
 
+## Pack
+1. Run `pack.bat` and confirm it ended sucessfully
+1. Make sure the following 2 zip files were created
+	1. `Src\App\bin\Publish\Klipboard.zip`
+	1. `Src\Setup\Release\KlipboardSetup.zip`
+
 ## Create a New Release
+1. Complete the version PR
 1. Go to release and create a new release.
 1. Set the release name to _v[Major].[Minor].\[Build\]_
 1. Set the release to create a tag with the value of _v[Major].[Minor].\[Build\]_
 1. Set the release notes including major changes included in the version
 1. Upload `Src\App\bin\Publish\Klipboard.zip`
-1. Upload `Src\Setup\Release\KlipboardSetup.msi`
+1. Upload `Src\Setup\Release\KlipboardSetup.zip`
