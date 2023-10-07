@@ -5,7 +5,7 @@ namespace Klipboard.Utils
 {
     public class AutoDispose : IDisposable
     {
-        Action m_disposeAction;
+        Action? m_disposeAction;
         
         public AutoDispose(Action disposeAction)
         {
