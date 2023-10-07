@@ -2,6 +2,9 @@
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
+using Kusto.Cloud.Platform.Utils;
+using Kusto.Data.Common;
+using Kusto.Ingest;
 
 namespace Klipboard.Utils
 {
@@ -69,6 +72,19 @@ namespace Klipboard.Utils
             return nameBuilder.ToString();
         }
 
+        public static string StrippedColumnName(string columnName)
+        {
+            columnName = columnName.Trim();
+
+            if ((columnName.StartsWith("['") || columnName.StartsWith("[\"")) &&
+                (columnName.EndsWith("']") || columnName.EndsWith("\"]")))
+            {
+                columnName = columnName.Substring(2, columnName.Length - 4);
+            }
+
+            return columnName;
+        }
+
         public override string ToString()
         {
             return ToSchemaString(strictEntityNaming: false);
@@ -109,6 +125,29 @@ namespace Klipboard.Utils
 
             schemaBuilder.Append(")");
             return schemaBuilder.ToString();
+        }
+
+        public IngestionMapping ToJsonMapping()
+        {
+            var mappingList = new List<ColumnMapping>();
+
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                var col = Columns[i];
+                var colMapping = new ColumnMapping(NormalizeColumnName(col.Name, i), 
+                    col.Type.Name, 
+                    new Dictionary<string, string>() { {"Path", $"$.{StrippedColumnName(col.Name)}"} });
+
+                mappingList.Add(colMapping);
+            }
+
+            var mapping = new IngestionMapping()
+            {
+                IngestionMappingKind = Kusto.Data.Ingestion.IngestionMappingKind.Json,
+                IngestionMappings = mappingList,
+            };
+
+            return mapping;
         }
     }
     #endregion
