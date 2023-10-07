@@ -149,7 +149,7 @@ namespace Klipboard.Workers
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri, firstRowIsHeader);
                 if (autoDetectRes.Success)
                 {
-                    schemaStr = autoDetectRes.Schema.ToString();
+                    schemaStr = autoDetectRes.Schema.ToSchemaString(strictEntityNaming: true);
                     formatDefinition = FileHelper.GetFormatFromExtension(autoDetectRes.Format);
                 }
                 else
@@ -162,7 +162,7 @@ namespace Klipboard.Workers
                 var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, formatDefinition.Extension, firstRowIsHeader);
                 if (schemaRes.Success)
                 {
-                    schemaStr = schemaRes.TableScheme.ToString();
+                    schemaStr = schemaRes.TableScheme.ToSchemaString(strictEntityNaming: true);
                 }
                 else
                 {
