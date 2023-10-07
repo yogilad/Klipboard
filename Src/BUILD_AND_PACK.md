@@ -17,10 +17,13 @@
 	1. Confirm the dialog requesting _ProductCode_ change
 
 ## Build
-1. Run `build.bat` and confirm it ended sucessfully
+1. Open a shell (cmd) window and CD into the Src directory
+1. Run the build script `build.bat [version]` where _[version]_ is _v[Major].[Minor].\[Build\]_
+1. Confirm the build had ended sucessfully
 1. In Visual Studio, build the _Setup_ project
 
 ## Pack
+1. Open a shell (cmd) window and CD into the Src directory
 1. Run `pack.bat` and confirm it ended sucessfully
 1. Make sure the following 2 zip files were created
 	1. `Src\App\bin\Publish\Klipboard.zip`
