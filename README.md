@@ -36,9 +36,22 @@ Easily query unstructured text with Kusto. Copy any multiline text or text file 
 If the data you commonly query has a fixed structure, you can set a Quick Actions predefined KQL to parse the data with.
 
 
-## Road Map
-* Queued, Direct and Streaming ingestion of data to existing or new tables.
-* UX Overhaul 
-* Multi platform using .NET MAUI
-* Ingestion Improvements: Ingestion Tags, Creation Time, file name and extension filtering.
-* Mapping file extensions to data formats or free parsing rules.
+# Road Map
+## Milestone #2 - Project Maturity
+* Logs
+* Proper Testing and E2Es
+* Signed application and installation
+
+## Milestone #3 - Mass Ingestion & UX Improvements
+* Improved Notifications
+* Action progress tracking  
+* Queued, Direct and Streaming ingestion to new or existing tables
+
+## Milestone #4 - Modern UX & Multi Platform
+* UX Overhaul using .NET MAUI
+* Multi platform support (Linux and Mac)
+
+## Milestone #5 - Functionality Improvements
+* Ingestion Improvements: Ingestion Tags, Creation Time, file name and extension filtering
+* Mapping file extensions to data formats
+* Supporting multiple free-text parsing rules
