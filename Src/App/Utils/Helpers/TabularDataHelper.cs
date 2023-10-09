@@ -134,7 +134,7 @@ namespace Klipboard.Utils
             for (int i = 0; i < Columns.Count; i++)
             {
                 var col = Columns[i];
-                var colMapping = new ColumnMapping(NormalizeColumnName(col.Name, i), 
+                var colMapping = new ColumnMapping(StrippedColumnName(NormalizeColumnName(col.Name, i)), 
                     col.Type.Name, 
                     new Dictionary<string, string>() { {"Path", $"$.{StrippedColumnName(col.Name)}"} });
 

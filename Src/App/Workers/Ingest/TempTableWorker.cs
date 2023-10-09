@@ -208,9 +208,12 @@ namespace Klipboard.Workers
                 TableName = tempTableName,
                 Format = formatDefinition.Format,
                 IgnoreFirstRecord = firstRowIsHeader,
-                // TODO: Mapping does not fully work
-                // IngestionMapping = mapping,
             };
+
+            if (mapping != null)
+            {
+                ingestionProperties.IngestionMapping = mapping;
+            }
 
             var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, ingestionProperties, storageOptions);
 
