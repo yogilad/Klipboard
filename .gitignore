@@ -1,5 +1,6 @@
-.vs
-.user
-.msi
+*.vs
+*.user
+*.msi
+*.zip
 **/bin/**
 **/obj/**

@@ -90,7 +90,7 @@ namespace Klipboard.Workers
 
                     if (autoDetectRes.Success)
                     {
-                        schemaStr = autoDetectRes.Schema.ToString();
+                        schemaStr = autoDetectRes.Schema.ToSchemaString();
                         format = autoDetectRes.Format;
                         break;
                     }
@@ -113,7 +113,7 @@ namespace Klipboard.Workers
                     var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format, firstrowIsHeader);
                     if (schemaRes.Success)
                     {
-                        schemaStr = schemaRes.TableScheme.ToString();
+                        schemaStr = schemaRes.TableScheme.ToSchemaString();
                         break;
                     }
 

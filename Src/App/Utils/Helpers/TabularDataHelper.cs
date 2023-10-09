@@ -2,6 +2,9 @@
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
+using Kusto.Cloud.Platform.Utils;
+using Kusto.Data.Common;
+using Kusto.Ingest;
 
 namespace Klipboard.Utils
 {
@@ -9,14 +12,26 @@ namespace Klipboard.Utils
     public class TableColumns
     {
         private static char[] s_allowedSigns = { ' ', '-', '_', '.'};
-        private bool m_disableNameEscaping;
         public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
-        public TableColumns(bool disableNameEscaping = false)
+        public static string EscapeColumnName(string columnName, int columnIndex = 0)
         {
-            m_disableNameEscaping = disableNameEscaping;
-        }
+            columnName = columnName.Trim();
 
+            if ((columnName.StartsWith("['") || columnName.StartsWith("[\"")) &&
+                (columnName.EndsWith("']") || columnName.EndsWith("\"]")))
+            {
+                return columnName;
+            }
+
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                return $"['Column_{columnIndex}']";
+            }
+
+            columnName = columnName.Replace("'", "\\'");
+            return $"['{columnName}']";
+        }
 
         public static string NormalizeColumnName(string columnName, int columnIndex = 0)
         {
@@ -30,7 +45,7 @@ namespace Klipboard.Utils
 
             if (string.IsNullOrWhiteSpace(columnName))
             {
-                return $"Column_{columnIndex}";
+                return $"['Column_{columnIndex}']";
             }
 
             var nameBuilder = new StringBuilder();
@@ -57,7 +72,25 @@ namespace Klipboard.Utils
             return nameBuilder.ToString();
         }
 
+        public static string StrippedColumnName(string columnName)
+        {
+            columnName = columnName.Trim();
+
+            if ((columnName.StartsWith("['") || columnName.StartsWith("[\"")) &&
+                (columnName.EndsWith("']") || columnName.EndsWith("\"]")))
+            {
+                columnName = columnName.Substring(2, columnName.Length - 4);
+            }
+
+            return columnName;
+        }
+
         public override string ToString()
+        {
+            return ToSchemaString(strictEntityNaming: false);
+        }
+
+        public string ToSchemaString(bool strictEntityNaming = false)
         {
             var schemaBuilder = new StringBuilder();
             var notFirstCol = false;
@@ -74,9 +107,13 @@ namespace Klipboard.Utils
                     schemaBuilder.Append(", ");
                 }
 
-                if(!m_disableNameEscaping)
+                if(strictEntityNaming)
                 {
                     columnName = NormalizeColumnName(Columns[i].Name, i);
+                }
+                else
+                {
+                    columnName = EscapeColumnName(Columns[i].Name, i);
                 }
 
                 schemaBuilder.Append(columnName);
@@ -88,6 +125,29 @@ namespace Klipboard.Utils
 
             schemaBuilder.Append(")");
             return schemaBuilder.ToString();
+        }
+
+        public IngestionMapping ToJsonMapping()
+        {
+            var mappingList = new List<ColumnMapping>();
+
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                var col = Columns[i];
+                var colMapping = new ColumnMapping(StrippedColumnName(NormalizeColumnName(col.Name, i)), 
+                    col.Type.Name, 
+                    new Dictionary<string, string>() { {"Path", $"$.{StrippedColumnName(col.Name)}"} });
+
+                mappingList.Add(colMapping);
+            }
+
+            var mapping = new IngestionMapping()
+            {
+                IngestionMappingKind = Kusto.Data.Ingestion.IngestionMappingKind.Json,
+                IngestionMappings = mappingList,
+            };
+
+            return mapping;
         }
     }
     #endregion
@@ -259,7 +319,7 @@ namespace Klipboard.Utils
             };
 
             queryBuilder.Append("let Klipboard = datatable");
-            queryBuilder.AppendLine(tableScheme.ToString());
+            queryBuilder.AppendLine(tableScheme.ToSchemaString());
             queryBuilder.AppendLine("[");
 
             if (firstRowIsHeader)

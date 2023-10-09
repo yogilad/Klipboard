@@ -1,8 +1,8 @@
 ﻿using System.Text;
+using Kusto.Data.Common;
 using Kusto.Ingest;
 
 using Klipboard.Utils;
-using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard.Workers
 {
@@ -143,14 +143,24 @@ namespace Klipboard.Workers
             }
 
             string schemaStr = AppConstants.TextLinesSchemaStr;
+            IngestionMapping mapping = null;
 
             if (formatDefinition.Extension == AppConstants.UnknownFormat)
             {
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri, firstRowIsHeader);
                 if (autoDetectRes.Success)
                 {
-                    schemaStr = autoDetectRes.Schema.ToString();
+                    schemaStr = autoDetectRes.Schema.ToSchemaString(strictEntityNaming: true);
                     formatDefinition = FileHelper.GetFormatFromExtension(autoDetectRes.Format);
+                    
+                    switch(formatDefinition.Format) 
+                    {
+                        case DataSourceFormat.json:
+                        case DataSourceFormat.singlejson:
+                        case DataSourceFormat.multijson:
+                            mapping = autoDetectRes.Schema.ToJsonMapping();
+                            break;
+                    }
                 }
                 else
                 {
@@ -162,7 +172,16 @@ namespace Klipboard.Workers
                 var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, formatDefinition.Extension, firstRowIsHeader);
                 if (schemaRes.Success)
                 {
-                    schemaStr = schemaRes.TableScheme.ToString();
+                    schemaStr = schemaRes.TableScheme.ToSchemaString(strictEntityNaming: true);
+
+                    switch (formatDefinition.Format)
+                    {
+                        case DataSourceFormat.json:
+                        case DataSourceFormat.singlejson:
+                        case DataSourceFormat.multijson:
+                            mapping = schemaRes.TableScheme.ToJsonMapping();
+                            break;
+                    }
                 }
                 else
                 {
@@ -190,6 +209,11 @@ namespace Klipboard.Workers
                 Format = formatDefinition.Format,
                 IgnoreFirstRecord = firstRowIsHeader,
             };
+
+            if (mapping != null)
+            {
+                ingestionProperties.IngestionMapping = mapping;
+            }
 
             var uploadBlobRes = await databaseHelper.TryDirectIngestStorageToTable(uploadRes.BlobUri, ingestionProperties, storageOptions);
 

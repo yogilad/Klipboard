@@ -12,21 +12,29 @@ namespace Klipboard
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
+            if (!OpSysHelper.TryAcquireSingleProcessLock(out var processLock)) 
+            {
+                return;
+            }
 
-            var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
-            var clipboardHelper = new ClipboardHelper();
+            using (processLock)
+            {
+                // To customize application configuration such as set high DPI settings or default font,
+                // see https://aka.ms/applicationconfiguration.
+                ApplicationConfiguration.Initialize();
 
-            var workers = CreateWorkers(settings);
-            using var notificationIcon = new NotificationIcon(workers, clipboardHelper);
+                var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
+                var clipboardHelper = new ClipboardHelper();
 
-            VersionHelper.StartPolling();
+                var workers = CreateWorkers(settings);
+                using var notificationIcon = new NotificationIcon(workers, clipboardHelper);
 
-            Application.Run();
+                VersionHelper.StartPolling();
 
-            VersionHelper.StopPolling();
+                Application.Run();
+
+                VersionHelper.StopPolling();
+            }
         }
 
         private static List<WorkerUxConfig> CreateWorkers(ISettings settings)
