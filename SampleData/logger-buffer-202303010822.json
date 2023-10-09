@@ -1,0 +1,12 @@
+﻿{"@t":"2023-01-19T11:18:42.0839560Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_Streaming Processed {@Position} in {Elapsed:000} ms.","@r":["034"],"@l":"Verbose","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1063820Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1065130Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"@l":"Warning","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1066090Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingException occurred","@l":"Error"}
+{"@t":"2023-01-19T11:18:42.1066780Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms. ","@r":["034"],"@l":"Debug","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1066980Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"@l":"Verbose","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1067090Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1067210Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"@l":"Warning","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1067310Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingException occurred","@l":"Error"}
+{"@t":"2023-01-19T11:18:42.1067360Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms. ","@r":["034"],"@l":"Debug","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1067450Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"@l":"Verbose","Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
+{"@t":"2023-01-19T11:18:42.1067540Z","@mt":"Test_AzureDataExplorer_Durable_Serilog_Sink_StreamingProcessed {@Position} in {Elapsed:000} ms.","@r":["034"],"Position":{"Latitude":25,"Longitude":134},"Elapsed":34}
