@@ -12,59 +12,58 @@ namespace Klipboard.Workers
         {
         }
 
-        public override string GetMenuText(ClipboardContent content) => "Preview Clipboard Content";
+        public override string GetMenuText(ClipboardContent content) => "View Clipboard Content";
 
         public override string GetToolTipText() => "Display a preview of Clipboard Data";
 
-        public override bool IsMenuVisible() => AppConstants.DevMode;
+        public override bool IsMenuVisible() => true;
 
         public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
         {
-            var contentBuilder = new StringBuilder();
-            int length = csvData.Length / 1024;
-            length += (csvData.Length % 1024 > 0) ? 1:0;
-
-            contentBuilder.Append("Clipborad contains ~");
-            contentBuilder.Append(length.ToString());
-            contentBuilder.AppendLine("KBs of structured data:");
-            contentBuilder.AppendLine();
-            contentBuilder.AppendLine(csvData);
-
-            ShowDialog(contentBuilder.ToString());
+            ShowDialog("Table Data", ToSizeString(csvData.Length), csvData);
         }
 
         public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
         {
-            var contentBuilder = new StringBuilder();
-            int length = textData.Length / 1024;
-            length += (textData.Length % 1024 > 0) ? 1 : 0;
-
-            contentBuilder.Append("Clipborad contains ~");
-            contentBuilder.Append(length.ToString());
-            contentBuilder.AppendLine("KBs of unstructured text data:");
-            contentBuilder.AppendLine();
-            contentBuilder.AppendLine(textData);
-
-            ShowDialog(contentBuilder.ToString());
+            ShowDialog("Free Text", ToSizeString(textData.Length), textData);
         }
 
         public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
         {
             var contentBuilder = new StringBuilder();
 
-            contentBuilder.Append("Clipborad contains ");
-            contentBuilder.Append(filesAndFolders.Count);
-            contentBuilder.AppendLine(" files and folders:");
-            contentBuilder.AppendLine();
-
             foreach (var file in filesAndFolders)
             {
                 contentBuilder.AppendLine(file ?? "file item is null");
             }
 
-            ShowDialog(contentBuilder.ToString());
+            ShowDialog("Files", filesAndFolders.Count.ToString(), contentBuilder.ToString());
         }
 
-        public abstract void ShowDialog(string content);
+        public abstract void ShowDialog(string contentType, string size, string content);
+
+        public static string ToSizeString(double size)
+        {
+            const int KB = 1024;
+            const int MB = KB* 1024;
+            const int GB = MB * 1024;
+
+            if (size < KB)
+            {
+                return $"{size:F0} bytes";
+            }
+            
+            if (size < MB)
+            {
+                return $"{size/KB:F2} KB";
+            }
+
+            if (size < GB)
+            {
+                return $"{size/MB:F2} MBs";
+            }
+
+            return $"~{size/MB:F2} GBs";
+        }
     }
 }
