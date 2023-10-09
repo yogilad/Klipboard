@@ -10,9 +10,9 @@ namespace Klipboard
         {
         }
 
-        public override void ShowDialog(string content)
+        public override void ShowDialog(string contentType, string size, string content)
         {
-            var form = new InspectForm(content);
+            var form = new InspectForm(contentType, size, content);
             form.ShowDialog();
         }
     }
