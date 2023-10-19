@@ -135,7 +135,7 @@ namespace Klipboard
 
         public void SendNotification(string title, string message)
         {
-            m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None);
+            ToastNotifcationHelper.ShowBasicToast(title, message);
         }
     }
 }
