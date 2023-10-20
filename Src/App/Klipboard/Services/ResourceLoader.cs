@@ -12,7 +12,7 @@ namespace Klipboard
         static ResourceLoader()
         {
 #if DEBUG
-            KustoColorIcon = new Icon(LoadResourceAsStream("letter-k.ico", "Resources"));
+            KustoColorIcon = new Icon(LoadResourceAsStream("adx_grey.ico", "Resources"));
 #else
             KustoColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
 #endif
