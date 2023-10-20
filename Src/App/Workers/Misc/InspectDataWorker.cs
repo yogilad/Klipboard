@@ -7,8 +7,8 @@ namespace Klipboard.Workers
 {
     public abstract class InspectDataWorker : WorkerBase
     {
-        public InspectDataWorker(ISettings settings)
-            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings)
+        public InspectDataWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper)
         {
         }
 
@@ -18,17 +18,17 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
+        public override async Task HandleCsvAsync(string csvData, string? chosenOptions)
         {
             ShowDialog("Table Data", ToSizeString(csvData.Length), csvData);
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
+        public override async Task HandleTextAsync(string textData, string? chosenOptions)
         {
             ShowDialog("Free Text", ToSizeString(textData.Length), textData);
         }
 
-        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleFilesAsync(List<string> filesAndFolders, string? chosenOption)
         {
             var contentBuilder = new StringBuilder();
 

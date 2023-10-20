@@ -5,8 +5,8 @@ namespace Klipboard
 {
     public class DirectIngestWorkerUx : IngestWorkerUxBase
     {
-        public DirectIngestWorkerUx(ISettings settings) 
-            : base(settings)
+        public DirectIngestWorkerUx(ISettings settings, INotificationHelper notificationHelper) 
+            : base(settings, notificationHelper)
         {
         }
 

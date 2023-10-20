@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class NewVersionWorker : WorkerBase
     {
-        public NewVersionWorker(ISettings settings)
-            : base(ClipboardContent.None, settings)
+        public NewVersionWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.None, settings, notificationHelper)
         {
         }
 
@@ -18,7 +18,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => VersionHelper.HasNewVersion;
 
-        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleAsync(string? chosenOption)
         {
             OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/releases");
         }

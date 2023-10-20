@@ -5,8 +5,8 @@ namespace Klipboard
 {
     public class InspectDataUxWorker : InspectDataWorker
     {
-        public InspectDataUxWorker(ISettings settings) 
-            : base(settings)
+        public InspectDataUxWorker(ISettings settings, INotificationHelper notificationHelper) 
+            : base(settings, notificationHelper)
         {
         }
 

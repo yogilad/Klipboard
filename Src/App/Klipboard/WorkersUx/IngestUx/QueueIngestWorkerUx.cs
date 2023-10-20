@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class QueueIngestWorkerUx : IngestWorkerUxBase
     {
-        public QueueIngestWorkerUx(ISettings settings)
-            : base(settings)
+        public QueueIngestWorkerUx(ISettings settings, INotificationHelper notificationHelper)
+            : base(settings, notificationHelper)
         {
         }
 

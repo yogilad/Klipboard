@@ -25,9 +25,10 @@ namespace Klipboard
 
                 var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
                 var clipboardHelper = new ClipboardHelper();
+                var notificationHelper = new NotificationHelper();
 
-                var workers = CreateWorkers(settings);
-                using var notificationIcon = new NotificationIcon(workers, clipboardHelper);
+                var workers = CreateWorkers(settings, notificationHelper);
+                using var notificationIcon = new NotificationIcon(workers, clipboardHelper, notificationHelper);
 
                 VersionHelper.StartPolling();
 
@@ -37,26 +38,26 @@ namespace Klipboard
             }
         }
 
-        private static List<WorkerUxConfig> CreateWorkers(ISettings settings)
+        private static List<WorkerUxConfig> CreateWorkers(ISettings settings, INotificationHelper notificationHelper)
         {
             var workers = new List<WorkerUxConfig>();
 
-            workers.Add(new WorkerUxConfig(new QuickActionsUxWorker(settings), WorkerCategory.QuickActions, Icon: ResourceLoader.KustoColorIcon));
-            workers.Add(new WorkerUxConfig(new StructuredDataInlineQueryWorker(settings), WorkerCategory.QuickActions));
-            workers.Add(new WorkerUxConfig(new FreeTextInlineQueryWorker(settings), WorkerCategory.QuickActions));
-            workers.Add(new WorkerUxConfig(new ExternalDataQueryWorker(settings), WorkerCategory.QuickActions));
-            workers.Add(new WorkerUxConfig(new TempTableWorker(settings), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUxConfig(new QuickActionsUxWorker(settings, notificationHelper), WorkerCategory.QuickActions, Icon: ResourceLoader.KustoColorIcon));
+            workers.Add(new WorkerUxConfig(new StructuredDataInlineQueryWorker(settings, notificationHelper), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUxConfig(new FreeTextInlineQueryWorker(settings, notificationHelper), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUxConfig(new ExternalDataQueryWorker(settings, notificationHelper), WorkerCategory.QuickActions));
+            workers.Add(new WorkerUxConfig(new TempTableWorker(settings, notificationHelper), WorkerCategory.QuickActions));
 
             // Actions
-            workers.Add(new WorkerUxConfig(new QueueIngestWorkerUx(settings), WorkerCategory.Actions));
-            workers.Add(new WorkerUxConfig(new StreamIngestWorkerUx(settings), WorkerCategory.Actions));
-            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
-            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings), WorkerCategory.Actions));
+            workers.Add(new WorkerUxConfig(new QueueIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions));
+            workers.Add(new WorkerUxConfig(new StreamIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions));
+            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
+            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings, notificationHelper), WorkerCategory.Actions));
 
             // Management
-            workers.Add(new WorkerUxConfig(new NewVersionWorker(settings), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
-            workers.Add(new WorkerUxConfig(new SettingsUxWorker(settings), WorkerCategory.Management));
-            workers.Add(new WorkerUxConfig(new HelpWorker(settings), WorkerCategory.Management));
+            workers.Add(new WorkerUxConfig(new NewVersionWorker(settings, notificationHelper), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));
+            workers.Add(new WorkerUxConfig(new SettingsUxWorker(settings, notificationHelper), WorkerCategory.Management));
+            workers.Add(new WorkerUxConfig(new HelpWorker(settings, notificationHelper), WorkerCategory.Management));
             return workers;
         }
     }

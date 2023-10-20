@@ -15,8 +15,8 @@ namespace Klipboard.Workers
         private const string About          = "About";
 
 
-        public HelpWorker(ISettings settings)
-            : base(ClipboardContent.None, settings, new List<string> { Help, Share, FreeCluster, Report, Updates, SignOut, About })
+        public HelpWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, Share, FreeCluster, Report, Updates, SignOut, About })
         {
         }
 
@@ -26,7 +26,7 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleAsync(string? chosenOption)
         {
             switch(chosenOption)
             {
@@ -36,7 +36,7 @@ namespace Klipboard.Workers
 
                 case About:
                     var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/Wiki";
-                    sendNotification(AppConstants.ApplicationName, msg);
+                    m_notificationHelper.ShowBasicNotification(AppConstants.ApplicationName, msg);
                     break;
 
                 case SignOut:
@@ -63,11 +63,11 @@ namespace Klipboard.Workers
                 case Updates:
                     if (await VersionHelper.CheckForNewVersion())
                     {
-                        sendNotification(AppConstants.ApplicationName, $"Version {VersionHelper.LatestVersion} is available for download");
+                        m_notificationHelper.ShowBasicNotification(AppConstants.ApplicationName, $"Version {VersionHelper.LatestVersion} is available for download");
                     }
                     else 
                     {
-                        sendNotification(AppConstants.ApplicationName, "You are running the latest version.");
+                        m_notificationHelper.ShowBasicNotification(AppConstants.ApplicationName, "You are running the latest version.");
                     }
                     break;
             }

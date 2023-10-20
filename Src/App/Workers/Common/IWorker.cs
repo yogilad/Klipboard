@@ -10,8 +10,6 @@ namespace Klipboard.Workers
         Debug
     }
 
-    public delegate void SendNotification(string title, string message);
-
     public interface IWorker
     {
         ClipboardContent SupportedContent { get; }
@@ -20,13 +18,13 @@ namespace Klipboard.Workers
         bool IsMenuEnabled(ClipboardContent content);
         string GetMenuText(ClipboardContent content);
         string GetToolTipText();
-        Task HandleAsync(SendNotification sendNotification, string? chosenOption);
-        Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOption);
-        Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOption);
-        Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption);
+        Task HandleAsync(string? chosenOption);
+        Task HandleCsvAsync(string csvData, string? chosenOption);
+        Task HandleTextAsync(string textData, string? chosenOption);
+        Task HandleFilesAsync(List<string> filesAndFolders, string? chosenOption);
         
         // Unused - consider removing if no need to handle streams
-        Task HandleCsvStreamAsync(Stream csvData, SendNotification sendNotification);
-        Task HandleTextStreamAsync(Stream textData, SendNotification sendNotification);
+        Task HandleCsvStreamAsync(Stream csvData);
+        Task HandleTextStreamAsync(Stream textData);
     }
 }

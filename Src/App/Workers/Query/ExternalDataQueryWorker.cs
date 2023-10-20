@@ -12,8 +12,8 @@ namespace Klipboard.Workers
         private const string FirstRowIsHeader = "First Row Is Header";
         private const string NoHeaderRow = "No Header Row";
 
-        public ExternalDataQueryWorker(ISettings settings)
-            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, new List<string> { FirstRowIsHeader, NoHeaderRow })
+        public ExternalDataQueryWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper, new List<string> { FirstRowIsHeader, NoHeaderRow })
         {
         }
 
@@ -23,27 +23,27 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Upload clipboard tabular data , free text or a single file to a blob and invoke a an external data query on it";
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleCsvAsync(string csvData, string? chosenOption)
         {
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            await HandleStreamAsync(csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, chosenOption);
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleTextAsync(string textData, string? chosenOption)
         {
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            await HandleStreamAsync(textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, chosenOption);
         }
 
-        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleFilesAsync(List<string> files, string? chosenOption)
         {
             if (files.Count > 1)
             {
-                sendNotification(NotificationTitle, "External data query only supports a single file.");
+                m_notificationHelper.ShowBasicNotification(NotificationTitle, "External data query only supports a single file.");
             }
 
             var file = files[0];
@@ -51,13 +51,13 @@ namespace Klipboard.Workers
 
             if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                sendNotification(NotificationTitle, "External data query does not support directories.");
+                m_notificationHelper.ShowBasicNotification(NotificationTitle, "External data query does not support directories.");
                 return;
             }
 
             if (!fileInfo.Exists)
             {
-                sendNotification(NotificationTitle, $"File '{file}' does not exist.");
+                m_notificationHelper.ShowBasicNotification(NotificationTitle, $"File '{file}' does not exist.");
             }
 
             var dt = DateTime.Now;
@@ -65,10 +65,10 @@ namespace Klipboard.Workers
             var formatDefintion = FileHelper.GetFormatFromFileName(fileInfo.Name);
             using var dataStream = File.OpenRead(file);
 
-            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, sendNotification, chosenOption);
+            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, chosenOption);
         }
 
-        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, SendNotification sendNotification, string? chosenOption)
+        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, string? chosenOption)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion);
@@ -76,7 +76,7 @@ namespace Klipboard.Workers
 
             if (!uploadRes.Success)
             {
-                sendNotification(NotificationTitle, $"Failed to upload file: {uploadRes.Error}");
+                m_notificationHelper.ShowExtendedNotification(NotificationTitle, $"Failed to upload file", uploadRes.Error);
                 return;
             }
 
@@ -163,7 +163,7 @@ namespace Klipboard.Workers
             var query = queryBuilder.ToString();
             if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
-                sendNotification(NotificationTitle, error ?? "Unknown error.");
+                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to invoke external data query", error ?? "Unknown error.");
                 return;
             }
         }

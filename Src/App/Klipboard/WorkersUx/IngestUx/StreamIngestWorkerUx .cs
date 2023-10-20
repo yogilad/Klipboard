@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class StreamIngestWorkerUx : IngestWorkerUxBase
     {
-        public StreamIngestWorkerUx(ISettings settings) 
-            : base(settings)
+        public StreamIngestWorkerUx(ISettings settings, INotificationHelper notificationHelper) 
+            : base(settings, notificationHelper)
         {
         }
 
