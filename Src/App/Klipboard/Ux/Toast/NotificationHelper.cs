@@ -134,6 +134,22 @@ namespace Klipboard
             // Update the existing notification's data by using tag/group
             ToastNotificationManagerCompat.CreateToastNotifier().Update(data, m_tag);
         }
+
+        public void CloseNotification(int withinSeconds = 0)
+        {
+            if (withinSeconds == 0)
+            {
+                ToastNotificationManagerCompat.History.Remove(m_tag);
+            }
+            else
+            {
+                Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(withinSeconds));
+                    ToastNotificationManagerCompat.History.Remove(m_tag);
+                });
+            }
+        }
     }
     #endregion
 

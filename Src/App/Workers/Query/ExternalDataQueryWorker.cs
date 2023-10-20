@@ -71,18 +71,27 @@ namespace Klipboard.Workers
         private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, string? chosenOption)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
+            var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Querying {upstreamFileName}");
+
+            // Step #1
+            progressNotification.UpdateProgress("Uploading data", 0 / 3.0, "step 1/3");
+
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion);
-            var firstrowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, $"Failed to upload file", uploadRes.Error);
                 return;
             }
 
-            string schemaStr = AppConstants.TextLinesSchemaStr;
+            // Step #2 
+            progressNotification.UpdateProgress("Detecting Schema", 1 / 3.0, "step 2/3");
 
+            string schemaStr = AppConstants.TextLinesSchemaStr;
             var format = formatDefintion.Extension;
+
             switch (format)
             {
                 case AppConstants.UnknownFormat:
@@ -110,7 +119,7 @@ namespace Klipboard.Workers
                 case "orc":
                 case "parquet":
                 case "avro":
-                    var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format, firstrowIsHeader);
+                    var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format, firstRowIsHeader);
                     if (schemaRes.Success)
                     {
                         schemaStr = schemaRes.TableScheme.ToSchemaString();
@@ -124,6 +133,9 @@ namespace Klipboard.Workers
                     format = "txt";
                     break;
             }
+
+            // Step #3 
+            progressNotification.UpdateProgress("Running Query", 2 / 3.0, "step 2/3");
 
             var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
@@ -148,7 +160,7 @@ namespace Klipboard.Workers
             }
 
             queryBuilder.Append("ignoreFirstRecord = ");
-            queryBuilder.Append(firstrowIsHeader);
+            queryBuilder.Append(firstRowIsHeader);
             queryBuilder.AppendLine(");");
             queryBuilder.AppendLine("Klipboard");
 
@@ -166,6 +178,9 @@ namespace Klipboard.Workers
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to invoke external data query", error ?? "Unknown error.");
                 return;
             }
+
+            progressNotification.UpdateProgress("Query Launched", 3 / 3.0, "step 3/3");
+            progressNotification.CloseNotification(withinSeconds: 5);
         }
     }
 }

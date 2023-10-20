@@ -38,5 +38,11 @@
         /// <param name="progress">A numeric progress between 0 and 1</param>
         /// <param name="progressString">A string progress</param>
         void UpdateProgress(string status, double progress, string progressString);
+
+        /// <summary>
+        /// Close a notification within the allotted time
+        /// </summary>
+        /// <param name="withinSeconds">Seconds to wait before closing the notification</param>
+        void CloseNotification(int withinSeconds = 0);
     }
 }
