@@ -62,6 +62,9 @@
     <Compile Update="Settings\Settings.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Ux\TextView\TextViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

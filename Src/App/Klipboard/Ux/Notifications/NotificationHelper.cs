@@ -29,7 +29,8 @@ namespace Klipboard
                     case "MessageBox":
                         args.TryGetValue("title", out var title);
                         args.TryGetValue("message", out var message);
-                        MessageBox.Show(message, title, MessageBoxButtons.OK);
+                        args.TryGetValue("details", out var details);
+                        new TextViewForm(title, message, details, wordWrap: true).ShowDialog();
                         break;
                 }
             };
@@ -54,7 +55,9 @@ namespace Klipboard
             var buttonArgs = new ToastArguments()
                 .Add("action", "MessageBox")
                 .Add("title", title)
-                .Add("message", extraDetails);
+                .Add("message", shortMessage)
+                .Add("details", extraDetails);
+
 
             new ToastContentBuilder()
                 .AddText(title)
