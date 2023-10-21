@@ -318,6 +318,7 @@ namespace Klipboard.Utils
                 HasFieldsEnclosedInQuotes = true,
             };
 
+            queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
             queryBuilder.Append("let Klipboard = datatable");
             queryBuilder.AppendLine(tableScheme.ToSchemaString());
             queryBuilder.AppendLine("[");
@@ -363,6 +364,7 @@ namespace Klipboard.Utils
             var streamReader = new StreamReader(stream);
             var queryBuilder = new StringBuilder();
 
+            queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
             queryBuilder.AppendLine("let Klipboard = datatable(['Line']:string)");
             queryBuilder.AppendLine("[");
 

@@ -271,6 +271,7 @@ namespace Klipboard.Workers
             progressNotification.UpdateProgress("Running Query", 0.9, "");
             var target = GetQuickActionTarget();
             var query = new StringBuilder()
+                .AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)")
                 .Append("['")
                 .Append(tempTableName)
                 .AppendLine("']")

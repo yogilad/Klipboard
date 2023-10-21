@@ -142,6 +142,7 @@ namespace Klipboard.Workers
             var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
 
+            queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
             queryBuilder.AppendLine("let Klipboard =");
             queryBuilder.Append("externaldata");
             queryBuilder.AppendLine(schemaStr);
