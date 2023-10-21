@@ -23,10 +23,12 @@
         /// Show a progress notification
         /// Returns an object allowing to update progress of the new notification 
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="shortMessage"></param>
+        /// <param name="title">Notification Title</param>
+        /// <param name="shortMessage">Notification Message</param>
+        /// <param name="step">The current running step</param>
+        /// <param name="progressString">A textual progress string</param>
         /// <returns>ProgressNotificationUpdater class instance linked to the new created notification</returns>
-        IProgressNotificationUpdater ShowProgressNotification(string title, string shortMessage);
+        IProgressNotificationUpdater ShowProgressNotification(string title, string shortMessage, string step = "", string progressString = "");
     }
 
     public interface IProgressNotificationUpdater
@@ -34,10 +36,10 @@
         /// <summary>
         /// Update the progress of the notification
         /// </summary>
-        /// <param name="status">the current operation stage</param>
+        /// <param name="step">the current running step</param>
         /// <param name="progress">A numeric progress between 0 and 1</param>
-        /// <param name="progressString">A string progress</param>
-        void UpdateProgress(string status, double progress, string progressString);
+        /// <param name="progressString">A textual progress string</param>
+        void UpdateProgress(string step, double progress, string progressString);
 
         /// <summary>
         /// Close a notification within the allotted time

@@ -26,17 +26,19 @@ namespace Klipboard.Workers
         public override async Task HandleCsvAsync(string csvData, string? chosenOption)
         {
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard Table", "Preparing Data", "Step 1/4");
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            await HandleStreamAsync(csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, chosenOption);
+            await HandleStreamAsync(csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, chosenOption, progressNotification);
         }
 
         public override async Task HandleTextAsync(string textData, string? chosenOption)
         {
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard Text", "Preparing Data", "Step 1/4");
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            await HandleStreamAsync(textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, chosenOption);
+            await HandleStreamAsync(textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, chosenOption, progressNotification);
         }
 
         public override async Task HandleFilesAsync(List<string> files, string? chosenOption)
@@ -60,22 +62,22 @@ namespace Klipboard.Workers
                 m_notificationHelper.ShowBasicNotification(NotificationTitle, $"File '{file}' does not exist.");
             }
 
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard File", "Preparing Data", "Step 1/4");
             var dt = DateTime.Now;
             var upsteramFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
             var formatDefintion = FileHelper.GetFormatFromFileName(fileInfo.Name);
             using var dataStream = File.OpenRead(file);
 
-            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, chosenOption);
+            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, chosenOption, progressNotification);
         }
 
-        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, string? chosenOption)
+        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, string? chosenOption, IProgressNotificationUpdater progressNotification)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
-            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Querying {upstreamFileName}");
 
             // Step #1
-            progressNotification.UpdateProgress("Uploading data", 0 / 3.0, "step 1/3");
+            progressNotification.UpdateProgress("Uploading data", 1 / 4.0, "step 2/4");
 
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion);
 
@@ -87,7 +89,7 @@ namespace Klipboard.Workers
             }
 
             // Step #2 
-            progressNotification.UpdateProgress("Detecting Schema", 1 / 3.0, "step 2/3");
+            progressNotification.UpdateProgress("Detecting Schema", 2 / 4.0, "step 3/4");
 
             string schemaStr = AppConstants.TextLinesSchemaStr;
             var format = formatDefintion.Extension;
@@ -135,7 +137,7 @@ namespace Klipboard.Workers
             }
 
             // Step #3 
-            progressNotification.UpdateProgress("Running Query", 2 / 3.0, "step 2/3");
+            progressNotification.UpdateProgress("Running Query", 2 / 4.0, "step 4/4");
 
             var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
@@ -179,7 +181,7 @@ namespace Klipboard.Workers
                 return;
             }
 
-            progressNotification.UpdateProgress("Query Launched", 3 / 3.0, "step 3/3");
+            progressNotification.UpdateProgress("Query Launched", 4 / 4.0, "step 4/4");
             progressNotification.CloseNotification(withinSeconds: 5);
         }
     }

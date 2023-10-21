@@ -69,7 +69,7 @@ namespace Klipboard
                 });
         }
 
-        public IProgressNotificationUpdater ShowProgressNotification(string title, string shortMessage)
+        public IProgressNotificationUpdater ShowProgressNotification(string title, string shortMessage, string step = "", string progressString = "")
         {
             // Define a tag (and optionally a group) to uniquely identify the notification, in order update the notification data later;
             string tag = Guid.NewGuid().ToString();
@@ -90,8 +90,8 @@ namespace Klipboard
                     toast.Tag = tag;
                     toast.Data = new NotificationData();
                     toast.Data.Values["progressValue"] = "0.0";
-                    toast.Data.Values["progressValueString"] = "";
-                    toast.Data.Values["progressStatus"] = "";
+                    toast.Data.Values["progressValueString"] = progressString;
+                    toast.Data.Values["progressStatus"] = step;
                     toast.Data.SequenceNumber = 1;
                 });
 
@@ -112,7 +112,7 @@ namespace Klipboard
             m_sequence = 1;
         }
 
-        public void UpdateProgress(string status, double progress, string progressString)
+        public void UpdateProgress(string step, double progress, string progressString)
         {
             var data = new NotificationData
             {
@@ -126,7 +126,7 @@ namespace Klipboard
             // Assign new values
             // Note that you only need to assign values that changed. In this example
             // we don't assign progressStatus since we don't need to change it
-            data.Values["progressStatus"] = status;
+            data.Values["progressStatus"] = step;
             data.Values["progressValue"] = progress.ToString();
             data.Values["progressValueString"] = progressString;
 
