@@ -1,4 +1,6 @@
-﻿using Serilog;
+﻿using Kusto.Cloud.Platform.Utils;
+using Serilog;
+using Serilog.Formatting.Json;
 
 
 namespace Klipboard.Utils
@@ -22,14 +24,16 @@ namespace Klipboard.Utils
             s_log = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(
+                    new JsonFormatter(renderMessage: true),
                     logPath, 
-                    rollingInterval: RollingInterval.Day, 
+                    rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 7,
                     buffered: true,
                     flushToDiskInterval: TimeSpan.FromSeconds(5))
                 .CreateLogger();
 
             // Redirect C# traces to Serilog
+            TraceSourceManager.SetTraceVerbosityForAll(TraceVerbosity.Info);
             s_traceListener = new SerilogTraceListener.SerilogTraceListener(s_log);
             System.Diagnostics.Trace.Listeners.Add(s_traceListener);
         }
