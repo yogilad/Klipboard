@@ -26,37 +26,42 @@ namespace Klipboard.Workers
 
         public override async Task HandleCsvAsync(string csvData, string? chosenOptions)
         {
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard Table", "Preparing Data", "");
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
             var target = GetQuickActionTarget();
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, chosenOptions))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, csvStream, FileHelper.TsvFormatDefinition, upstreamFileName, chosenOptions, progressNotification))
             {
-                InvokeTempTableQuery(tempTableName);
+                InvokeTempTableQuery(tempTableName, progressNotification);
             }
         }
 
         public override async Task HandleTextAsync(string textData, string? chosenOptions)
         {
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard Text", "Preparing Data", "");
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
             var target = GetQuickActionTarget();
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
 
-            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, chosenOptions))
+            if (await HandleSingleTextStreamAsync(databaseHelper, tempTableName, textStream, FileHelper.UnknownFormatDefinition, upstreamFileName, chosenOptions, progressNotification))
             {
-                InvokeTempTableQuery(tempTableName);
+                InvokeTempTableQuery(tempTableName, progressNotification);
             }
         }
 
         public override async Task HandleFilesAsync(List<string> filesAndFolders, string? chosenOption)
         {
+            var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard Files", "Preparing Data", "");
+            var log = new List<string>();
+            var mutex = new object();
             var firstFile = true;
-            var successCount = 0;
-            var fileCount = 0;
+            var fileCount = 0.0;
+            var progressCount = 0.0;
             var target = GetQuickActionTarget();
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
@@ -67,26 +72,21 @@ namespace Klipboard.Workers
             {
                 if (!level.Equals("Info", StringComparison.OrdinalIgnoreCase))
                 {
-                    m_notificationHelper.ShowBasicNotification(NotificationTitle, $"{level}: {message}");
+                    log.Add($"{level}: {message}");
                 }
             };
 
             m_ingestionRunner.ReportProgress += (workItem, success) =>
             {
-                if (success)
+                lock(mutex)
                 {
-                    Interlocked.Increment(ref successCount);
+                    progressCount++;
+                    progressNotification.UpdateProgress("Uploading data", (progressCount / fileCount) * 0.4 + 0.5, $"{progressCount}/{fileCount}");
                 }
             };
 
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders)) 
             {
-                if(fileCount++ > 100)
-                {
-                    m_notificationHelper.ShowBasicNotification(NotificationTitle, "Limit of 100 files reached");
-                    break;
-                }
-
                 var fileInfo = new FileInfo(path);
                 var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
                 var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
@@ -95,16 +95,29 @@ namespace Klipboard.Workers
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption);
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption, progressNotification);
                     if (!success)
                     {
                         // A notification was sent from the failed function
                         return;
                     }
 
-                    successCount++;
+                    progressCount++;
                     firstFile = false;
                     continue;
+                }
+
+                lock (mutex)
+                {
+                    fileCount++;
+                    
+                    if (fileCount > 100)
+                    {
+                        log.Add("Warning: Limit of 100 files reached");
+                        break;
+                    }
+
+                    progressNotification.UpdateProgress("Uploading data", (progressCount / fileCount) * 0.4 + 0.5, $"{progressCount}/{fileCount}");
                 }
 
                 var storageOptions = new StorageSourceOptions()
@@ -125,22 +138,37 @@ namespace Klipboard.Workers
 
             await m_ingestionRunner.CloseAndWaitForCompletionAsync();
 
-            if (successCount > 0) 
+            InvokeTempTableQuery(tempTableName, progressNotification);
+            if (log.Count > 0)
             {
-                InvokeTempTableQuery(tempTableName);
+                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Some errors occured during run", string.Join("\n", log));
             }
         }
 
-        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, string tempTableName, Stream dataStream, FileFormatDefiniton formatDefinition, string upstreamFileName, string? chosenOption)
+        private async Task<bool> HandleSingleTextStreamAsync(KustoDatabaseHelper databaseHelper, 
+            string tempTableName, 
+            Stream dataStream, 
+            FileFormatDefiniton formatDefinition, 
+            string upstreamFileName, 
+            string? chosenOption,
+            IProgressNotificationUpdater progressNotification)
         {
+            const double steps = 5 * 2; // double 2 => (step / steps) * (50 / 100) = step / (steps * 2)
+
+            // Steps #1
+            progressNotification.UpdateProgress("Uploading initial data", 1 / steps, "");
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefinition);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to upload file", uploadRes.Error);
                 return false;
             }
+
+            // #step #2
+            progressNotification.UpdateProgress("Detecting schema", 2 / steps, "");
 
             string schemaStr = AppConstants.TextLinesSchemaStr;
             IngestionMapping mapping = null;
@@ -164,6 +192,7 @@ namespace Klipboard.Workers
                 }
                 else
                 {
+                    progressNotification.CloseNotification();
                     m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to detect file fromat and schema", autoDetectRes.Error);
                     return false;
                 }
@@ -186,18 +215,25 @@ namespace Klipboard.Workers
                 }
                 else
                 {
+                    progressNotification.CloseNotification();
                     m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to detect file schema", schemaRes.Error);
                     return false;
                 }
             }
 
+            // #step #3
+            progressNotification.UpdateProgress("Creating table", 3 / steps, "");
             var createTableRes = await databaseHelper.TryCreateTableAync(tempTableName, schemaStr, ingestionBatchingTimeSeconds: 60, tableLifetimeDays: 3);
 
             if (!createTableRes.Success)
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to create a temp table", createTableRes.Error);
                 return false;
             }
+
+            // #step #4
+            progressNotification.UpdateProgress("Uploading data", 4 / steps, "1/1");
 
             var storageOptions = new StorageSourceOptions()
             {
@@ -221,15 +257,18 @@ namespace Klipboard.Workers
 
             if (!uploadBlobRes.Success)
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to upload first file", uploadBlobRes.Error);
                 return false;
             }
 
+            progressNotification.UpdateProgress("Uploading data", 5 / steps, "1/1");
             return true;
         }
 
-        private void InvokeTempTableQuery(string tempTableName)
+        private void InvokeTempTableQuery(string tempTableName, IProgressNotificationUpdater progressNotification)
         {
+            progressNotification.UpdateProgress("Running Query", 0.9, "");
             var target = GetQuickActionTarget();
             var query = new StringBuilder()
                 .Append("['")
@@ -255,8 +294,13 @@ namespace Klipboard.Workers
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, $"Failed to invoke query on temp table '{tempTableName}'", error ?? "Unknown error.");
+                return;
             }
+
+            progressNotification.UpdateProgress("Query Launched", 1.0, "");
+            progressNotification.CloseNotification(withinSeconds: 5);
         }
 
         private Cluster GetQuickActionTarget()

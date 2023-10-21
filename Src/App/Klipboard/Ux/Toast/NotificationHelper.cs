@@ -130,7 +130,6 @@ namespace Klipboard
             data.Values["progressValue"] = progress.ToString();
             data.Values["progressValueString"] = progressString;
 
-
             // Update the existing notification's data by using tag/group
             ToastNotificationManagerCompat.CreateToastNotifier().Update(data, m_tag);
         }

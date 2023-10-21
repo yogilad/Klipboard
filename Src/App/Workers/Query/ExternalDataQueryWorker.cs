@@ -137,7 +137,7 @@ namespace Klipboard.Workers
             }
 
             // Step #3 
-            progressNotification.UpdateProgress("Running Query", 2 / 4.0, "step 4/4");
+            progressNotification.UpdateProgress("Running Query", 3 / 4.0, "step 4/4");
 
             var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
@@ -177,6 +177,7 @@ namespace Klipboard.Workers
             var query = queryBuilder.ToString();
             if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
+                progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to invoke external data query", error ?? "Unknown error.");
                 return;
             }
