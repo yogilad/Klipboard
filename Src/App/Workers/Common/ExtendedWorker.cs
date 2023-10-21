@@ -18,7 +18,7 @@ namespace Klipboard.Workers
             switch (contentToHandle)
             {
                 case ClipboardContent.None:
-                    worker.RunWorker(async () => await worker.HandleAsync(chosenOption), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleAsync), async () => await worker.HandleAsync(chosenOption), notificationHelper);
                     break;
 
                 case ClipboardContent.CSV:
@@ -30,7 +30,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async () => await worker.HandleCsvAsync(csvData, chosenOption), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleCsvAsync), async () => await worker.HandleCsvAsync(csvData, chosenOption), notificationHelper);
                     break;
 
                 case ClipboardContent.CSV_Stream:
@@ -42,7 +42,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async () => await worker.HandleCsvStreamAsync(csvStream), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleCsvStreamAsync), async () => await worker.HandleCsvStreamAsync(csvStream), notificationHelper);
                     break;
 
                 case ClipboardContent.Text:
@@ -54,7 +54,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async () => await worker.HandleTextAsync(textData, chosenOption), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleTextAsync), async () => await worker.HandleTextAsync(textData, chosenOption), notificationHelper);
                     break;
 
                 case ClipboardContent.Text_Stream:
@@ -66,7 +66,7 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async () => await worker.HandleTextStreamAsync(textStream), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleTextStreamAsync), async () => await worker.HandleTextStreamAsync(textStream), notificationHelper);
                     break;
 
                 case ClipboardContent.Files:
@@ -78,21 +78,29 @@ namespace Klipboard.Workers
                         return;
                     }
 
-                    worker.RunWorker(async () => await worker.HandleFilesAsync(filesAndFolders, chosenOption), notificationHelper);
+                    worker.RunWorker(nameof(worker.HandleFilesAsync), async () => await worker.HandleFilesAsync(filesAndFolders, chosenOption), notificationHelper);
                     break;
             }
         }
 
-        private static void RunWorker(this IWorker worker, Func<Task> action, INotificationHelper notificationHelper)
+        private static void RunWorker(this IWorker worker, string operation, Func<Task> action, INotificationHelper notificationHelper)
         {
             Task.Run(async () =>
             {
+                using var scope = Logger.OperationScope(worker.GetType().ToString(), operation);
+
                 try
                 {
+                    Logger.Log.Information("Operation Started");
+
                     await action();
+
+                    Logger.Log.Information("Operation Ended");
+
                 }
                 catch (Exception ex)
                 {
+                    Logger.Log.Error(ex, "Operation ended with an exception");
                     notificationHelper.ShowExtendedNotification(worker.GetType().ToString(), $"{ex.Message}", ex.ToString());
                 }
             });

@@ -12,10 +12,10 @@ namespace Klipboard
         [STAThread]
         static void Main()
         {
-            Logger.Log.Information("{appName} Starting", AppConstants.ApplicationName);
+            Logger.Log.Information($"{AppConstants.ApplicationName} Starting");
             if (!OpSysHelper.TryAcquireSingleProcessLock(out var processLock)) 
             {
-                Logger.Log.Warning("{appName} closing as another instance is running", AppConstants.ApplicationName);
+                Logger.Log.Warning($"{AppConstants.ApplicationName} closing as another instance is running");
                 return;
             }
 
@@ -23,6 +23,7 @@ namespace Klipboard
             {
                 // To customize application configuration such as set high DPI settings or default font,
                 // see https://aka.ms/applicationconfiguration.
+
                 ApplicationConfiguration.Initialize();
 
                 var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -36,8 +37,9 @@ namespace Klipboard
 
                 Application.Run();
 
+                // Shutdown
                 VersionHelper.StopPolling();
-                Logger.Log.Information("{appName} Closing", AppConstants.ApplicationName);
+                Logger.Log.Information($"{AppConstants.ApplicationName} Closing");
                 Logger.CloseLog();
             }
         }

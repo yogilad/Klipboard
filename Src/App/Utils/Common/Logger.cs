@@ -1,5 +1,6 @@
 ﻿using Kusto.Cloud.Platform.Utils;
 using Serilog;
+using Serilog.Context;
 using Serilog.Formatting.Json;
 
 
@@ -22,6 +23,7 @@ namespace Klipboard.Utils
 
             // Create a Logger Instance
             s_log = new LoggerConfiguration()
+                .Enrich.FromLogContext()
                 .MinimumLevel.Verbose()
                 .WriteTo.File(
                     new JsonFormatter(renderMessage: true),
@@ -32,10 +34,19 @@ namespace Klipboard.Utils
                     flushToDiskInterval: TimeSpan.FromSeconds(5))
                 .CreateLogger();
 
-            // Redirect C# traces to Serilog
-            TraceSourceManager.SetTraceVerbosityForAll(TraceVerbosity.Info);
+            // Redirect C# traces to Serilog (Warning or higher)
+            TraceSourceManager.SetTraceVerbosityForAll(TraceVerbosity.Warning);
             s_traceListener = new SerilogTraceListener.SerilogTraceListener(s_log);
             System.Diagnostics.Trace.Listeners.Add(s_traceListener);
+        }
+
+        public static IDisposable OperationScope(string className, string operationName, bool appendGuid = true)
+        {
+            var guidStr = appendGuid ? $";{Guid.NewGuid().ToString()}" : "";
+            var scopeStr = $"{className};{operationName}{guidStr}";
+            var scope = LogContext.PushProperty("OperationScope", scopeStr);
+
+            return scope;
         }
 
         public static void CloseLog()
