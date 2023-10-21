@@ -1,10 +1,10 @@
 namespace Klipboard
 {
-    public partial class InspectForm : Form
+    public partial class TextViewForm : Form
     {
         private static string TruncationMessage = $"...{Environment.NewLine}{Environment.NewLine}( Remaining Content Truncated )";
 
-        public InspectForm(string contentType, string size, string content)
+        public TextViewForm(string title, string status, string content, bool wordWrap = false)
         {
             InitializeComponent();
             StyleDesigner.SetDialogDesign(this);
@@ -14,9 +14,10 @@ namespace Klipboard
                 content = content.Substring(0, textBox.MaxLength - TruncationMessage.Length) + TruncationMessage;
             }
 
-            this.toolStripLabel1.Text = contentType;
-            this.toolStripLabel2.Text = size;
+            Text = title;
+            toolStripStatusLabel.Text = status;
             textBox.Text = content;
+            textBox.WordWrap = wordWrap;
         }
 
         private void InspectForm_Load(object sender, EventArgs e)

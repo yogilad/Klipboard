@@ -5,8 +5,8 @@ namespace Klipboard.Workers
 {
     public class SettingsWorker : WorkerBase
     {
-        public SettingsWorker(ISettings settings)
-            : base(ClipboardContent.None, settings)
+        public SettingsWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.None, settings, notificationHelper)
         {
         }
 

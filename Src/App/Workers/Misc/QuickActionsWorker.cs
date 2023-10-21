@@ -26,8 +26,8 @@ namespace Klipboard.Workers
             }
         }
 
-        public QuickActionsWorker(ISettings settings)
-            : base(ClipboardContent.None, settings)
+        public QuickActionsWorker(ISettings settings, INotificationHelper notificationHelper)
+            : base(ClipboardContent.None, settings, notificationHelper)
         {
         }
 
@@ -71,7 +71,7 @@ namespace Klipboard.Workers
 
         public abstract Task<QuickActionsUserSelection> PromptUser();
 
-        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleAsync(string? chosenOption)
         {
             var result = await PromptUser();
 

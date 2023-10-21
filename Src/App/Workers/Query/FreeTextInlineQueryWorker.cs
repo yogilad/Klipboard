@@ -8,8 +8,8 @@ namespace Klipboard.Workers
         private static readonly string ToolTipText = $"Invoke a query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard containing unstructured text";
         private static readonly string NotifcationTitle = "Free Text Inline Query";
 
-        public FreeTextInlineQueryWorker(ISettings settings)
-        : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings) // Todo Support Text and File Data
+        public FreeTextInlineQueryWorker(ISettings settings, INotificationHelper notificationHelper)
+        : base(ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper)
         {
         }
 
@@ -19,22 +19,22 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, SendNotification sendNotification, string? chosenOptions)
+        public override async Task HandleCsvAsync(string csvData, string? chosenOptions)
         {
-            await Task.Run(() => HandleFreeTextData(csvData, sendNotification));
+            await Task.Run(() => HandleFreeTextData(csvData));
         }
 
-        public override async Task HandleTextAsync(string textData, SendNotification sendNotification, string? chosenOptions)
+        public override async Task HandleTextAsync(string textData, string? chosenOptions)
         {
             // a failed detection could simply mean a single column
-            await Task.Run(() => HandleFreeTextData(textData, sendNotification));
+            await Task.Run(() => HandleFreeTextData(textData));
         }
 
-        public override async Task HandleFilesAsync(List<string> files, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleFilesAsync(List<string> files, string? chosenOption)
         {
             if (files.Count > 1)
             {
-                sendNotification(NotifcationTitle, "Inline query only supports a single file.");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, "Inline query only supports a single file.");
             }
 
             var file = files[0];
@@ -42,33 +42,33 @@ namespace Klipboard.Workers
 
             if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                sendNotification(NotifcationTitle, "Inline query does not support directories.");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, "Inline query does not support directories.");
                 return;
             }
 
             if (!fileInfo.Exists)
             {
-                sendNotification(NotifcationTitle, $"File '{file}' does not exist.");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, $"File '{file}' does not exist.");
                 return;
             }
 
             if (fileInfo.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"File size exceeds max limit of {AppConstants.MaxAllowedDataLengthKb}KB for inline query ");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, $"File size exceeds max limit of {AppConstants.MaxAllowedDataLengthKb}KB for inline query ");
                 return;
             }
 
             string textData = await File.ReadAllTextAsync(file);
 
             // a failed detection could simply mean a single column
-            await Task.Run(() => HandleFreeTextData(textData, sendNotification));
+            await Task.Run(() => HandleFreeTextData(textData));
         }
 
-        private void HandleFreeTextData(string freeText, SendNotification sendNotification)
+        private void HandleFreeTextData(string freeText)
         {
             if (AppConstants.EnforceInlineQuerySizeLimits && freeText.Length > AppConstants.MaxAllowedDataLength)
             {
-                sendNotification(NotifcationTitle, $"Source data size {(int) (freeText.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, $"Source data size {(int) (freeText.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
                 return;
             }
             var appConfig = m_settings.GetConfig();
@@ -84,13 +84,13 @@ namespace Klipboard.Workers
 
             if (!success || query == null)
             {
-                sendNotification(NotifcationTitle, "Failed to create query text.");
+                m_notificationHelper.ShowBasicNotification(NotifcationTitle, "Failed to create query text.");
                 return;
             }
 
             if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
             {
-                sendNotification(NotifcationTitle, error ?? "Unknown error.");
+                m_notificationHelper.ShowExtendedNotification(NotifcationTitle, "Failed to invoke inline query", error ?? "Unknown error.");
                 return;
             }
         }

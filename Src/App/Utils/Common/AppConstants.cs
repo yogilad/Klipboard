@@ -26,6 +26,10 @@
         public const string ApplicationName = "Klipboard";
         public static readonly Version ApplicationVersion = new Version(0, 1, 1);
 
+        // Notifcation Constants
+        public const int PersistNotificationTime = 0;
+        public const int DefaultNotificationTime = 30;
+
         static AppConstants()
         {
             TextLinesSchema = new TableColumns();

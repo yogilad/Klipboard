@@ -8,8 +8,8 @@ namespace Klipboard
     {
         QuickActionsTargetSelectorForm m_ux;
 
-        public QuickActionsUxWorker(ISettings settings)
-        : base(settings)
+        public QuickActionsUxWorker(ISettings settings, INotificationHelper notificationHelper)
+        : base(settings, notificationHelper)
         {
             m_ux = new QuickActionsTargetSelectorForm(settings);
         }

@@ -11,7 +11,11 @@ namespace Klipboard
 
         static ResourceLoader()
         {
+#if DEBUG
+            KustoColorIcon = new Icon(LoadResourceAsStream("adx_grey.ico", "Resources"));
+#else
             KustoColorIcon = new Icon(LoadResourceAsStream("adx_color.ico", "Resources"));
+#endif
             DownloadIcon = new Icon(LoadResourceAsStream("download.ico", "Resources"));
             DevModeIcon = new Icon(LoadResourceAsStream("wand.ico", "Resources"));
         }

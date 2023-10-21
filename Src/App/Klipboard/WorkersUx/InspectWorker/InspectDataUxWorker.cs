@@ -5,14 +5,14 @@ namespace Klipboard
 {
     public class InspectDataUxWorker : InspectDataWorker
     {
-        public InspectDataUxWorker(ISettings settings) 
-            : base(settings)
+        public InspectDataUxWorker(ISettings settings, INotificationHelper notificationHelper) 
+            : base(settings, notificationHelper)
         {
         }
 
         public override void ShowDialog(string contentType, string size, string content)
         {
-            var form = new InspectForm(contentType, size, content);
+            var form = new TextViewForm("Clipboard Content", $"{contentType} | {size}", content);
             form.ShowDialog();
         }
     }

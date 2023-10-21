@@ -14,9 +14,9 @@ namespace Klipboard
         private NotifyIcon m_notifyIcon;
         private ContextMenuStrip m_contextMenuStrip;
         private IClipboardHelper m_clipboardHelper;
+        private INotificationHelper m_notificationHelper;
 
-
-        public NotificationIcon(List<WorkerUxConfig> workerConfig, IClipboardHelper clipboardHelper)
+        public NotificationIcon(List<WorkerUxConfig> workerConfig, IClipboardHelper clipboardHelper, INotificationHelper notificationHelper)
         {
             m_clipboardHelper = clipboardHelper;
             m_components = new System.ComponentModel.Container();
@@ -36,6 +36,7 @@ namespace Klipboard
 
             // Display the notification icon
             m_notifyIcon.Visible = true;
+            m_notificationHelper = notificationHelper;
         }
 
         private void BuildMenu(List<WorkerUxConfig> workerConfig)
@@ -124,18 +125,13 @@ namespace Klipboard
                 return;
             }
 
-            tag.Worker.OnClick(m_clipboardHelper, SendNotification, tag.chosenOption);
+            tag.Worker.OnClick(m_clipboardHelper, m_notificationHelper, tag.chosenOption);
         }
 
 
         private void Exit_OnClick(object? Sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        public void SendNotification(string title, string message)
-        {
-            m_notifyIcon.ShowBalloonTip(20, title, message, ToolTipIcon.None);
         }
     }
 }

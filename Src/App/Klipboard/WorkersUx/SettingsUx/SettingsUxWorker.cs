@@ -6,11 +6,11 @@ namespace Klipboard
 {
     internal class SettingsUxWorker : SettingsWorker
     {
-        public SettingsUxWorker(ISettings settings) : base(settings)
+        public SettingsUxWorker(ISettings settings, INotificationHelper notificationHelper) : base(settings, notificationHelper)
         {
         }
 
-        public override async Task HandleAsync(SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleAsync(string? chosenOption)
         {
             ((Settings) m_settings).ShowDialog();
         }
