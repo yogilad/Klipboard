@@ -10,5 +10,8 @@
     <PackageReference Include="Azure.Storage.Blobs" Version="12.17.0" />
     <PackageReference Include="Microsoft.Azure.Kusto.Data" Version="11.3.3" />
     <PackageReference Include="Microsoft.Azure.Kusto.Ingest" Version="11.3.3" />
+    <PackageReference Include="Serilog" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="SerilogTraceListener" Version="3.2.0" />
   </ItemGroup>
 </Project>

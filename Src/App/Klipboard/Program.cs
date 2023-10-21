@@ -12,8 +12,10 @@ namespace Klipboard
         [STAThread]
         static void Main()
         {
+            Logger.Log.Information("{appName} Starting", AppConstants.ApplicationName);
             if (!OpSysHelper.TryAcquireSingleProcessLock(out var processLock)) 
             {
+                Logger.Log.Warning("{appName} closing as another instance is running", AppConstants.ApplicationName);
                 return;
             }
 
@@ -35,6 +37,8 @@ namespace Klipboard
                 Application.Run();
 
                 VersionHelper.StopPolling();
+                Logger.Log.Information("{appName} Closing", AppConstants.ApplicationName);
+                Logger.CloseLog();
             }
         }
 

@@ -51,5 +51,11 @@ namespace Klipboard.Utils
             processLock = new AutoDispose(() => singleProcessMutex.ReleaseMutex());
             return true;
         }
+
+        public static string AppFolderPath()
+        {
+            var appDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppConstants.ApplicationName);
+            return appDir;
+        }
     }
 }

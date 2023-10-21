@@ -57,7 +57,7 @@ namespace Klipboard.Utils
 
         public AppConfigFile()
         {
-            ConfigDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Klipboard");
+            ConfigDir = OpSysHelper.AppFolderPath();
             ConfigPath = Path.Combine(ConfigDir, "config.json");
         }
 
