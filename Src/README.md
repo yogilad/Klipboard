@@ -10,6 +10,7 @@
 
 ## Before Publishing a New Release
 1. Create a new PR named _v[Major].[Minor].\[Build\]_
+1. Edit `ReleaseNotes.md`
 1. Update the version in `Src\App\Utils\Common\AppConstants.cs_` to _v[Major].[Minor].\[Build\]_
 1. In Visual Studio, 
 	1. Select the _Setup_ project 
@@ -18,13 +19,13 @@
 
 ## Build
 1. Open a shell (cmd) window and CD into the Src directory
-1. Run the build script `build.bat [version]` where _[version]_ is _v[Major].[Minor].\[Build\]_
+1. Run the build script `build.bat [version]` where _[version]_ is _[Major].[Minor].\[Build\]_ (do not use the 'v' prefix)
 1. Confirm the build had ended sucessfully
 1. In Visual Studio, build the _Setup_ project
 
 ## Pack
 1. Open a shell (cmd) window and CD into the Src directory
-1. Run `pack.bat` and confirm it ended sucessfully
+1. Run `pack.bat` and confirm it ended successfully
 1. Make sure the following 2 zip files were created
 	1. `Src\App\bin\Publish\Klipboard.zip`
 	1. `Src\Setup\Release\KlipboardSetup.zip`
@@ -34,6 +35,6 @@
 1. Go to release and create a new release.
 1. Set the release name to _v[Major].[Minor].\[Build\]_
 1. Set the release to create a tag with the value of _v[Major].[Minor].\[Build\]_
-1. Set the release notes including major changes included in the version
+1. Add release notes for major changes included in the version
 1. Upload `Src\App\bin\Publish\Klipboard.zip`
 1. Upload `Src\Setup\Release\KlipboardSetup.zip`

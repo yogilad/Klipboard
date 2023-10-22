@@ -44,6 +44,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -163,16 +171,16 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Klipborad"
-        "ProductCode" = "8:{F875FADA-EA01-4C94-865C-404E600227C8}"
-        "PackageCode" = "8:{7E2056CA-C569-4388-994B-2E30B81285AD}"
+        "ProductName" = "8:Klipboard"
+        "ProductCode" = "8:{33A57412-C541-4071-BB28-9F52E08D8D6B}"
+        "PackageCode" = "8:{88A5D9CD-FF5C-4C4E-833F-B53A18F9D158}"
         "UpgradeCode" = "8:{BFC47E8D-EFD9-4D89-BD1C-114FD68478A6}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.1.1"
+        "ProductVersion" = "8:0.1.2"
         "Manufacturer" = "8:YochaiSoft"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/yogilad/Klipboard/wiki"
@@ -439,8 +447,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1202"
+                            "Setting" = "3:2"
+                            "Value" = "8:Please close Klipboard before continuing with the installation."
                             "DefaultValue" = "8:#1202"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -496,8 +504,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1202"
+                            "Setting" = "3:2"
+                            "Value" = "8:Please close Klipboard before continuing with the installation."
                             "DefaultValue" = "8:#1202"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -714,7 +722,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8BD05E88855C412988B04FB11350C5E7"
             {
-            "SourcePath" = "8:..\\App\\Klipboard\\obj\\Release\\net6.0-windows\\win-x64\\apphost.exe"
+            "SourcePath" = "8:..\\App\\Klipboard\\obj\\Release\\net6.0-windows10.0.17763.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5613BEA74FB14518817FC6E0CC6E0EA5"
