@@ -5,13 +5,13 @@ Kilpboard aims to provide a simple and intuitive way for people to get insights 
 
 Klipboard runs in the System Tray. When clicked it will display a menu of actions that can be done with the content that is currently placed in the operating system clipboard.
 
+**[What's New](https://github.com/yogilad/Klipboard/blob/main/ReleaseNotes.md)**
+
 **[Installation and Quick Start Guide](https://github.com/yogilad/Klipboard/wiki/Quick-Start-Guide)**
 
-**[Read the Wiki For Instructions and Help](https://github.com/yogilad/Klipboard/wiki)**
+**[Wiki with Instructions and Help](https://github.com/yogilad/Klipboard/wiki)**
 
-**[See What New (ReleaseNotes)](https://github.com/yogilad/Klipboard/blob/main/ReleaseNotes.md)
-
-**[3rd Parties and Open Source Resources Used](https://github.com/yogilad/Klipboard/blob/main/ThirdPartyAtribution.md)
+**[List of 3rd Parties and Open Source Resources Used](https://github.com/yogilad/Klipboard/blob/main/ThirdPartyAtribution.md)**
 
 
 ### Query Anything With Ease 
