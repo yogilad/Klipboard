@@ -171,9 +171,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Klipborad"
+        "ProductName" = "8:Klipboard"
         "ProductCode" = "8:{33A57412-C541-4071-BB28-9F52E08D8D6B}"
-        "PackageCode" = "8:{C7105F1F-35F5-46A4-A3B0-B3E495016AF7}"
+        "PackageCode" = "8:{88A5D9CD-FF5C-4C4E-833F-B53A18F9D158}"
         "UpgradeCode" = "8:{BFC47E8D-EFD9-4D89-BD1C-114FD68478A6}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -447,8 +447,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1202"
+                            "Setting" = "3:2"
+                            "Value" = "8:Please close Klipboard before continuing with the installation."
                             "DefaultValue" = "8:#1202"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -504,8 +504,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1202"
+                            "Setting" = "3:2"
+                            "Value" = "8:Please close Klipboard before continuing with the installation."
                             "DefaultValue" = "8:#1202"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -722,7 +722,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8BD05E88855C412988B04FB11350C5E7"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\App\\Klipboard\\obj\\Release\\net6.0-windows10.0.17763.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5613BEA74FB14518817FC6E0CC6E0EA5"

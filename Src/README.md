@@ -25,7 +25,7 @@
 
 ## Pack
 1. Open a shell (cmd) window and CD into the Src directory
-1. Run `pack.bat` and confirm it ended sucessfully
+1. Run `pack.bat` and confirm it ended successfully
 1. Make sure the following 2 zip files were created
 	1. `Src\App\bin\Publish\Klipboard.zip`
 	1. `Src\Setup\Release\KlipboardSetup.zip`
