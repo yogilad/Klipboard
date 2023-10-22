@@ -35,6 +35,6 @@
 1. Go to release and create a new release.
 1. Set the release name to _v[Major].[Minor].\[Build\]_
 1. Set the release to create a tag with the value of _v[Major].[Minor].\[Build\]_
-1. Set the release notes including major changes included in the version
+1. Add release notes for major changes included in the version
 1. Upload `Src\App\bin\Publish\Klipboard.zip`
 1. Upload `Src\Setup\Release\KlipboardSetup.zip`
