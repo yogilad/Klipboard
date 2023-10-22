@@ -9,6 +9,10 @@ Klipboard runs in the System Tray. When clicked it will display a menu of action
 
 **[Read the Wiki For Instructions and Help](https://github.com/yogilad/Klipboard/wiki)**
 
+**[See What New (ReleaseNotes)](https://github.com/yogilad/Klipboard/blob/main/ReleaseNotes.md)
+
+**[3rd Parties and Open Source Resources Used](https://github.com/yogilad/Klipboard/blob/main/ThirdPartyAtribution.md)
+
 
 ### Query Anything With Ease 
 Klipboard Quick Actions helps you run queries on **structured and unstructured** data without having to go through the trouble of creating tables and uploading data to them.
