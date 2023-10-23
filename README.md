@@ -42,13 +42,11 @@ If the data you commonly query has a fixed structure, you can set a Quick Action
 
 # Road Map
 ## Milestone #2 - Project Maturity
+* Improved Notifications
 * Logs
 * Proper Testing and E2Es
-* Signed application and installation
 
 ## Milestone #3 - Mass Ingestion & UX Improvements
-* Improved Notifications
-* Action progress tracking  
 * Queued, Direct and Streaming ingestion to new or existing tables
 
 ## Milestone #4 - Modern UX & Multi Platform
