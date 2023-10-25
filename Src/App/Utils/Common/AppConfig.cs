@@ -58,7 +58,11 @@ namespace Klipboard.Utils
         public AppConfigFile()
         {
             ConfigDir = OpSysHelper.AppFolderPath();
+#if DEBUG
+            ConfigPath = Path.Combine(ConfigDir, "config_debug.json");
+#else
             ConfigPath = Path.Combine(ConfigDir, "config.json");
+#endif
         }
 
         public AppConfigFile(string path)
@@ -136,5 +140,5 @@ namespace Klipboard.Utils
             }
         }
     }
-    #endregion
+#endregion
 }
