@@ -95,7 +95,8 @@ namespace Klipboard.Workers
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption, progressNotification);
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption, progressNotification, path
+                        );
                     if (!success)
                     {
                         // A notification was sent from the failed function
@@ -151,13 +152,14 @@ namespace Klipboard.Workers
             FileFormatDefiniton formatDefinition, 
             string upstreamFileName, 
             string? chosenOption,
-            IProgressNotificationUpdater progressNotification)
+            IProgressNotificationUpdater progressNotification,
+            string? filePath = null)
         {
             const double steps = 5 * 2; // double 2 => (step / steps) * (50 / 100) = step / (steps * 2)
 
             // Steps #1
             progressNotification.UpdateProgress("Uploading initial data", 1 / steps, "");
-            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefinition);
+            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefinition, filePath);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
 
             if (!uploadRes.Success)

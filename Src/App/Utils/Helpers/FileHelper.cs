@@ -9,6 +9,7 @@ namespace Klipboard.Utils
 
     public static class FileHelper
     {
+        #region Defintion and Constructor
         public static readonly FileFormatDefiniton UnknownFormatDefinition = new FileFormatDefiniton(DataSourceFormat.txt, AppConstants.UnknownFormat, DoNotCompress: false);
         public static readonly FileFormatDefiniton TsvFormatDefinition = new FileFormatDefiniton(DataSourceFormat.tsv, "tsv", DoNotCompress: false);
 
@@ -48,6 +49,21 @@ namespace Klipboard.Utils
             s_fileFormatDefinition.Add("txt", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
             s_fileFormatDefinition.Add("log", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
         }
+        #endregion
+
+        #region File Utils
+        public static void CreateTempFile(string fileName, Stream dataStream, out string filePath)
+        {
+            filePath = Path.Combine(Path.GetTempPath(), fileName);
+            
+            using var fileStream = new FileStream(filePath, FileMode.CreateNew);
+
+            dataStream.Seek(0, SeekOrigin.Begin);
+            dataStream.CopyTo(fileStream);
+            fileStream.Flush();
+            fileStream.Close();
+        }
+        #endregion
 
         #region Path Utils
         /// <summary>

@@ -13,7 +13,13 @@ namespace Klipboard.Utils
 
         public static bool TryInvokeInlineQuery(AppConfig appConfig, string clusterUri, string databaseName, string query, out string? error)
         {
-            var clusterHost = clusterUri.Trim().TrimEnd('/').Replace("https://", "");
+            var clusterHost = clusterUri;
+            
+            if (Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
+            {
+                clusterHost = uri.Host;
+            }
+            
             string queryLink;
 
             if (string.IsNullOrWhiteSpace(query))

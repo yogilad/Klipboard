@@ -63,15 +63,19 @@ namespace Klipboard.Workers
             }
 
             var progressNotification = m_notificationHelper.ShowProgressNotification(NotificationTitle, $"Clipboard File", "Preparing Data", "Step 1/4");
-            var dt = DateTime.Now;
             var upsteramFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
             var formatDefintion = FileHelper.GetFormatFromFileName(fileInfo.Name);
             using var dataStream = File.OpenRead(file);
 
-            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, chosenOption, progressNotification);
+            await HandleStreamAsync(dataStream, formatDefintion, upsteramFileName, chosenOption, progressNotification, file);
         }
 
-        private async Task HandleStreamAsync(Stream dataStream, FileFormatDefiniton formatDefintion, string upstreamFileName, string? chosenOption, IProgressNotificationUpdater progressNotification)
+        private async Task HandleStreamAsync(Stream dataStream, 
+            FileFormatDefiniton formatDefintion, 
+            string upstreamFileName, 
+            string? chosenOption, 
+            IProgressNotificationUpdater progressNotification,
+            string? filePath = null)
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
@@ -79,7 +83,7 @@ namespace Klipboard.Workers
             // Step #1
             progressNotification.UpdateProgress("Uploading data", 1 / 4.0, "step 2/4");
 
-            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion);
+            var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefintion, filePath);
 
             if (!uploadRes.Success)
             {
