@@ -203,7 +203,25 @@ namespace Klipboard.Utils
         {
             try
             {
-                if (m_localhost)
+                ///////////////////////////////////////
+                // Ingest files to an online cluster
+                ///////////////////////////////////////
+                if (!m_localhost)
+                {
+                    var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
+                    var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
+
+                    if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
+                    {
+                        return (true, null);
+                    }
+
+                    return (false, $"Failed to ingest stream to Kusto: Status='{ingestStatus.Status}', ErrorCode='{ingestStatus.ErrorCode}', FailureStatus='{ingestStatus.FailureStatus}'");
+                }
+                ///////////////////////////////////////
+                // Ingest files to a local cluster
+                ///////////////////////////////////////
+                else
                 {
                     sourceOptions.IsLocalFileSystem = true;
                     sourceOptions.Compress = false;
@@ -215,24 +233,14 @@ namespace Klipboard.Utils
                             extensions: ingestionProperties.GetIngestionProperties());
 
                     using var resultReader = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, command).ConfigureAwait(false);
-                    
+
                     resultReader.Read();
-                    
+
                     var hasErrors = resultReader.GetBoolean(3);
-                    var error = hasErrors? $"Ingest oprtation '{resultReader.GetString(4)}' failed" : null;
+                    var error = hasErrors ? $"Ingest oprtation '{resultReader.GetString(4)}' failed" : null;
 
                     return (Success: !hasErrors, Error: error);
                 }
-
-                var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
-                var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
-
-                if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
-                {
-                    return (true, null);
-                }
-
-                return (false, $"Failed to ingest stream to Kusto: Status='{ingestStatus.Status}', ErrorCode='{ingestStatus.ErrorCode}', FailureStatus='{ingestStatus.FailureStatus}'");
             }
             catch (Exception ex)
             {
