@@ -66,7 +66,7 @@ namespace Klipboard.Workers
             var tempTableName = KustoDatabaseHelper.CreateTempTableName();
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
-            var m_ingestionRunner = new KustoIngestRunner(databaseHelper.GetDirectIngestClient(), degreeOfParallelism: 2);
+            var m_ingestionRunner = new KustoIngestRunner(databaseHelper.TryDirectIngestStorageToTable, degreeOfParallelism: 2);
 
             m_ingestionRunner.TraceEvent += (level, message) => 
             {
@@ -95,8 +95,7 @@ namespace Klipboard.Workers
                 {
                     using var file = File.OpenRead(path);
 
-                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption, progressNotification, path
-                        );
+                    var success = await HandleSingleTextStreamAsync(databaseHelper, tempTableName, file, formatResult, upstreamFileName, chosenOption, progressNotification, path);
                     if (!success)
                     {
                         // A notification was sent from the failed function

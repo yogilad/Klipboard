@@ -91,6 +91,7 @@ namespace Klipboard.Utils
 
         public async Task<(bool Success, TableColumns? TableScheme, string? format, string? Error)> TryGetBlobSchemeAsync(string blobUri, string? format = null, bool? firstRowIsHeader = null)
         {
+            blobUri = blobUri.Replace(@"\", "/");
             var formatStr = (format != null) ? $", '{format}'" : string.Empty;
             var firstRowStr = (format != null && firstRowIsHeader != null) ? $", dynamic({{'UseFirstRowAsHeader':{firstRowIsHeader}}})" : string.Empty;
             var cmd = $"evaluate external_data_schema('{blobUri}'{formatStr}{firstRowStr})";
