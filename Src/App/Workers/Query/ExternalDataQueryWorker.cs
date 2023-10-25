@@ -143,7 +143,7 @@ namespace Klipboard.Workers
             // Step #3 
             progressNotification.UpdateProgress("Running Query", 3 / 4.0, "step 4/4");
 
-            var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
+            var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas).Replace(@"\", "/");
             var queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
@@ -153,8 +153,13 @@ namespace Klipboard.Workers
             queryBuilder.AppendLine("[");
             queryBuilder.Append(" '");
             queryBuilder.Append(blobPath);
-            queryBuilder.Append("' h'?");
-            queryBuilder.Append(blboSas);
+            
+            if (!string.IsNullOrWhiteSpace(blboSas))
+            {
+                queryBuilder.Append("' h'?");
+                queryBuilder.Append(blboSas);
+            }
+            
             queryBuilder.AppendLine("'");
             queryBuilder.AppendLine("]");
             queryBuilder.Append("with(");
