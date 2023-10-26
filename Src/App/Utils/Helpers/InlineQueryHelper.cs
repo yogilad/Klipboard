@@ -13,11 +13,10 @@ namespace Klipboard.Utils
 
         public static bool TryInvokeInlineQuery(AppConfig appConfig, string clusterUri, string databaseName, string query, out string? error)
         {
-            var clusterHost = clusterUri;
-            
-            if (Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
+            if (!Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
             {
-                clusterHost = uri.Host;
+                error = "ClusterUri is not a valid Uri.";
+                return false;
             }
             
             string queryLink;
@@ -39,11 +38,11 @@ namespace Klipboard.Utils
 
             if (appConfig.DefaultQueryApp == QueryApp.Desktop)
             {
-                queryLink = $"https://{clusterHost}/{databaseName}?query={query}&web=0";
+                queryLink = new Uri(uri, $"{databaseName}?query={query}&web=0").ToString(); ;
             }
             else
             {
-                queryLink = $"https://dataexplorer.azure.com/clusters/{clusterHost}/databases/{databaseName}?query={query}";
+                queryLink = $"https://dataexplorer.azure.com/clusters/{uri.Host}/databases/{databaseName}?query={query}";
             }
 
             OpSysHelper.InvokeLink(queryLink);
