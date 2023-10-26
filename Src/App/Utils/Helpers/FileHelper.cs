@@ -339,7 +339,7 @@ namespace Klipboard.Utils
             return UnknownFormatDefinition;
         }
 
-        public static IEnumerable<string> ExpandDropFileList(List<string> dropFiles, string? extension = null)
+        public static IEnumerable<string> ExpandDropFileList(IEnumerable<string> dropFiles, string? extension = null)
         {
             var wildCardFileMatcher = "*";
             var enumOptions = new EnumerationOptions()
@@ -362,7 +362,6 @@ namespace Klipboard.Utils
 
                 if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    // TODO: this does not recursively explore directories
                     foreach (var subFile in Directory.GetFiles(path, wildCardFileMatcher, enumOptions))
                     {
                         yield return NormalizeFilePathString(subFile);
