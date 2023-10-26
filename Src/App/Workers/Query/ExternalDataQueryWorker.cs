@@ -48,7 +48,7 @@ namespace Klipboard.Workers
                 m_notificationHelper.ShowBasicNotification(NotificationTitle, "External data query only supports a single file.");
             }
 
-            var file = files[0];
+            var file = FileHelper.NormalizeFilePathString(files[0]);
             var fileInfo = new FileInfo(file);
 
             if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
@@ -143,7 +143,7 @@ namespace Klipboard.Workers
             // Step #3 
             progressNotification.UpdateProgress("Running Query", 3 / 4.0, "step 4/4");
 
-            var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas).Replace(@"\", "/");
+            var blobPath = uploadRes.BlobUri.SplitFirst("?", out var blboSas);
             var queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");

@@ -362,9 +362,10 @@ namespace Klipboard.Utils
 
                 if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
+                    // TODO: this does not recursively explore directories
                     foreach (var subFile in Directory.GetFiles(path, wildCardFileMatcher, enumOptions))
                     {
-                        yield return subFile;
+                        yield return NormalizeFilePathString(subFile);
                     }
                 }
 
@@ -378,10 +379,25 @@ namespace Klipboard.Utils
                     continue;
                 }
 
-                yield return path;
+                yield return NormalizeFilePathString(path);
             }
 
             yield break;
+        }
+
+        /// <summary>
+        /// Replaces all backslashes with forward slashes, so the file path requires no escaping when represented as a string in KQL
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>normalized file path</returns>
+        public static string NormalizeFilePathString(string path)
+        {
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                path = path.Replace(@"\", "/"); ;
+            }
+
+            return path;
         }
         #endregion
 
