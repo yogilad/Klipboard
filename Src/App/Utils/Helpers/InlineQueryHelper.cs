@@ -19,6 +19,7 @@ namespace Klipboard.Utils
             }
             
             string queryLink;
+            string uriParam;
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -27,7 +28,6 @@ namespace Klipboard.Utils
             }
 
             error = null;
-            query = TabularDataHelper.GzipBase64(query);
 
             if (AppConstants.EnforceInlineQuerySizeLimits && query.Length > AppConstants.MaxAllowedQueryLength)
             {
@@ -35,14 +35,31 @@ namespace Klipboard.Utils
                 return false;
             }
 
-            if (appConfig.DefaultQueryApp == QueryApp.Desktop)
+            switch (appConfig.DefaultQueryApp)
             {
-                string uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
-                queryLink = new Uri(uri, $"?uri={uriParam}&query={query}&web=0").ToString();
+                case QueryApp.Desktop:
+                    query = TabularDataHelper.GzipBase64(query);
+                    uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
+                    queryLink = new Uri(uri, $"?uri={uriParam}&query={query}&web=0").ToString();
+                    break;
+                
+                case QueryApp.DesktopModern:
+                    uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
+                    queryLink = $"kusto://query?uri={Uri.EscapeDataString(uriParam)}&query={Uri.EscapeDataString(query)}";
+                    break;
+
+                case QueryApp.Web:
+                default: // compilation fix
+                    query = TabularDataHelper.GzipBase64(query);
+                    queryLink = new Uri(new Uri("https://dataexplorer.azure.com/"), $"/clusters/{uri.Host}/databases/{databaseName}?&query={query}").ToString();
+                    break;
             }
-            else
+
+            if (queryLink.Length > AppConstants.MaxAllowedQueryLength)
             {
-                queryLink = new Uri(new Uri("https://dataexplorer.azure.com/"), $"/clusters/{uri.Host}/databases/{databaseName}?&query={query}").ToString();
+                // TODO: If an when Clipboard Query Target is supported, place the query back to the klipboard
+                error = $"Resulting query link excceds {AppConstants.MaxAllowedQueryLengthKB}KB.";
+                return false;
             }
 
             OpSysHelper.InvokeLink(queryLink);

@@ -7,7 +7,8 @@ namespace Klipboard.Utils
     public enum QueryApp
     {
         Web,
-        Desktop
+        Desktop,
+        DesktopModern
     }
 
     public record Cluster(string ConnectionString, string DatabaseName);
