@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Kusto.Data;
+﻿using Kusto.Data;
 
 
 namespace Klipboard.Utils
@@ -38,11 +37,12 @@ namespace Klipboard.Utils
 
             if (appConfig.DefaultQueryApp == QueryApp.Desktop)
             {
-                queryLink = new Uri(uri, $"{databaseName}?query={query}&web=0").ToString(); ;
+                string uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
+                queryLink = new Uri(uri, $"?uri={uriParam}&query={query}&web=0").ToString();
             }
             else
             {
-                queryLink = $"https://dataexplorer.azure.com/clusters/{uri.Host}/databases/{databaseName}?query={query}";
+                queryLink = new Uri(new Uri("https://dataexplorer.azure.com/"), $"/clusters/{uri.Host}/databases/{databaseName}?&query={query}").ToString();
             }
 
             OpSysHelper.InvokeLink(queryLink);
