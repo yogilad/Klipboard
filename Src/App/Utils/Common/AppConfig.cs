@@ -8,7 +8,6 @@ namespace Klipboard.Utils
     {
         Web,
         Desktop,
-        DesktopModern
     }
 
     public record Cluster(string ConnectionString, string DatabaseName);

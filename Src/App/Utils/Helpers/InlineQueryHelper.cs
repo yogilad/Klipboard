@@ -28,6 +28,7 @@ namespace Klipboard.Utils
             }
 
             error = null;
+            query = TabularDataHelper.GzipBase64(query);
 
             if (AppConstants.EnforceInlineQuerySizeLimits && query.Length > AppConstants.MaxAllowedQueryLength)
             {
@@ -38,28 +39,14 @@ namespace Klipboard.Utils
             switch (appConfig.DefaultQueryApp)
             {
                 case QueryApp.Desktop:
-                    query = TabularDataHelper.GzipBase64(query);
-                    uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
-                    queryLink = new Uri(uri, $"?uri={uriParam}&query={query}&web=0").ToString();
-                    break;
-                
-                case QueryApp.DesktopModern:
                     uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
                     queryLink = $"kusto://query?uri={Uri.EscapeDataString(uriParam)}&query={Uri.EscapeDataString(query)}";
                     break;
 
                 case QueryApp.Web:
                 default: // compilation fix
-                    query = TabularDataHelper.GzipBase64(query);
-                    queryLink = new Uri(new Uri("https://dataexplorer.azure.com/"), $"/clusters/{uri.Host}/databases/{databaseName}?&query={query}").ToString();
+                    queryLink = $"https://dataexplorer.azure.com/clusters/{Uri.EscapeDataString(uri.Host)}/databases/{Uri.EscapeDataString(databaseName)}?&query={Uri.EscapeDataString(query)}";
                     break;
-            }
-
-            if (queryLink.Length > AppConstants.MaxAllowedQueryLength)
-            {
-                // TODO: If an when Clipboard Query Target is supported, place the query back to the klipboard
-                error = $"Resulting query link excceds {AppConstants.MaxAllowedQueryLengthKB}KB.";
-                return false;
             }
 
             OpSysHelper.InvokeLink(queryLink);
