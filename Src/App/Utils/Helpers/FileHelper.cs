@@ -54,7 +54,7 @@ namespace Klipboard.Utils
         #region File Utils
         public static void CreateTempFile(string fileName, Stream dataStream, out string filePath)
         {
-            filePath = Path.Combine(Path.GetTempPath(), fileName);
+            filePath = FileHelper.NormalizeFilePathString(Path.Combine(Path.GetTempPath(), fileName));
             
             using var fileStream = new FileStream(filePath, FileMode.CreateNew);
 
