@@ -1,3 +1,16 @@
+# Building and Using Klipboard
+
+## Prerequisites
+* Download a local copy of the source code from the GitHub or sync the repo using [git](https://git-scm.com/downloads).  
+* Install [dotnet 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+
+# Instrcutions 
+* Open a command line windows
+* CD into the `Src` directorry of the repository
+* Run `build.bat`
+* Copy the content of `Src\App\Klipboard\bin\Publish\Klipboard` to a directory of your choice.
+* Run `Klipboard.exe` 
+
 # Publishing a New Release
 
 > Note! At the moment the files published are not signed and warn when run by the user.
