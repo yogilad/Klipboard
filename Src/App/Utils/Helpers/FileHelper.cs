@@ -9,6 +9,7 @@ namespace Klipboard.Utils
 
     public static class FileHelper
     {
+        #region Defintion and Constructor
         public static readonly FileFormatDefiniton UnknownFormatDefinition = new FileFormatDefiniton(DataSourceFormat.txt, AppConstants.UnknownFormat, DoNotCompress: false);
         public static readonly FileFormatDefiniton TsvFormatDefinition = new FileFormatDefiniton(DataSourceFormat.tsv, "tsv", DoNotCompress: false);
 
@@ -48,6 +49,21 @@ namespace Klipboard.Utils
             s_fileFormatDefinition.Add("txt", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
             s_fileFormatDefinition.Add("log", new FileFormatDefiniton(DataSourceFormat.txt, "txt", DoNotCompress: false));
         }
+        #endregion
+
+        #region File Utils
+        public static void CreateTempFile(string fileName, Stream dataStream, out string filePath)
+        {
+            filePath = FileHelper.NormalizeFilePathString(Path.Combine(Path.GetTempPath(), fileName));
+            
+            using var fileStream = new FileStream(filePath, FileMode.CreateNew);
+
+            dataStream.Seek(0, SeekOrigin.Begin);
+            dataStream.CopyTo(fileStream);
+            fileStream.Flush();
+            fileStream.Close();
+        }
+        #endregion
 
         #region Path Utils
         /// <summary>
@@ -323,7 +339,7 @@ namespace Klipboard.Utils
             return UnknownFormatDefinition;
         }
 
-        public static IEnumerable<string> ExpandDropFileList(List<string> dropFiles, string? extension = null)
+        public static IEnumerable<string> ExpandDropFileList(IEnumerable<string> dropFiles, string? extension = null)
         {
             var wildCardFileMatcher = "*";
             var enumOptions = new EnumerationOptions()
@@ -348,7 +364,7 @@ namespace Klipboard.Utils
                 {
                     foreach (var subFile in Directory.GetFiles(path, wildCardFileMatcher, enumOptions))
                     {
-                        yield return subFile;
+                        yield return NormalizeFilePathString(subFile);
                     }
                 }
 
@@ -362,10 +378,25 @@ namespace Klipboard.Utils
                     continue;
                 }
 
-                yield return path;
+                yield return NormalizeFilePathString(path);
             }
 
             yield break;
+        }
+
+        /// <summary>
+        /// Replaces all backslashes with forward slashes, so the file path requires no escaping when represented as a string in KQL
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>normalized file path</returns>
+        public static string NormalizeFilePathString(string path)
+        {
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                path = path.Replace(@"\", "/"); ;
+            }
+
+            return path;
         }
         #endregion
 

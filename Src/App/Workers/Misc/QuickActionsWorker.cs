@@ -34,7 +34,7 @@ namespace Klipboard.Workers
         public override string GetMenuText(ClipboardContent content)
         {
             var config = m_settings.GetConfig();
-            string clusterName = config.ChosenCluster.ConnectionString.ToLower().SplitTakeLast("//").SplitFirst(".").ToUpper();
+            string clusterName = GetClusterName(config.ChosenCluster.ConnectionString);
 
             // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show version once on creation.
             if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
@@ -86,6 +86,16 @@ namespace Klipboard.Workers
 
                 await m_settings.UpdateConfig(targetConfig);
             }
+        }
+
+        private string GetClusterName(string connectionString)
+        {
+            if(Uri.TryCreate(connectionString, UriKind.Absolute, out var uri))
+            {
+                return uri.Host.ToUpper();
+            }
+
+            return connectionString.SplitTakeLast("//").SplitFirst(".").SplitFirst(":").ToUpper();
         }
 
         #region

@@ -11,10 +11,15 @@ namespace Klipboard.Utils
     public class KustoDatabaseHelper : IDisposable
     {
         #region Members
+        private static readonly HashSet<string> s_localhosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "localhost", "127.0.0.1", "::1", "[::1]" };
+        
         private Lazy<ICslAdminProvider> m_engineAdminClient;
         private Lazy<ICslQueryProvider> m_engineQueryClient;
         private Lazy<IKustoIngestClient> m_directIngestClient;
-        private string m_databaseName = string.Empty;
+        
+        private readonly string m_databaseName = string.Empty;
+        private readonly bool m_localhost = false;
+        private readonly bool m_userHttps = false;
         #endregion
 
         #region Construction
@@ -30,8 +35,14 @@ namespace Klipboard.Utils
 
         public KustoDatabaseHelper(KustoConnectionStringBuilder connectionString, string databaseName)
         {
+            m_localhost = s_localhosts.Contains(connectionString.Hostname);
+            m_userHttps = connectionString.ConnectionScheme == "https";
+
             // TODO: This needs to be UX driven
-            var engineKcsb = new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication();
+            var engineKcsb = m_userHttps ?
+                new KustoConnectionStringBuilder(connectionString).WithAadUserPromptAuthentication() :
+                new KustoConnectionStringBuilder(connectionString.DataSource);
+
             engineKcsb.SetConnectorDetails(AppConstants.ApplicationName, AppConstants.ApplicationVersion.ToString(), sendUser: false);
 
             m_engineAdminClient = new Lazy<ICslAdminProvider>(() => KustoClientFactory.CreateCslAdminProvider(engineKcsb));
@@ -50,8 +61,18 @@ namespace Klipboard.Utils
         #endregion
 
         #region Public APIs
-        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefintion)
+        public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefintion, string? filePath = null)
         {
+            if (m_localhost)
+            {
+                if (filePath == null)
+                {
+                    FileHelper.CreateTempFile(upstreamFileName, dataStream, out filePath);
+                }
+
+                return (Success: true, BlobUri: filePath, Error: null);
+            }
+
             try
             {
                 using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
@@ -182,15 +203,44 @@ namespace Klipboard.Utils
         {
             try
             {
-                var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
-                var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
-
-                if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
+                ///////////////////////////////////////
+                // Ingest files to an online cluster
+                ///////////////////////////////////////
+                if (!m_localhost)
                 {
-                    return (true, null);
-                }
+                    var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
+                    var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
 
-                return (false, $"Failed to ingest stream to Kusto: Status='{ingestStatus.Status}', ErrorCode='{ingestStatus.ErrorCode}', FailureStatus='{ingestStatus.FailureStatus}'");
+                    if (ingestStatus.Status == Kusto.Ingest.Status.Succeeded)
+                    {
+                        return (true, null);
+                    }
+
+                    return (false, $"Failed to ingest stream to Kusto: Status='{ingestStatus.Status}', ErrorCode='{ingestStatus.ErrorCode}', FailureStatus='{ingestStatus.FailureStatus}'");
+                }
+                ///////////////////////////////////////
+                // Ingest files to a local cluster
+                ///////////////////////////////////////
+                else
+                {
+                    sourceOptions.IsLocalFileSystem = true;
+                    sourceOptions.Compress = false;
+                    var command =
+                        CslCommandGenerator.GenerateTableIngestPullCommand(
+                            ingestionProperties.TableName,
+                            new[] { blobUriOrFile },
+                            isAsync: false,
+                            extensions: ingestionProperties.GetIngestionProperties());
+
+                    using var resultReader = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, command).ConfigureAwait(false);
+
+                    resultReader.Read();
+
+                    var hasErrors = resultReader.GetBoolean(3);
+                    var error = hasErrors ? $"Ingest oprtation '{resultReader.GetString(4)}' failed" : null;
+
+                    return (Success: !hasErrors, Error: error);
+                }
             }
             catch (Exception ex)
             {

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Kusto.Data;
+﻿using Kusto.Data;
 
 
 namespace Klipboard.Utils
@@ -13,8 +12,14 @@ namespace Klipboard.Utils
 
         public static bool TryInvokeInlineQuery(AppConfig appConfig, string clusterUri, string databaseName, string query, out string? error)
         {
-            var clusterHost = clusterUri.Trim().TrimEnd('/').Replace("https://", "");
+            if (!Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
+            {
+                error = "ClusterUri is not a valid Uri.";
+                return false;
+            }
+            
             string queryLink;
+            string uriParam;
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -31,13 +36,17 @@ namespace Klipboard.Utils
                 return false;
             }
 
-            if (appConfig.DefaultQueryApp == QueryApp.Desktop)
+            switch (appConfig.DefaultQueryApp)
             {
-                queryLink = $"https://{clusterHost}/{databaseName}?query={query}&web=0";
-            }
-            else
-            {
-                queryLink = $"https://dataexplorer.azure.com/clusters/{clusterHost}/databases/{databaseName}?query={query}";
+                case QueryApp.Desktop:
+                    uriParam = $"Data Source={clusterUri};Initial Catalog={databaseName}";
+                    queryLink = $"kusto://query?uri={Uri.EscapeDataString(uriParam)}&query={Uri.EscapeDataString(query)}";
+                    break;
+
+                case QueryApp.Web:
+                default: // compilation fix
+                    queryLink = $"https://dataexplorer.azure.com/clusters/{Uri.EscapeDataString(uri.Host)}/databases/{Uri.EscapeDataString(databaseName)}?&query={Uri.EscapeDataString(query)}";
+                    break;
             }
 
             OpSysHelper.InvokeLink(queryLink);

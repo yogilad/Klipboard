@@ -8,10 +8,12 @@ namespace Klipboard.Utils
     public record IngestFileWorkItem(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
     public delegate void Trace(string level, string message);
     public delegate void ProgressReport(IngestFileWorkItem item, bool success);
+    public delegate Task<(bool Success, string? Error)> IngestFunc(string filePath, KustoIngestionProperties ingestProperties, StorageSourceOptions sourceOptions);
 
     public class KustoIngestRunner
     {
-        private IKustoIngestClient m_ingestClient;
+        private IngestFunc m_ingestFunc = null;
+        private IKustoIngestClient m_ingestClient = null;
         private ActionBlock<IngestFileWorkItem> m_ingestBlock;
 
         public event Trace TraceEvent;
@@ -22,6 +24,14 @@ namespace Klipboard.Utils
             var options = new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = degreeOfParallelism };
 
             m_ingestClient = ingestClient;
+            m_ingestBlock = new ActionBlock<IngestFileWorkItem>(TryIngestFile, options);
+        }
+
+        public KustoIngestRunner(IngestFunc ingestFunc, int degreeOfParallelism)
+        {
+            var options = new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = degreeOfParallelism };
+
+            m_ingestFunc = ingestFunc;
             m_ingestBlock = new ActionBlock<IngestFileWorkItem>(TryIngestFile, options);
         }
 
@@ -40,9 +50,26 @@ namespace Klipboard.Utils
         {
             try
             {
-                await IngestFileImpl(workItem);
+                if (m_ingestClient != null)
+                {
+                    await IngestFileImpl(workItem);
+                    return;
+                }
+
+                var res = await m_ingestFunc.Invoke(workItem.filePath, workItem.ingestProperties, workItem.sourceOptions);
+                
+                if (res.Success)
+                {
+                    TraceEvent?.Invoke("Info", $"ingestion of file '{workItem.filePath}' succeeded");
+                    ReportProgress?.Invoke(workItem, success: true);
+                }
+                else
+                {
+                    TraceEvent?.Invoke("Error", $"ingestion of file '{workItem.filePath}' failed with error: {res.Error}");
+                    ReportProgress?.Invoke(workItem, success: false);
+                }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 TraceEvent?.Invoke("Error", $"ingestion of file '{workItem.filePath}' failed with exception:\n{ex}");
                 ReportProgress?.Invoke(workItem, success: false);
