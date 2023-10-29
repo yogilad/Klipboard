@@ -185,7 +185,7 @@ namespace Klipboard.Workers
             queryBuilder.AppendLine("| take 100");
 
             var query = queryBuilder.ToString();
-            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, NotificationTitle, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, m_notificationHelper, out var error))
             {
                 progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Failed to invoke external data query", error ?? "Unknown error.");

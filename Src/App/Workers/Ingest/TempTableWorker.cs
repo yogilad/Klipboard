@@ -294,7 +294,7 @@ namespace Klipboard.Workers
                 .AppendLine("']")
                 .ToString();
 
-            if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), target.ConnectionString, target.DatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(m_settings.GetConfig(), NotificationTitle,target.ConnectionString, target.DatabaseName, query, m_notificationHelper, out var error))
             {
                 progressNotification.CloseNotification();
                 m_notificationHelper.ShowExtendedNotification(NotificationTitle, $"Failed to invoke query on temp table '{tempTableName}'", error ?? "Unknown error.");

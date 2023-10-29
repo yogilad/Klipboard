@@ -116,7 +116,7 @@ namespace Klipboard.Workers
             }
             var appConfig = m_settings.GetConfig();
 
-            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, out var error))
+            if (!InlineQueryHelper.TryInvokeInlineQuery(appConfig, NotifcationTitle, appConfig.ChosenCluster.ConnectionString, appConfig.ChosenCluster.DatabaseName, query, m_notificationHelper, out var error))
             {
                 m_notificationHelper.ShowExtendedNotification(NotifcationTitle, "Failed to invoke inline query", error ?? "Unknown error.");
                 return;

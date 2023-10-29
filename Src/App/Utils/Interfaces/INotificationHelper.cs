@@ -29,6 +29,15 @@
         /// <param name="progressString">A textual progress string</param>
         /// <returns>ProgressNotificationUpdater class instance linked to the new created notification</returns>
         IProgressNotificationUpdater ShowProgressNotification(string title, string shortMessage, string step = "", string progressString = "");
+
+        /// <summary>
+        /// Set a result back to the Cliboard
+        /// </summary>
+        /// <param name="title">Notification title</param>
+        /// <param name="shortMessage">Notification message</param>
+        /// <param name="text">Text to copy to the clipboard</param>
+        /// <param name="timeoutSeconds">Time to show notification</param>
+        void CopyResultNotification(string title, string shortMessage, string text, int timeoutSeconds = AppConstants.DefaultNotificationTime);
     }
 
     public interface IProgressNotificationUpdater

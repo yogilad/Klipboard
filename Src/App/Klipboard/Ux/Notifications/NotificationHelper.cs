@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.Foundation.Collections;
 using Windows.UI.Notifications;
@@ -11,7 +12,10 @@ namespace Klipboard
     #region NotifcationHelper
     public class NotificationHelper : INotificationHelper
     {
-        static NotificationHelper()
+        static readonly MemoryCache m_largeObjectCache = new MemoryCache(new MemoryCacheOptions());
+
+
+        public NotificationHelper(ClipboardHelper clipboardHelper)
         {
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
             {
@@ -31,11 +35,27 @@ namespace Klipboard
                     case "MessageBox":
                         args.TryGetValue("title", out var title);
                         args.TryGetValue("message", out var message);
-                        args.TryGetValue("details", out var details);
+                        args.TryGetValue("detailsId", out var detailsId);
+                        var details = m_largeObjectCache.Get(detailsId) as string;
+
+                        if (details != null)
+                        {
+                            m_largeObjectCache.Remove(detailsId);
+                            clipboardHelper.SetText(details);
+                        }
                         
-                        var decodeDetails = Encoding.UTF8.GetString(Convert.FromBase64String(details));
-                        
-                        new TextViewForm(title, message, decodeDetails, wordWrap: true).ShowDialog();
+                        new TextViewForm(title, message, details, wordWrap: true).ShowDialog();
+                        break;
+
+                    case "SetClipboard":
+                        args.TryGetValue("textId", out var textId);
+                        var text = m_largeObjectCache.Get(textId) as string;
+
+                        if (text != null)
+                        {
+                            m_largeObjectCache.Remove(textId);
+                            clipboardHelper.SetText(text);
+                        }
                         break;
                 }
             };
@@ -57,18 +77,41 @@ namespace Klipboard
 
         public void ShowExtendedNotification(string title, string shortMessage, string extraDetails, int timeoutSeconds = AppConstants.DefaultNotificationTime)
         {
-            var encodedExtraDetails = Convert.ToBase64String(Encoding.UTF8.GetBytes(extraDetails));
+            var cahceId = Guid.NewGuid().ToString();
             var buttonArgs = new ToastArguments()
                 .Add("action", "MessageBox")
                 .Add("title", title)
                 .Add("message", shortMessage)
-                .Add("details", encodedExtraDetails);
+            .Add("detailsId", cahceId);
 
+            m_largeObjectCache.Set(cahceId, extraDetails, TimeSpan.FromHours(1));
 
             new ToastContentBuilder()
                 .AddText(title)
                 .AddText(shortMessage)
                 .AddButton("See full details", ToastActivationType.Foreground, buttonArgs.ToString())
+                .Show(toast =>
+                {
+                    if (timeoutSeconds > 0)
+                        toast.ExpirationTime = DateTime.Now.AddSeconds(timeoutSeconds);
+
+                    toast.Priority = ToastNotificationPriority.High;
+                });
+        }
+
+        public void CopyResultNotification(string title, string shortMessage, string text, int timeoutSeconds = AppConstants.DefaultNotificationTime)
+        {
+            var cahceId = Guid.NewGuid().ToString();
+            var buttonArgs = new ToastArguments()
+                .Add("action", "SetClipboard")
+                .Add("textId", cahceId);
+
+            m_largeObjectCache.Set(cahceId, text, TimeSpan.FromHours(1));
+
+            new ToastContentBuilder()
+                .AddText(title)
+                .AddText(shortMessage)
+                .AddButton("Copy Result", ToastActivationType.Foreground, buttonArgs.ToString())
                 .Show(toast =>
                 {
                     if (timeoutSeconds > 0)

@@ -114,7 +114,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(46, 282);
+            label2.Location = new Point(46, 285);
             label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
             label2.Size = new Size(58, 15);
@@ -155,12 +155,12 @@
             // lblOpenWith
             // 
             lblOpenWith.AutoSize = true;
-            lblOpenWith.Location = new Point(28, 309);
+            lblOpenWith.Location = new Point(27, 312);
             lblOpenWith.Margin = new Padding(2, 0, 2, 0);
             lblOpenWith.Name = "lblOpenWith";
-            lblOpenWith.Size = new Size(76, 15);
+            lblOpenWith.Size = new Size(77, 15);
             lblOpenWith.TabIndex = 14;
-            lblOpenWith.Text = "Query Editor:";
+            lblOpenWith.Text = "Query Target:";
             // 
             // txtQuery
             // 

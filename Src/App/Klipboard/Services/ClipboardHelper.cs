@@ -59,5 +59,32 @@ namespace Klipboard
 
             return Clipboard.GetFileDropList().Cast<string?>().Where(x => x != null).ToList()!;
         }
+
+        public Task SetText(string text)
+        {
+            return StartSTATask(() => Clipboard.SetText(text));
+        }
+
+        private static Task StartSTATask(Action func)
+        {
+            var tcs = new TaskCompletionSource();
+
+            Thread thread = new Thread(() =>
+            {
+                try
+                {
+                    func();
+                    tcs.SetResult();
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            return tcs.Task;
+        }
     }
 }
