@@ -36,13 +36,6 @@ namespace Klipboard.Workers
             var config = m_settings.GetConfig();
             string clusterName = GetClusterName(config.ChosenCluster.ConnectionString);
 
-            // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show version once on creation.
-            if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
-            {
-                var tempName = clusterName.ToLower();
-                clusterName = $"MyFreeCluster [{tempName.Substring(0, 3)} {tempName.Substring(3, 5)}]";
-            }
-
             string targetStr = $"{clusterName} / {config.ChosenCluster.DatabaseName}";
 
             if ((content & (ClipboardContent.CSV | ClipboardContent.CSV_Stream)) != ClipboardContent.None)
@@ -90,12 +83,30 @@ namespace Klipboard.Workers
 
         private string GetClusterName(string connectionString)
         {
-            if(Uri.TryCreate(connectionString, UriKind.Absolute, out var uri))
+            string clusterName;
+
+            if (Uri.TryCreate(connectionString, UriKind.Absolute, out var uri))
             {
-                return uri.Host.ToUpper();
+                clusterName = uri.Host.ToUpper();
+
+                if (clusterName.Contains(".KUSTO")) 
+                {
+                    clusterName = clusterName.SplitFirst(".");
+                }
+            }
+            else
+            {
+                clusterName = connectionString.SplitTakeLast("//").SplitFirst(".").SplitFirst(":").ToUpper();
             }
 
-            return connectionString.SplitTakeLast("//").SplitFirst(".").SplitFirst(":").ToUpper();
+            // TODO - the correct way to do this is to have some framework which qualifies KVCs by the result of .show version once on creation.
+            if (clusterName.StartsWith("KVC") && clusterName.Length >= 20)
+            {
+                var tempName = clusterName.ToLower();
+                clusterName = $"MyFreeCluster [{tempName.Substring(0, 3)} {tempName.Substring(3, 5)}]";
+            }
+
+            return clusterName;
         }
 
         #region
