@@ -1,7 +1,9 @@
-﻿using Klipboard.Utils;
+﻿using System.Text;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.Foundation.Collections;
 using Windows.UI.Notifications;
+
+using Klipboard.Utils;
 
 
 namespace Klipboard
@@ -30,7 +32,10 @@ namespace Klipboard
                         args.TryGetValue("title", out var title);
                         args.TryGetValue("message", out var message);
                         args.TryGetValue("details", out var details);
-                        new TextViewForm(title, message, details, wordWrap: true).ShowDialog();
+                        
+                        var decodeDetails = Encoding.UTF8.GetString(Convert.FromBase64String(details));
+                        
+                        new TextViewForm(title, message, decodeDetails, wordWrap: true).ShowDialog();
                         break;
                 }
             };
@@ -52,11 +57,12 @@ namespace Klipboard
 
         public void ShowExtendedNotification(string title, string shortMessage, string extraDetails, int timeoutSeconds = AppConstants.DefaultNotificationTime)
         {
+            var encodedExtraDetails = Convert.ToBase64String(Encoding.UTF8.GetBytes(extraDetails));
             var buttonArgs = new ToastArguments()
                 .Add("action", "MessageBox")
                 .Add("title", title)
                 .Add("message", shortMessage)
-                .Add("details", extraDetails);
+                .Add("details", encodedExtraDetails);
 
 
             new ToastContentBuilder()
