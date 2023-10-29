@@ -5,21 +5,17 @@ namespace Klipboard.Utils
 {
     public static class InlineQueryHelper
     {
-        public static bool TryInvokeInlineQuery(AppConfig appConfig, KustoConnectionStringBuilder clusterKcsb, string databaseName, string query, out string? error)
+        public static bool TryInvokeInlineQuery(AppConfig appConfig, string actionName, KustoConnectionStringBuilder clusterKcsb, string databaseName, string query, INotificationHelper notificationHelper, out string? error)
         {
-            return TryInvokeInlineQuery(appConfig, clusterKcsb.DataSource, databaseName, query, out error);
+            return TryInvokeInlineQuery(appConfig, actionName, clusterKcsb.DataSource, databaseName, query, notificationHelper, out error);
         }
 
-        public static bool TryInvokeInlineQuery(AppConfig appConfig, string clusterUri, string databaseName, string query, out string? error)
+        public static bool TryInvokeInlineQuery(AppConfig appConfig, string actionName, string clusterUri, string databaseName, string query, INotificationHelper notificationHelper, out string? error)
         {
-            if (!Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
-            {
-                error = "ClusterUri is not a valid Uri.";
-                return false;
-            }
-            
             string queryLink;
             string uriParam;
+
+            error = null;
 
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -27,7 +23,18 @@ namespace Klipboard.Utils
                 return false;
             }
 
-            error = null;
+            if (appConfig.DefaultQueryApp == QueryApp.Clipboard)
+            {
+                notificationHelper.CopyResultNotification(actionName, "Query Is Ready", query);
+                return true;
+            }
+
+            if (!Uri.TryCreate(clusterUri, UriKind.Absolute, out var uri))
+            {
+                error = "ClusterUri is not a valid Uri.";
+                return false;
+            }
+
             query = TabularDataHelper.GzipBase64(query);
 
             if (AppConstants.EnforceInlineQuerySizeLimits && query.Length > AppConstants.MaxAllowedQueryLength)

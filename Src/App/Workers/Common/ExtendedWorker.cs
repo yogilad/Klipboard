@@ -1,5 +1,5 @@
 using Klipboard.Utils;
-
+using Kusto.Cloud.Platform.Utils;
 
 namespace Klipboard.Workers
 {
@@ -87,7 +87,8 @@ namespace Klipboard.Workers
         {
             Task.Run(async () =>
             {
-                using var scope = Logger.OperationScope(worker.GetType().ToString(), operation);
+                var className = worker.GetType().ToString().SplitTakeLast(".");
+                using var scope = Logger.OperationScope(className, operation);
 
                 try
                 {

@@ -5,8 +5,15 @@ using Klipboard.Utils;
 
 namespace Klipboard
 {
-    public class ClipboardHelper : IClipboardHelper
+    public class ClipboardHelper : IClipboardHelper, IDisposable
     {
+        private readonly UxTaskScheduler m_uxTaskScheduler = new UxTaskScheduler();
+
+        public void Dispose()
+        {
+            m_uxTaskScheduler?.Dispose();
+        }
+
         public ClipboardContent GetClipboardContent()
         {
             // TODO: Consider supporting extracting html tables from HTML drop content
@@ -58,6 +65,11 @@ namespace Klipboard
             }
 
             return Clipboard.GetFileDropList().Cast<string?>().Where(x => x != null).ToList()!;
+        }
+
+        public Task SetText(string text)
+        {
+            return m_uxTaskScheduler.Run(() => Clipboard.SetText(text));
         }
     }
 }

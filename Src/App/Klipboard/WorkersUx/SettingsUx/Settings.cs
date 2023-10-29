@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Klipboard.Properties;
+﻿using System.Runtime.CompilerServices;
 using Klipboard.Utils;
 
 namespace Klipboard
@@ -15,7 +13,7 @@ namespace Klipboard
         private Settings()
         {
             InitializeComponent();
-            
+
             foreach (ColumnHeader c in lstClusters.Columns)
             {
                 c.Width = -2;
@@ -48,7 +46,6 @@ namespace Klipboard
             var path = m_appConfigFile?.ConfigPath ?? Properties.Settings.Default.SettingsPath;
             m_appConfigFile = string.IsNullOrWhiteSpace(path) ? new AppConfigFile() : new AppConfigFile(path);
             Properties.Settings.Default.SettingsPath = m_appConfigFile.ConfigPath;
-            txtSettingsPath.Text = Properties.Settings.Default.SettingsPath;
         }
 
         private ConfiguredTaskAwaitable<bool> SaveSettings(AppConfig? config = null)
@@ -105,11 +102,6 @@ namespace Klipboard
         }
 
         #region Events
-        private async void btnLoadSettings_Click(object sender, EventArgs e)
-        {
-            await ExceptionUtils.Protect(async () => await LoadSettingsToUx()).ConfigureAwait(false);
-        }
-
         private void lstClusters_SelectedIndexChanged(object sender, EventArgs e)
         {
             ExceptionUtils.Protect(() =>
@@ -176,7 +168,6 @@ namespace Klipboard
             await ExceptionUtils.Protect(async () => await SaveSettings());
             Close();
         }
-
 
         private async void CancelButton_Click(object sender, EventArgs e)
         {
