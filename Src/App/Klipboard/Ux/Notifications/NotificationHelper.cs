@@ -14,7 +14,6 @@ namespace Klipboard
     {
         static readonly MemoryCache m_largeObjectCache = new MemoryCache(new MemoryCacheOptions());
 
-
         public NotificationHelper(ClipboardHelper clipboardHelper)
         {
             ToastNotificationManagerCompat.OnActivated += toastArgs =>

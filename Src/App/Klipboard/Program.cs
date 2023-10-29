@@ -27,9 +27,8 @@ namespace Klipboard
                 ApplicationConfiguration.Initialize();
 
                 var settings = Settings.Init().ConfigureAwait(false).GetAwaiter().GetResult();
-                var clipboardHelper = new ClipboardHelper();
+                using var clipboardHelper = new ClipboardHelper();
                 var notificationHelper = new NotificationHelper(clipboardHelper);
-
                 var workers = CreateWorkers(settings, notificationHelper);
                 using var notificationIcon = new NotificationIcon(workers, clipboardHelper, notificationHelper);
 
