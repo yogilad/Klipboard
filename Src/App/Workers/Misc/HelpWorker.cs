@@ -16,7 +16,7 @@ namespace Klipboard.Workers
 
 
         public HelpWorker(ISettings settings, INotificationHelper notificationHelper)
-            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, Share, FreeCluster, Report, Updates, SignOut, About })
+            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, About, Share, FreeCluster, Report, Updates, SignOut })
         {
         }
 
