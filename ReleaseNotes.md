@@ -1,5 +1,17 @@
 # Release Notes
 
+## Version v0.1.3
+### Features
+* Add support for working with a local instance of Kusto (Kusto Personal or a debug version of Kusto).
+To do so, create a connection with the following format `http[s]://localhost[:port]`.
+* Invoke Kusto Explorer Desktop using app link (without going through Edge browser).
+* New Quick Actions Target: Paste resulting queries back to the clipboard.
+
+### Bug Fixes
+* Show exceptions as multi line strings.
+* Improved Quick-Action cluster name detection.
+* Remove unneeded settings file path UX option.
+
 ## Version v0.1.2
 ### Features
 * New Command: Inspect Clipboard Content (shows a preview of the content of the clipboard)

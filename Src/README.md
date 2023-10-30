@@ -24,7 +24,7 @@
 ## Before Publishing a New Release
 1. Create a new PR named _v[Major].[Minor].\[Build\]_
 1. Edit `ReleaseNotes.md`
-1. Update the version in `Src\App\Utils\Common\AppConstants.cs_` to _v[Major].[Minor].\[Build\]_
+1. Update the version in `Src\App\Utils\Common\AppConstants.cs` to _v[Major].[Minor].\[Build\]_
 1. In Visual Studio, 
 	1. Select the _Setup_ project 
 	1. Set the version in the properties pane to _v[Major].[Minor].\[Build\]_
@@ -34,7 +34,7 @@
 1. Open a shell (cmd) window and CD into the Src directory
 1. Run the build script `build.bat [version]` where _[version]_ is _[Major].[Minor].\[Build\]_ (do not use the 'v' prefix)
 1. Confirm the build had ended sucessfully
-1. In Visual Studio, build the _Setup_ project
+1. In Visual Studio, set the build type to `Release` and build the `Setup` project
 
 ## Pack
 1. Open a shell (cmd) window and CD into the Src directory

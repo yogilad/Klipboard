@@ -13,10 +13,11 @@ namespace Klipboard.Workers
         private const string Updates        = "Check For Updates";
         private const string SignOut        = "Sign Out of AAD";
         private const string About          = "About";
+        private const string WhatsNew       = "What's New";
 
 
         public HelpWorker(ISettings settings, INotificationHelper notificationHelper)
-            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, About, Share, FreeCluster, Report, Updates, SignOut })
+            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, About, WhatsNew, Share, Report, Updates, SignOut, FreeCluster })
         {
         }
 
@@ -58,6 +59,10 @@ namespace Klipboard.Workers
 
                 case FreeCluster:
                     OpSysHelper.InvokeLink("https://dataexplorer.azure.com/freecluster");
+                    break;
+
+                case WhatsNew:
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/blob/main/ReleaseNotes.md#release-notes");
                     break;
 
                 case Updates:
