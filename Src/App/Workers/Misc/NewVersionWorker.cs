@@ -20,7 +20,7 @@ namespace Klipboard.Workers
 
         public override async Task HandleAsync(string? chosenOption)
         {
-            OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/releases");
+            OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/releases/latest");
         }
     }
 }

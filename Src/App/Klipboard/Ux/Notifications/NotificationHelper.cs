@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.Foundation.Collections;
 using Windows.UI.Notifications;
@@ -12,7 +11,19 @@ namespace Klipboard
     #region NotifcationHelper
     public class NotificationHelper : INotificationHelper
     {
-        static readonly MemoryCache m_largeObjectCache = new MemoryCache(new MemoryCacheOptions());
+        static readonly MemoryCache m_ObjectCache = new MemoryCache(new MemoryCacheOptions());
+
+        // Actions
+        private const string ShowMessageBoxAction = "ShowMessageBox";
+        private const string SetClipboardAction = "SetClipboard";
+        private const string RunOnClickAction = "RunOnClickAction";
+
+        // Parameters
+        private const string TitleArg = "Title";
+        private const string ActionArg = "Action";
+        private const string MessageArg = "Message";
+        private const string CacheObjectIdArg = "CacheObjectId";
+
 
         public NotificationHelper(ClipboardHelper clipboardHelper)
         {
@@ -24,48 +35,93 @@ namespace Klipboard
                 // Obtain any user input (text boxes, menu selections) from the notification
                 ValueSet userInput = toastArgs.UserInput;
 
-                if (!args.TryGetValue("action", out var action))
+                if (!args.TryGetValue(ActionArg, out var action))
                 {
                     return;
                 }
 
                 switch (action)
                 {
-                    case "MessageBox":
-                        args.TryGetValue("title", out var title);
-                        args.TryGetValue("message", out var message);
-                        args.TryGetValue("detailsId", out var detailsId);
-                        var details = m_largeObjectCache.Get(detailsId) as string;
+                    case ShowMessageBoxAction:
+                        args.TryGetValue(TitleArg, out var title);
+                        args.TryGetValue(MessageArg, out var message);
+                        args.TryGetValue(CacheObjectIdArg, out var detailsId);
+                        var details = m_ObjectCache.Get(detailsId) as string;
 
                         if (details != null)
                         {
-                            m_largeObjectCache.Remove(detailsId);
+                            m_ObjectCache.Remove(detailsId);
                             clipboardHelper.SetText(details);
                         }
                         
                         new TextViewForm(title, message, details, wordWrap: true).ShowDialog();
                         break;
 
-                    case "SetClipboard":
-                        args.TryGetValue("textId", out var textId);
-                        var text = m_largeObjectCache.Get(textId) as string;
+                    case SetClipboardAction:
+                        args.TryGetValue(CacheObjectIdArg, out var textId);
+                        var text = m_ObjectCache.Get(textId) as string;
 
                         if (text != null)
                         {
-                            m_largeObjectCache.Remove(textId);
+                            m_ObjectCache.Remove(textId);
                             clipboardHelper.SetText(text);
                         }
                         break;
+
+                    case RunOnClickAction:
+                        args.TryGetValue(CacheObjectIdArg, out var actionId);
+                        var onClick = m_ObjectCache.Get(actionId) as Action;
+
+                        if (onClick != null)
+                        {
+                            m_ObjectCache.Remove(actionId);
+                            Task.Run(() =>
+                            {
+                                try
+                                {
+                                    onClick.Invoke();
+                                }
+                                catch(Exception ex)
+                                {
+                                    Logger.Log.Error(ex, "notifcation Action ended with exception");
+                                }
+                                
+                            });
+                        }
+                        break;
+
                 }
             };
         }
 
-        public void ShowBasicNotification(string title, string message, int timeoutSeconds = AppConstants.DefaultNotificationTime)
+        public void ShowBasicNotification(string title, string message, int timeoutSeconds = AppConstants.DefaultNotificationTime, Action? onClick = null, string? onClickButton = null)
         {
-            new ToastContentBuilder()
+            var builder = new ToastContentBuilder();
+                
+            builder
                 .AddText(title)
-                .AddText(message)
-                .Show(toast =>
+                .AddText(message);
+
+            if (onClick != null)
+            {
+                var actionId = Guid.NewGuid().ToString();
+                var buttonArgs = new ToastArguments()
+                .Add(ActionArg, RunOnClickAction)
+                .Add(CacheObjectIdArg, actionId);
+
+                m_ObjectCache.Set(actionId, onClick);
+
+                if (string.IsNullOrWhiteSpace(onClickButton))
+                {
+                    builder.AddToastActivationInfo(buttonArgs.ToString(), ToastActivationType.Foreground);
+                }
+                else
+                {
+                    builder.AddButton(onClickButton, ToastActivationType.Foreground, buttonArgs.ToString());
+                }
+            }
+
+            builder.Show(toast =>
                 {
                     if (timeoutSeconds > 0)
                         toast.ExpirationTime = DateTime.Now.AddSeconds(timeoutSeconds);
@@ -78,12 +134,12 @@ namespace Klipboard
         {
             var cahceId = Guid.NewGuid().ToString();
             var buttonArgs = new ToastArguments()
-                .Add("action", "MessageBox")
-                .Add("title", title)
-                .Add("message", shortMessage)
-            .Add("detailsId", cahceId);
+                .Add(ActionArg, ShowMessageBoxAction)
+                .Add(TitleArg, title)
+                .Add(MessageArg, shortMessage)
+                .Add(CacheObjectIdArg, cahceId);
 
-            m_largeObjectCache.Set(cahceId, extraDetails, TimeSpan.FromHours(1));
+            m_ObjectCache.Set(cahceId, extraDetails, TimeSpan.FromHours(1));
 
             new ToastContentBuilder()
                 .AddText(title)
@@ -102,10 +158,10 @@ namespace Klipboard
         {
             var cahceId = Guid.NewGuid().ToString();
             var buttonArgs = new ToastArguments()
-                .Add("action", "SetClipboard")
-                .Add("textId", cahceId);
+                .Add(ActionArg, SetClipboardAction)
+                .Add(CacheObjectIdArg, cahceId);
 
-            m_largeObjectCache.Set(cahceId, text, TimeSpan.FromHours(1));
+            m_ObjectCache.Set(cahceId, text, TimeSpan.FromHours(1));
 
             new ToastContentBuilder()
                 .AddText(title)

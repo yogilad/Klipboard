@@ -8,7 +8,9 @@
         /// <param name="title"></param>
         /// <param name="message"></param>
         /// <param name="timeoutSeconds">Number of seconds before hiding the notification. 0 to persist indefinitely.</param>
-        void ShowBasicNotification(string title, string message, int timeoutSeconds = AppConstants.DefaultNotificationTime);
+        /// <param name="onClick">Optional action to invoke if clicked</param>
+        /// <param name="onClickButton">Optional button for action. If not set the action will be called when the notification itself is clicked</param>
+        void ShowBasicNotification(string title, string message, int timeoutSeconds = AppConstants.DefaultNotificationTime, Action? onClick = null, string? onClickButton = null);
 
         /// <summary>
         /// Show a text notification with an extended message details button 
