@@ -84,24 +84,26 @@ namespace Klipboard.Workers
             var fileList = new List<string>();
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
             var target = GetQuickActionTarget();
-            var hasMoreFiles = false;
             var curFileNo = 0.0;
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             var report = new StringBuilder();
-            
+
+            progressNotification.UpdateProgress("Listing Files", 0, $"0/{fileList.Count}");
+
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders))
             {
                 if (fileList.Count == 100)
                 {
-                    hasMoreFiles = true;
                     break;
                 }
 
                 fileList.Add(path);
-                progressNotification.UpdateProgress("Listing Files", 0, $"0/{fileList.Count}");
             }
 
-            foreach(var filePath in fileList) 
+            progressNotification.UpdateProgress("Listing Files", 0, $"0/{fileList.Count}");
+            report.AppendLine("\"No\",\"File\",\"Format\",\"Schema\",\"Error\"");
+
+            foreach (var filePath in fileList) 
             {
                 var fileInfo = new FileInfo(filePath);
                 var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
@@ -110,32 +112,23 @@ namespace Klipboard.Workers
                 var result = await HandleSingleTextStreamAsync(databaseHelper, fileStream, formatResult, upstreamFileName, firstRowIsHeader, filePath);
 
                 curFileNo++;
+                report.Append("\"");
                 report.Append(curFileNo);
-                report.Append(". ");
-                report.AppendLine(filePath);
-
-                if (result.Success)
-                {
-                    report.Append("Schema: ");
-                    report.AppendLine(result.Schema.ToSchemaString());
-                    report.Append("Format: ");
-                    report.AppendLine(result.Format);
-                }
-                else
-                {
-                    report.Append("Detection failed: ");
-                    report.AppendLine(result.Error);
-                }
+                report.Append("\",\"");
+                report.Append(filePath);
+                report.Append("\",\"");
+                report.Append(result.Format);
+                report.Append("\",\"");
+                report.Append(result.Schema?.ToSchemaString());
+                report.Append("\",\"");
+                report.Append(result.Error);
+                report.AppendLine("\"");
 
                 progressNotification.UpdateProgress("Inspecting Files", curFileNo / fileList.Count, $"{curFileNo}/{fileList.Count}");
             }
 
-            if (hasMoreFiles)
-            {
-                report.AppendLine();
-                report.AppendLine("Remaining files not processed");
-            }
-
+            progressNotification.UpdateProgress("Done", 1.0, $"{curFileNo}/{fileList.Count}");
+            progressNotification.CloseNotification(5);
             m_notificationHelper.ShowExtendedNotification(NotificationTitle, $"Clipboard Files ({curFileNo})", report.ToString());
         }
 
