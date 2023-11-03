@@ -1,6 +1,5 @@
 ﻿using System.Text;
-using Kusto.Data.Common;
-using Kusto.Ingest;
+using System.Text.RegularExpressions;
 
 using Klipboard.Utils;
 
@@ -101,7 +100,7 @@ namespace Klipboard.Workers
             }
 
             progressNotification.UpdateProgress("Listing Files", 0, $"0/{fileList.Count}");
-            report.AppendLine("\"No\",\"File\",\"Format\",\"Schema\",\"Error\"");
+            report.AppendLine("No\tFile\tFormat\tSchema\tError");
 
             foreach (var filePath in fileList) 
             {
@@ -110,19 +109,29 @@ namespace Klipboard.Workers
                 var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
                 using var fileStream = File.OpenRead(filePath);
                 var result = await HandleSingleTextStreamAsync(databaseHelper, fileStream, formatResult, upstreamFileName, firstRowIsHeader, filePath);
+                var escapedSchema = string.Empty;
+                var escapedError = string.Empty;
+
+                if (result.Schema != null)
+                {
+                    escapedSchema = Regex.Replace(result.Schema.ToString(), @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                }
+
+                if (result.Error != null)
+                {
+                    escapedError = Regex.Replace(result.Error, @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                }
 
                 curFileNo++;
-                report.Append("\"");
                 report.Append(curFileNo);
-                report.Append("\",\"");
+                report.Append("\t");
                 report.Append(filePath);
-                report.Append("\",\"");
+                report.Append("\t");
                 report.Append(result.Format);
-                report.Append("\",\"");
-                report.Append(result.Schema?.ToSchemaString());
-                report.Append("\",\"");
-                report.Append(result.Error);
-                report.AppendLine("\"");
+                report.Append("\t");
+                report.Append(escapedSchema);
+                report.Append("\t");
+                report.AppendLine(escapedError);
 
                 progressNotification.UpdateProgress("Inspecting Files", curFileNo / fileList.Count, $"{curFileNo}/{fileList.Count}");
             }
