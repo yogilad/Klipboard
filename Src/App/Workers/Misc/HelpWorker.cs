@@ -36,8 +36,13 @@ namespace Klipboard.Workers
                     break;
 
                 case About:
-                    var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard/Wiki";
-                    m_notificationHelper.ShowBasicNotification(AppConstants.ApplicationName, msg);
+                    var msg = $"Version '{AppConstants.ApplicationVersion}'\nDeveloped by Yochai Gilad.\nhttps://github.com/yogilad/Klipboard";
+
+                    m_notificationHelper.ShowBasicNotification(
+                        AppConstants.ApplicationName, 
+                        msg, 
+                        onClick: () => OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard"));
+
                     break;
 
                 case SignOut:
@@ -68,7 +73,11 @@ namespace Klipboard.Workers
                 case Updates:
                     if (await VersionHelper.CheckForNewVersion())
                     {
-                        m_notificationHelper.ShowBasicNotification(AppConstants.ApplicationName, $"Version {VersionHelper.LatestVersion} is available for download");
+                        m_notificationHelper.ShowBasicNotification(
+                            AppConstants.ApplicationName, 
+                            $"Version {VersionHelper.LatestVersion} is available for download",
+                            onClick: () => OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/releases/latest"),
+                            onClickButton: "Go To Download Page");
                     }
                     else 
                     {
