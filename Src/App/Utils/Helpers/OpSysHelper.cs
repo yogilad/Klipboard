@@ -6,7 +6,12 @@ namespace Klipboard.Utils
     public class AutoDispose : IDisposable
     {
         Action? m_disposeAction;
-        
+
+        public AutoDispose()
+        {
+            m_disposeAction = null;
+        }
+
         public AutoDispose(Action disposeAction)
         {
             m_disposeAction = disposeAction;
@@ -39,6 +44,13 @@ namespace Klipboard.Utils
 #else
             var name = $"{AppConstants.ApplicationName}_RELEASE";
 #endif
+
+            if (Debugger.IsAttached)
+            {
+                processLock = new AutoDispose();
+                return true;
+            }
+
             var singleProcessMutex = new Mutex(initiallyOwned: false, name);
 
             if (!singleProcessMutex.WaitOne(0))

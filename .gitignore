@@ -1,3 +1,4 @@
+*.orig
 *.exe
 *.vs
 *.user

@@ -21,7 +21,7 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Inspect the schema of tabular data or up to 100 files";
 
-        public override bool IsMenuVisible() => AppConstants.DevMode;
+        public override bool IsMenuVisible() => true;
 
         public override async Task HandleCsvAsync(string csvData, string? chosenOption)
         {

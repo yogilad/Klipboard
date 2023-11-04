@@ -17,10 +17,6 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Queue clipboard tabular data or any number of files to a table";
 
-        public override bool IsMenuVisible() => AppConstants.DevMode;
-
-        public override bool IsMenuEnabled(ClipboardContent content) => content == ClipboardContent.Files;
-
         public override IKustoIngestClient CreateIngestClient(KustoConnectionStringBuilder ClusterUri)
         {
             var client = KustoIngestFactory.CreateQueuedIngestClient(ClusterUri);

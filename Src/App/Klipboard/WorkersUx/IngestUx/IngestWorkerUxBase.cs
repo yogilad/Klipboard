@@ -11,6 +11,10 @@ namespace Klipboard
         {
         }
 
+        public override bool IsMenuVisible() => AppConstants.DevMode;
+
+        public override bool IsMenuEnabled(ClipboardContent content) => AppConstants.DevMode && content == ClipboardContent.Files;
+
         public override async Task HandleFilesAsync(List<string> filesAndFolders, string? chosenOption)
         {
             using var ux = new IngestForm(GetMenuText(ClipboardContent.Files), devMode: true);
