@@ -21,18 +21,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build Debug
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --configuration Debug
     - name: Build Release
       run: dotnet build --no-restore --configuration Release
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: Debug
-        path: |
-          Src/App/Klipboard/bin/Debug
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: Release
-        path: |
-          Src/App/Klipboard/bin/Release
