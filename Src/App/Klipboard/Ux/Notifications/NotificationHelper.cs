@@ -85,7 +85,6 @@ namespace Klipboard
                                 {
                                     Logger.Log.Error(ex, "notifcation Action ended with exception");
                                 }
-                                
                             });
                         }
                         break;
