@@ -38,6 +38,7 @@
             // 
             textBox.BorderStyle = BorderStyle.FixedSingle;
             textBox.Location = new Point(0, 1);
+            textBox.MaxLength = 1073741824;
             textBox.Multiline = true;
             textBox.Name = "textBox";
             textBox.ScrollBars = ScrollBars.Vertical;

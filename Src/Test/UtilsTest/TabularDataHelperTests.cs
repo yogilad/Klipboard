@@ -12,7 +12,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 10, addHeader: true, addNullRows: true, addEmptyRows: true);
-            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", out var scheme, out var firstRowIsHeader);
+            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null,out var scheme, out var firstRowIsHeader);
             
             Assert.IsTrue(res);
             Assert.IsTrue(firstRowIsHeader);
@@ -25,7 +25,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme(firstRowIsHeader: false);
             var tableData = generator.GenerateTableString(lines: 10, addHeader: false);
-            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", out var scheme, out var firstRowIsHeader);
+            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null, out var scheme, out var firstRowIsHeader);
 
             Assert.IsTrue(res);
             Assert.IsFalse(firstRowIsHeader);
@@ -38,7 +38,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme(firstRowIsHeader: true);
             var tableData = generator.GenerateTableString(lines: 0, addHeader: true);
-            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", out var scheme, out var firstRowIsHeader);
+            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null, out var scheme, out var firstRowIsHeader);
 
             Assert.IsTrue(res);
             Assert.IsFalse(firstRowIsHeader);
@@ -51,7 +51,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme(firstRowIsHeader: false);
             var tableData = generator.GenerateTableString(lines: 1, addHeader: false);
-            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", out var scheme, out var firstRowIsHeader);
+            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null, out var scheme, out var firstRowIsHeader);
 
             Assert.IsTrue(res);
             Assert.IsFalse(firstRowIsHeader);
@@ -64,7 +64,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableStream(lines: 10, addHeader: true);
-            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, ",", out var scheme, out var firstRowIsHeader);
+            var res = TabularDataHelper.TryAnalyzeTabularData(tableData, ",", KqlTypeDetectionMode.All, isFirstRowHeader: null, out var scheme, out var firstRowIsHeader);
 
             Assert.IsTrue(res);
             Assert.IsTrue(firstRowIsHeader);
@@ -77,7 +77,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 100, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", optionalKqlSuffix: null, out string inlineQuery);
+            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null, optionalKqlSuffix: null, out string inlineQuery);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQuery);
@@ -89,7 +89,7 @@ namespace Klipboard.Utils.Test
             var generator = new TableGenerator(autoGenerateScheme: true);
             var tableScheme = generator.GenerateTableScheme();
             var tableData = generator.GenerateTableString(lines: 200, addHeader: true, addNullRows: false, addEmptyRows: false);
-            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", optionalKqlSuffix: null, out string? inlineQueryLink);
+            var res = TabularDataHelper.TryConvertTableToInlineQuery(tableData, "\t", KqlTypeDetectionMode.All, isFirstRowHeader: null, optionalKqlSuffix: null, out string? inlineQueryLink);
 
             Assert.IsTrue(res);
             Assert.IsNotNull(inlineQueryLink);

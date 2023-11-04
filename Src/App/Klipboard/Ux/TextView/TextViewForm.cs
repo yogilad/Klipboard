@@ -2,7 +2,7 @@ namespace Klipboard
 {
     public partial class TextViewForm : Form
     {
-        private static string TruncationMessage = $"...{Environment.NewLine}{Environment.NewLine}( Remaining Content Truncated )";
+        private static string TruncationMessage = $"..{Environment.NewLine}{Environment.NewLine}( Remaining Content Truncated )";
 
         public TextViewForm(string title, string status, string content, bool wordWrap = false)
         {

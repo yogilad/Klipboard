@@ -7,9 +7,12 @@ namespace Klipboard.Workers
     {
         private static readonly string ToolTipText = $"Invoke a datatable query on one small file or {AppConstants.MaxAllowedDataLengthKb}KB of clipboard data structured as a table";
         private static string NotifcationTitle => "Inline Query";
+        private const string FirstRowIsHeader = "First Row Is Header";
+        private const string NoHeaderRow = "No Header Row";
+        private const string AutoDetection = "Auto Detect Header Row";
 
         public StructuredDataInlineQueryWorker(ISettings settings, INotificationHelper notificationHelper)
-        : base  (ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper)
+        : base  (ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper, new List<string> { FirstRowIsHeader, NoHeaderRow, AutoDetection })
         {
         }
 
@@ -19,19 +22,19 @@ namespace Klipboard.Workers
 
         public override bool IsMenuVisible() => true;
 
-        public override async Task HandleCsvAsync(string csvData, string? chosenOptions)
+        public override async Task HandleCsvAsync(string csvData, string? chosenOption)
         {
-            await Task.Run(() => HandleCsvData(csvData, '\t'));
+            await Task.Run(() => HandleCsvData(csvData, '\t', chosenOption));
         }
 
-        public override async Task HandleTextAsync(string textData, string? chosenOptions)
+        public override async Task HandleTextAsync(string textData, string? chosenOption)
         {
             char? separator;
 
             TabularDataHelper.TryDetectTabularTextFormat(textData, out separator);
 
             // a failed detection could simply mean a single column
-            await Task.Run(() => HandleCsvData(textData, separator ?? ','));
+            await Task.Run(() => HandleCsvData(textData, separator ?? ',', chosenOption));
         }
 
         public override async Task HandleFilesAsync(List<string> files, string? chosenOption)
@@ -92,11 +95,26 @@ namespace Klipboard.Workers
             }
 
             // a failed detection could simply mean a single column
-            await Task.Run(() => HandleCsvData(textData, separator ?? ','));
+            await Task.Run(() => HandleCsvData(textData, separator ?? ',', chosenOption));
         }
 
-        private void HandleCsvData(string csvData, char separator)
+        private void HandleCsvData(string csvData, char separator, string? chosenOption)
         {
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
+            bool? isForstRowHeader = null;
+
+            switch(chosenOption)
+            {
+                case FirstRowIsHeader:
+                    isForstRowHeader = true;
+                    break;
+
+                case NoHeaderRow:
+                    isForstRowHeader = false;
+                    break;
+            }
+            
+
             if (AppConstants.EnforceInlineQuerySizeLimits && csvData.Length > AppConstants.MaxAllowedDataLength)
             {
                 m_notificationHelper.ShowBasicNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
@@ -106,6 +124,8 @@ namespace Klipboard.Workers
             var success = TabularDataHelper.TryConvertTableToInlineQuery(
                 csvData,
                 separator.ToString(),
+                detectionMode,
+                isForstRowHeader,
                 "| take 100",
                 out var query);
 

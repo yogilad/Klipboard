@@ -17,6 +17,7 @@ namespace Klipboard.Utils
         List<Cluster> KustoConnectionStrings,
         int DefaultClusterIndex = 0,
         QueryApp DefaultQueryApp = QueryApp.Web,
+        KqlTypeDetectionMode KqlTypeDetectionMode = KqlTypeDetectionMode.StringsAndNumbers,
         string? PrependFreeTextQueriesWithKql = null
     )
     {
