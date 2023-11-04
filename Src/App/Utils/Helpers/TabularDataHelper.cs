@@ -340,14 +340,14 @@ namespace Klipboard.Utils
             return separator != null;
         }
 
-        public static bool TryAnalyzeTabularData(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
+        public static bool TryAnalyzeTabularData(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, bool? isFirstRowHeader, out TableColumns scheme, out bool firstRowIsHeader)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
 
-            return TryAnalyzeTabularData(stream, delimiter, detectionMode, out scheme, out firstRowIsHeader);
+            return TryAnalyzeTabularData(stream, delimiter, detectionMode, isFirstRowHeader, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryAnalyzeTabularData(Stream inputStream, string delimiter, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
+        public static bool TryAnalyzeTabularData(Stream inputStream, string delimiter, KqlTypeDetectionMode detectionMode, bool? isFirstRowHeader, out TableColumns scheme, out bool firstRowIsHeader)
         {
             var parser = new TextFieldParser(inputStream)
             {
@@ -355,16 +355,16 @@ namespace Klipboard.Utils
                 HasFieldsEnclosedInQuotes = true, 
             };
 
-            return TryAnalyzeTabularData(parser, detectionMode, out scheme, out firstRowIsHeader);
+            return TryAnalyzeTabularData(parser, detectionMode, isFirstRowHeader, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, string? optionalKqlSuffix, out string inlineQuery)
+        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, bool? isFirstRowHeader, string? optionalKqlSuffix, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
             using var stream1 = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
             
-            if (!TryAnalyzeTabularData(stream1, delimiter, detectionMode, out var tableScheme, out var firstRowIsHeader))
+            if (!TryAnalyzeTabularData(stream1, delimiter, detectionMode, isFirstRowHeader, out var tableScheme, out var firstRowIsHeader))
             {
                 return false;
             }
@@ -475,11 +475,12 @@ namespace Klipboard.Utils
         #endregion
 
         #region Private APIs
-        private static bool TryAnalyzeTabularData(TextFieldParser parser, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
+        private static bool TryAnalyzeTabularData(TextFieldParser parser, KqlTypeDetectionMode detectionMode, bool? isFirstRowHeader, out TableColumns scheme, out bool firstRowIsHeader)
         {
             scheme = new TableColumns();
-            firstRowIsHeader = true;
+            firstRowIsHeader = isFirstRowHeader ?? true;
 
+            // Analyze First Row
             var firstRowfields = parser.ReadFields();
 
             if (firstRowfields == null || firstRowfields.Length == 0) 
@@ -495,15 +496,20 @@ namespace Klipboard.Utils
                 firstRowCols[i].AnalyzeField(firstRowfields[i]);
             }
 
-            foreach (var col in firstRowCols) 
+            // If first row detection is required, determine if this is a header 
+            if (isFirstRowHeader == null)
             {
-                if (col.HasFindings)
+                foreach (var col in firstRowCols)
                 {
-                    firstRowIsHeader = false;
-                    break;
+                    if (col.HasFindings)
+                    {
+                        firstRowIsHeader = false;
+                        break;
+                    }
                 }
             }
 
+            // Analazye remaining lines
             var rowNum = 0;
 
             var cols = new List<ColumnFindings>(firstRowfields.Length);
@@ -534,6 +540,7 @@ namespace Klipboard.Utils
                 rowNum++;
             }
 
+            // If only header row, assume this is the data
             var colsToProcess = cols;
             if (rowNum == 0)
             {
@@ -541,6 +548,7 @@ namespace Klipboard.Utils
                 colsToProcess = firstRowCols;
             }
 
+            // Combine detection results
             var colNo = 0;
             foreach(var col in colsToProcess)
             {
