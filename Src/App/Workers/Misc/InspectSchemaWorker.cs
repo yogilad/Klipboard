@@ -108,33 +108,48 @@ namespace Klipboard.Workers
             foreach (var filePath in fileList) 
             {
                 var fileInfo = new FileInfo(filePath);
-                var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
-                var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
-                using var fileStream = File.OpenRead(filePath);
-                var result = await HandleSingleTextStreamAsync(databaseHelper, fileStream, formatResult, upstreamFileName, firstRowIsHeader, filePath);
-                var escapedSchema = string.Empty;
-                var escapedError = string.Empty;
 
-                if (result.Schema != null)
+                if (fileInfo.Length == 0)
                 {
-                    escapedSchema = Regex.Replace(result.Schema.ToSchemaString(detectionMode), @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                    curFileNo++;
+                    report.Append(curFileNo);
+                    report.Append("\t");
+                    report.Append(filePath);
+                    report.Append("\t");
+                    report.Append("\t");
+                    report.Append("\t");
+                    report.AppendLine("File is empty");
                 }
-
-                if (result.Error != null)
+                else
                 {
-                    escapedError = Regex.Replace(result.Error, @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
-                }
+                    var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
+                    var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
+                    using var fileStream = File.OpenRead(filePath);
+                    var result = await HandleSingleTextStreamAsync(databaseHelper, fileStream, formatResult, upstreamFileName, firstRowIsHeader, filePath);
+                    var escapedSchema = string.Empty;
+                    var escapedError = string.Empty;
 
-                curFileNo++;
-                report.Append(curFileNo);
-                report.Append("\t");
-                report.Append(filePath);
-                report.Append("\t");
-                report.Append(result.Format);
-                report.Append("\t");
-                report.Append(escapedSchema);
-                report.Append("\t");
-                report.AppendLine(escapedError);
+                    if (result.Schema != null)
+                    {
+                        escapedSchema = Regex.Replace(result.Schema.ToSchemaString(detectionMode), @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                    }
+
+                    if (result.Error != null)
+                    {
+                        escapedError = Regex.Replace(result.Error, @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                    }
+
+                    curFileNo++;
+                    report.Append(curFileNo);
+                    report.Append("\t");
+                    report.Append(filePath);
+                    report.Append("\t");
+                    report.Append(result.Format);
+                    report.Append("\t");
+                    report.Append(escapedSchema);
+                    report.Append("\t");
+                    report.AppendLine(escapedError);
+                }
 
                 progressNotification.UpdateProgress("Inspecting Files", curFileNo / fileList.Count, $"{curFileNo}/{fileList.Count}");
             }

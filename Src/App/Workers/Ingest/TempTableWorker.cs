@@ -88,6 +88,12 @@ namespace Klipboard.Workers
             foreach (var path in FileHelper.ExpandDropFileList(filesAndFolders)) 
             {
                 var fileInfo = new FileInfo(path);
+
+                if (fileInfo.Length == 0)
+                {
+                    continue;
+                }
+
                 var formatResult = FileHelper.GetFormatFromFileName(fileInfo.Name);
                 var upstreamFileName = FileHelper.CreateUploadFileName(fileInfo.Name);
 
