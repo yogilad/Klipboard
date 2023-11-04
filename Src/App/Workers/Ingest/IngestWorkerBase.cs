@@ -37,8 +37,8 @@ namespace Klipboard.Workers
             public int DegreeOfParallelism;
         }
 
-        public IngestWorkerBase(ISettings settings) 
-            : base(ClipboardContent.Files, settings)
+        public IngestWorkerBase(ISettings settings, INotificationHelper notificationHelper) 
+            : base(ClipboardContent.Files, settings, notificationHelper)
         {
         }
 
@@ -96,7 +96,7 @@ namespace Klipboard.Workers
                 {
                     DatabaseName = userSelection.Database,
                     TableName = userSelection.Table,
-                    Format = FileHelper.GetFormatFromExtension(format),
+                    Format = FileHelper.GetFormatFromExtension(format).Format,
                     IgnoreFirstRecord = userSelection.FirstRowIsHeader,
                 };
 

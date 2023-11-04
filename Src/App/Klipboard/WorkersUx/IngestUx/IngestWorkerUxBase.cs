@@ -11,7 +11,7 @@ namespace Klipboard
         {
         }
 
-        public override async Task HandleFilesAsync(List<string> filesAndFolders, SendNotification sendNotification, string? chosenOption)
+        public override async Task HandleFilesAsync(List<string> filesAndFolders, string? chosenOption)
         {
             using var ux = new IngestForm(GetMenuText(ClipboardContent.Files), devMode: true);
 
