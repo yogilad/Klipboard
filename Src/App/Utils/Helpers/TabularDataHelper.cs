@@ -5,16 +5,28 @@ using Microsoft.VisualBasic.FileIO;
 using Kusto.Cloud.Platform.Utils;
 using Kusto.Data.Common;
 using Kusto.Ingest;
+using Azure.Storage.Blobs.Models;
 
 namespace Klipboard.Utils
 {
-    #region Table Scheme Config
+    #region KqlTypeDetectionMode
+    public enum KqlTypeDetectionMode
+    {
+        OnlyStrings,
+        StringsAndNumbers,
+        StringsNumbersAndTime,
+        StringsNumbersTimeAndComplexTypes,
+        All
+    }
+    #endregion
+
+    #region Table Columns
     public class TableColumns
     {
         private static char[] s_allowedSigns = { ' ', '-', '_', '.'};
         public List<(string Name, KqlTypeDefinition Type)> Columns { get; private set; } = new List<(string, KqlTypeDefinition)>();
 
-        public static string EscapeColumnName(string columnName, int columnIndex = 0)
+        private static string EscapeColumnName(string columnName, int columnIndex = 0)
         {
             columnName = columnName.Trim();
 
@@ -33,7 +45,7 @@ namespace Klipboard.Utils
             return $"['{columnName}']";
         }
 
-        public static string NormalizeColumnName(string columnName, int columnIndex = 0)
+        private static string NormalizeColumnName(string columnName, int columnIndex = 0)
         {
             columnName = columnName.Trim();
 
@@ -72,7 +84,7 @@ namespace Klipboard.Utils
             return nameBuilder.ToString();
         }
 
-        public static string StrippedColumnName(string columnName)
+        private static string StrippedColumnName(string columnName)
         {
             columnName = columnName.Trim();
 
@@ -85,16 +97,47 @@ namespace Klipboard.Utils
             return columnName;
         }
 
-        public override string ToString()
+        private static string NormalizeTypeName(KqlTypeDefinition typeDefinition, KqlTypeDetectionMode detectionMode)
         {
-            return ToSchemaString(strictEntityNaming: false);
+            switch (typeDefinition.Type)
+            {
+                case KqlDataType.BoolType:
+                case KqlDataType.IntType:
+                case KqlDataType.LongType:
+                case KqlDataType.DecimalType:
+                case KqlDataType.RealType:
+                    if (detectionMode >= KqlTypeDetectionMode.StringsAndNumbers)
+                        return typeDefinition.Name;
+
+                    break;
+
+                case KqlDataType.TimeSpanType:
+                case KqlDataType.DateTimeType:
+                    if (detectionMode >= KqlTypeDetectionMode.StringsNumbersAndTime)
+                        return typeDefinition.Name;
+
+                    break;
+
+                case KqlDataType.DynamicType:
+                case KqlDataType.GuidType:
+                    if (detectionMode >= KqlTypeDetectionMode.StringsNumbersTimeAndComplexTypes)
+                        return typeDefinition.Name;
+
+                    break;
+            }
+
+            return KqlTypeHelper.GetTypeDedfinition(KqlDataType.StringType).Name;
         }
 
-        public string ToSchemaString(bool strictEntityNaming = false)
+        public override string ToString()
+        {
+            return ToSchemaString(KqlTypeDetectionMode.All, strictEntityNaming: false);
+        }
+
+        public string ToSchemaString(KqlTypeDetectionMode detectionMode, bool strictEntityNaming = false)
         {
             var schemaBuilder = new StringBuilder();
             var notFirstCol = false;
-            //var composedScheme = $"({string.Join(",", Columns.Select(c => $"['{c.Name}']:{c.Type.Name}"))})";
 
             schemaBuilder.Append("(");
             for (int i = 0; i < Columns.Count; i++)
@@ -119,7 +162,7 @@ namespace Klipboard.Utils
                 schemaBuilder.Append(columnName);
 
                 schemaBuilder.Append(":");
-                schemaBuilder.Append(columnType.Name);
+                schemaBuilder.Append(NormalizeTypeName(columnType, detectionMode));
                 notFirstCol = true;
             }
 
@@ -172,20 +215,36 @@ namespace Klipboard.Utils
         private static readonly Regex m_timespanRegex2 = new Regex("^\\s*(\\d+\\.)?\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?\\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly KqlTypeDefinition s_stringDefinition = KqlTypeHelper.GetTypeDedfinition(KqlDataType.StringType);
 
-        private List<ColumnFinding> m_matchers = new List<ColumnFinding>()
+        private readonly List<ColumnFinding> m_matchers;
+
+        internal ColumnFindings(KqlTypeDetectionMode detectionMode)
+        {
+            m_matchers = new List<ColumnFinding>();
+
+            // Order is important - if a value is equally matched by multiple entries the first one wins
+            // We do not check strings since everything is essentialy a string 
+
+            if (detectionMode >= KqlTypeDetectionMode.StringsAndNumbers)
             {
-                // Order is important - if a value is equally matched by multiple entries the first one wins
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.BoolType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.LongType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.RealType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DateTimeType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DynamicType)),
-                new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.GuidType)),
                 // We do not check int due to duplication with long
                 // We do not check decimal due to duplication with real (even though it's range is higher)
-                // We do not check strings since everything is essentialy a string 
-            };
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.BoolType)));
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.LongType)));
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.RealType)));
+            }
+
+            if (detectionMode >= KqlTypeDetectionMode.StringsNumbersAndTime)
+            {
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.TimeSpanType)));
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DateTimeType)));
+            }
+
+            if (detectionMode >= KqlTypeDetectionMode.StringsNumbersTimeAndComplexTypes)
+            { 
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.DynamicType)));
+                m_matchers.Add(new ColumnFinding(KqlTypeHelper.GetTypeDedfinition(KqlDataType.GuidType)));
+            }
+    }
 
         public bool HasFindings => m_matchers.Any(x => x.MismatchCount == 0 && x.MatchCount > 0);
         
@@ -281,31 +340,31 @@ namespace Klipboard.Utils
             return separator != null;
         }
 
-        public static bool TryAnalyzeTabularData(string tableData, string delimiter , out TableColumns scheme, out bool firstRowIsHeader)
+        public static bool TryAnalyzeTabularData(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
         {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
 
-            return TryAnalyzeTabularData(stream, delimiter, out scheme, out firstRowIsHeader);
+            return TryAnalyzeTabularData(stream, delimiter, detectionMode, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryAnalyzeTabularData(Stream inputStream, string delimiter, out TableColumns scheme, out bool firstRowIsHeader)
+        public static bool TryAnalyzeTabularData(Stream inputStream, string delimiter, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
         {
             var parser = new TextFieldParser(inputStream)
             {
                 Delimiters = new string[] { delimiter },
-                HasFieldsEnclosedInQuotes = true,
+                HasFieldsEnclosedInQuotes = true, 
             };
 
-            return TryAnalyzeTabularData(parser, out scheme, out firstRowIsHeader);
+            return TryAnalyzeTabularData(parser, detectionMode, out scheme, out firstRowIsHeader);
         }
 
-        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, string? optionalKqlSuffix, out string inlineQuery)
+        public static bool TryConvertTableToInlineQuery(string tableData, string delimiter, KqlTypeDetectionMode detectionMode, string? optionalKqlSuffix, out string inlineQuery)
         {
             inlineQuery = string.Empty;
 
             using var stream1 = new MemoryStream(Encoding.UTF8.GetBytes(tableData));
             
-            if (!TryAnalyzeTabularData(stream1, delimiter, out var tableScheme, out var firstRowIsHeader))
+            if (!TryAnalyzeTabularData(stream1, delimiter, detectionMode, out var tableScheme, out var firstRowIsHeader))
             {
                 return false;
             }
@@ -320,7 +379,7 @@ namespace Klipboard.Utils
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
             queryBuilder.Append("let Klipboard = datatable");
-            queryBuilder.AppendLine(tableScheme.ToSchemaString());
+            queryBuilder.AppendLine(tableScheme.ToSchemaString(detectionMode));
             queryBuilder.AppendLine("[");
 
             if (firstRowIsHeader)
@@ -416,7 +475,7 @@ namespace Klipboard.Utils
         #endregion
 
         #region Private APIs
-        private static bool TryAnalyzeTabularData(TextFieldParser parser, out TableColumns scheme, out bool firstRowIsHeader)
+        private static bool TryAnalyzeTabularData(TextFieldParser parser, KqlTypeDetectionMode detectionMode, out TableColumns scheme, out bool firstRowIsHeader)
         {
             scheme = new TableColumns();
             firstRowIsHeader = true;
@@ -432,7 +491,7 @@ namespace Klipboard.Utils
 
             for (int i = 0; i < firstRowfields.Length; i++)
             {
-                firstRowCols.Add(new ColumnFindings());
+                firstRowCols.Add(new ColumnFindings(detectionMode));
                 firstRowCols[i].AnalyzeField(firstRowfields[i]);
             }
 
@@ -466,7 +525,7 @@ namespace Klipboard.Utils
                 {
                     if (rowNum == 0)
                     {
-                        cols.Add(new ColumnFindings());
+                        cols.Add(new ColumnFindings(detectionMode));
                     }
 
                     cols[i].AnalyzeField(fields[i]);

@@ -31,6 +31,7 @@ namespace Klipboard.Workers
 
             var upstreamFileName = FileHelper.CreateUploadFileName("Table", "tsv");
             var target = GetQuickActionTarget();
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var csvStream = new MemoryStream(Encoding.UTF8.GetBytes(csvData));
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
@@ -40,7 +41,7 @@ namespace Klipboard.Workers
             {
                 progressNotification.UpdateProgress("Done", 1, "1/1");
                 progressNotification.CloseNotification(withinSeconds: 5);
-                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Clipboard Table Schema Result", $"Schema: {result.Schema.ToSchemaString()}\r\nFormat: {result.Format}");
+                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Clipboard Table Schema Result", $"Schema: {result.Schema.ToSchemaString(detectionMode)}\r\nFormat: {result.Format}");
             }
             else
             {
@@ -58,6 +59,7 @@ namespace Klipboard.Workers
 
             var upstreamFileName = FileHelper.CreateUploadFileName("Text", "txt");
             var target = GetQuickActionTarget();
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             using var textStream = new MemoryStream(Encoding.UTF8.GetBytes(textData));
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
@@ -67,7 +69,7 @@ namespace Klipboard.Workers
             {
                 progressNotification.UpdateProgress("Done", 1, "1/1");
                 progressNotification.CloseNotification(withinSeconds: 5);
-                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Clipboard Text", $"Schema: {result.Schema.ToSchemaString()}\r\nFormat: {result.Format}");
+                m_notificationHelper.ShowExtendedNotification(NotificationTitle, "Clipboard Text", $"Schema: {result.Schema.ToSchemaString(detectionMode)}\r\nFormat: {result.Format}");
             }
             else
             {
@@ -83,6 +85,7 @@ namespace Klipboard.Workers
             var fileList = new List<string>();
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
             var target = GetQuickActionTarget();
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
             var curFileNo = 0.0;
             using var databaseHelper = new KustoDatabaseHelper(target.ConnectionString, target.DatabaseName);
             var report = new StringBuilder();
@@ -114,7 +117,7 @@ namespace Klipboard.Workers
 
                 if (result.Schema != null)
                 {
-                    escapedSchema = Regex.Replace(result.Schema.ToString(), @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
+                    escapedSchema = Regex.Replace(result.Schema.ToSchemaString(detectionMode), @"\p{Cc}", a => string.Format("[{0:X2}]", (byte)a.Value[0]));
                 }
 
                 if (result.Error != null)

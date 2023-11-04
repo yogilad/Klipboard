@@ -160,6 +160,7 @@ namespace Klipboard.Workers
             progressNotification.UpdateProgress("Uploading initial data", 1 / steps, "");
             var uploadRes = await databaseHelper.TryUploadFileToEngineStagingAreaAsync(dataStream, upstreamFileName, formatDefinition, filePath);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
 
             if (!uploadRes.Success)
             {
@@ -179,7 +180,7 @@ namespace Klipboard.Workers
                 var autoDetectRes = await databaseHelper.TryAutoDetectTextBlobScheme(uploadRes.BlobUri, firstRowIsHeader);
                 if (autoDetectRes.Success)
                 {
-                    schemaStr = autoDetectRes.Schema.ToSchemaString(strictEntityNaming: true);
+                    schemaStr = autoDetectRes.Schema.ToSchemaString(detectionMode, strictEntityNaming: true);
                     formatDefinition = FileHelper.GetFormatFromExtension(autoDetectRes.Format);
                     
                     switch(formatDefinition.Format) 
@@ -203,7 +204,7 @@ namespace Klipboard.Workers
                 var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, formatDefinition.Extension, firstRowIsHeader);
                 if (schemaRes.Success)
                 {
-                    schemaStr = schemaRes.TableScheme.ToSchemaString(strictEntityNaming: true);
+                    schemaStr = schemaRes.TableScheme.ToSchemaString(detectionMode, strictEntityNaming: true);
 
                     switch (formatDefinition.Format)
                     {

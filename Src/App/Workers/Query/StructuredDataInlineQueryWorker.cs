@@ -97,6 +97,8 @@ namespace Klipboard.Workers
 
         private void HandleCsvData(string csvData, char separator)
         {
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
+
             if (AppConstants.EnforceInlineQuerySizeLimits && csvData.Length > AppConstants.MaxAllowedDataLength)
             {
                 m_notificationHelper.ShowBasicNotification(NotifcationTitle, $"Source data size {(int) (csvData.Length / 1024)}KB is greater then inline query limited of {AppConstants.MaxAllowedDataLengthKb}KB.");
@@ -106,6 +108,7 @@ namespace Klipboard.Workers
             var success = TabularDataHelper.TryConvertTableToInlineQuery(
                 csvData,
                 separator.ToString(),
+                detectionMode,
                 "| take 100",
                 out var query);
 

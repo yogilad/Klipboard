@@ -79,6 +79,7 @@ namespace Klipboard.Workers
         {
             using var databaseHelper = new KustoDatabaseHelper(m_settings.GetConfig().ChosenCluster);
             var firstRowIsHeader = FirstRowIsHeader.Equals(chosenOption);
+            var detectionMode = m_settings.GetConfig().KqlTypeDetectionMode;
 
             // Step #1
             progressNotification.UpdateProgress("Uploading data", 1 / 4.0, "step 2/4");
@@ -105,7 +106,7 @@ namespace Klipboard.Workers
 
                     if (autoDetectRes.Success)
                     {
-                        schemaStr = autoDetectRes.Schema.ToSchemaString();
+                        schemaStr = autoDetectRes.Schema.ToSchemaString(detectionMode);
                         format = autoDetectRes.Format;
                         break;
                     }
@@ -128,7 +129,7 @@ namespace Klipboard.Workers
                     var schemaRes = await databaseHelper.TryGetBlobSchemeAsync(uploadRes.BlobUri, format: format, firstRowIsHeader);
                     if (schemaRes.Success)
                     {
-                        schemaStr = schemaRes.TableScheme.ToSchemaString();
+                        schemaStr = schemaRes.TableScheme.ToSchemaString(detectionMode);
                         break;
                     }
 

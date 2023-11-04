@@ -56,6 +56,7 @@ namespace Klipboard
 
         private void DataToUx()
         {
+            // Clusters
             lstClusters.Items.Clear();
             foreach (var cluster in m_config.KustoConnectionStrings)
             {
@@ -70,13 +71,23 @@ namespace Klipboard
                 lstClusters.Items[m_config.DefaultClusterIndex].Selected = true;
             }
 
+            // Auto Start
             var success = AutoStartHelper.TryGetAutoStartEnabled(out var autoStratEnabled);
-
             chkAutoStart.Checked = success && autoStratEnabled;
+
+            // Query Target
             cmbApp.Items.Clear();
             string[] strings = Enum.GetNames(typeof(QueryApp));
             cmbApp.Items.AddRange(strings);
             cmbApp.SelectedIndex = (int)m_config.DefaultQueryApp;
+
+            // Detection Mode 
+            typeDetectionCombo.Items.Clear();
+            strings = Enum.GetNames(typeof(KqlTypeDetectionMode));
+            typeDetectionCombo.Items.AddRange(strings);
+            typeDetectionCombo.SelectedIndex = (int)m_config.KqlTypeDetectionMode;
+
+            // Free Text KQL
             txtQuery.Text = m_config.PrependFreeTextQueriesWithKql;
         }
 
@@ -88,6 +99,7 @@ namespace Klipboard
             var defaultClusterIndex = lstClusters.SelectedItems.Count > 0 ? lstClusters.SelectedItems[0].Index : 0;
             var startAutomatically = chkAutoStart.Checked;
             var defaultQueryApp = (QueryApp)cmbApp.SelectedIndex;
+            var detectionMode = (KqlTypeDetectionMode)typeDetectionCombo.SelectedIndex;
             var prependFreeTextQueriesWithKql = txtQuery.Text;
 
             if (AutoStartHelper.TryGetAutoStartEnabled(out var autoStratEnabled) && autoStratEnabled != startAutomatically)
@@ -98,7 +110,7 @@ namespace Klipboard
                 }
             }
 
-            return new AppConfig(clusters, defaultClusterIndex, defaultQueryApp, prependFreeTextQueriesWithKql);
+            return new AppConfig(clusters, defaultClusterIndex, defaultQueryApp, detectionMode, prependFreeTextQueriesWithKql);
         }
 
         #region Events

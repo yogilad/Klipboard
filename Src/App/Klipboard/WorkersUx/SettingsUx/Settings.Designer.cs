@@ -45,6 +45,8 @@
             btnSave = new Button();
             CancelButton = new Button();
             DeleteButton = new Button();
+            label3 = new Label();
+            typeDetectionCombo = new ComboBox();
             SuspendLayout();
             // 
             // lstClusters
@@ -77,7 +79,7 @@
             // chkAutoStart
             // 
             chkAutoStart.AutoSize = true;
-            chkAutoStart.Location = new Point(108, 336);
+            chkAutoStart.Location = new Point(107, 365);
             chkAutoStart.Margin = new Padding(2);
             chkAutoStart.Name = "chkAutoStart";
             chkAutoStart.Size = new Size(130, 19);
@@ -98,7 +100,7 @@
             txtDatabase.Location = new Point(108, 282);
             txtDatabase.Margin = new Padding(2);
             txtDatabase.Name = "txtDatabase";
-            txtDatabase.Size = new Size(189, 23);
+            txtDatabase.Size = new Size(238, 23);
             txtDatabase.TabIndex = 8;
             // 
             // label1
@@ -149,7 +151,7 @@
             cmbApp.Location = new Point(108, 309);
             cmbApp.Margin = new Padding(2);
             cmbApp.Name = "cmbApp";
-            cmbApp.Size = new Size(129, 23);
+            cmbApp.Size = new Size(238, 23);
             cmbApp.TabIndex = 13;
             // 
             // lblOpenWith
@@ -164,17 +166,17 @@
             // 
             // txtQuery
             // 
-            txtQuery.Location = new Point(15, 391);
+            txtQuery.Location = new Point(15, 416);
             txtQuery.Margin = new Padding(2);
             txtQuery.Multiline = true;
             txtQuery.Name = "txtQuery";
-            txtQuery.Size = new Size(598, 154);
+            txtQuery.Size = new Size(598, 129);
             txtQuery.TabIndex = 15;
             // 
             // lblPrepend
             // 
             lblPrepend.AutoSize = true;
-            lblPrepend.Location = new Point(15, 374);
+            lblPrepend.Location = new Point(15, 399);
             lblPrepend.Margin = new Padding(2, 0, 2, 0);
             lblPrepend.Name = "lblPrepend";
             lblPrepend.Size = new Size(183, 15);
@@ -212,11 +214,30 @@
             DeleteButton.UseVisualStyleBackColor = true;
             DeleteButton.Click += DeleteButton_Click;
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(16, 341);
+            label3.Name = "label3";
+            label3.Size = new Size(88, 15);
+            label3.TabIndex = 20;
+            label3.Text = "Type Detection:";
+            // 
+            // typeDetectionCombo
+            // 
+            typeDetectionCombo.FormattingEnabled = true;
+            typeDetectionCombo.Location = new Point(108, 338);
+            typeDetectionCombo.Name = "typeDetectionCombo";
+            typeDetectionCombo.Size = new Size(238, 23);
+            typeDetectionCombo.TabIndex = 21;
+            // 
             // Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 582);
+            Controls.Add(typeDetectionCombo);
+            Controls.Add(label3);
             Controls.Add(DeleteButton);
             Controls.Add(CancelButton);
             Controls.Add(btnSave);
@@ -258,5 +279,7 @@
         private Button btnSave;
         private Button CancelButton;
         private Button DeleteButton;
+        private Label label3;
+        private ComboBox typeDetectionCombo;
     }
 }
