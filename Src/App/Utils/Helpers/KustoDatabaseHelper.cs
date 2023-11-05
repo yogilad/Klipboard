@@ -63,6 +63,8 @@ namespace Klipboard.Utils
         #region Public APIs
         public async Task<(bool Success, string? BlobUri, string? Error)> TryUploadFileToEngineStagingAreaAsync(Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefintion, string? filePath = null)
         {
+            var cmd = ".create tempstorage";
+
             if (m_localhost)
             {
                 if (filePath == null)
@@ -75,7 +77,9 @@ namespace Klipboard.Utils
 
             try
             {
-                using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, ".create tempstorage");
+                Logger.Log.Information("KustoDatabaseHelper.TryUploadFileToEngineStagingAreaAsync: Executing control command: {0}", cmd);
+
+                using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, cmd);
                 res.Read();
 
                 var tempStorage = res.GetString(0);
@@ -85,6 +89,7 @@ namespace Klipboard.Utils
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryUploadFileToEngineStagingAreaAsync: Failed to get engine staging account");
                 return (false, null, "Failed to get engine staging account: " + ex.Message);
             }
         }
@@ -97,6 +102,8 @@ namespace Klipboard.Utils
 
             try
             {
+                Logger.Log.Information("KustoDatabaseHelper.TryGetBlobSchemeAsync: Executing control command: {0}", Logger.ObfuscateHiddentStrings(cmd));
+
                 using var res = await m_engineQueryClient.Value.ExecuteQueryAsync(m_databaseName, cmd, new ClientRequestProperties());
                 var tableScheme = new TableColumns();
                 var nameCol = res.GetOrdinal("ColumnName");
@@ -120,10 +127,12 @@ namespace Klipboard.Utils
                     return (true, tableScheme, format, null);
                 }
 
+                Logger.Log.Error("KustoDatabaseHelper.TryGetBlobSchemeAsync: Scheme detection returned no results");
                 return (false, null, format, "Scheme detection returned no results");
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryGetBlobSchemeAsync: Failed to get engine staging account");
                 return (false, null, format, "Failed to get engine staging account: " + ex.Message);
             }
         }
@@ -163,10 +172,14 @@ namespace Klipboard.Utils
             // Create the table
             try
             {
+                Logger.Log.Information("KustoDatabaseHelper.TryCreateTableAync: Executing control command: {0}", createTableCommand);
+
                 using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, createTableCommand);
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryCreateTableAync: Failed to create table {0}", tableName);
+
                 return (false, $"Failed to create table '{tableName}': {ex.Message}");
             }
 
@@ -175,11 +188,15 @@ namespace Klipboard.Utils
             {
                 if (!string.IsNullOrWhiteSpace(alterIngestionBatchingCommand))
                 {
+                    Logger.Log.Information("KustoDatabaseHelper.TryCreateTableAync: Executing control command: {0}",alterIngestionBatchingCommand);
+
                     using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, alterIngestionBatchingCommand);
                 }
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryCreateTableAync: Failed to create table {0}", tableName);
+
                 return (false, $"Failed to create table '{tableName}': {ex.Message}");
             }
 
@@ -188,11 +205,15 @@ namespace Klipboard.Utils
             {
                 if (!string.IsNullOrWhiteSpace(setTableLifetimeCommand))
                 {
+                    Logger.Log.Information("KustoDatabaseHelper.TryCreateTableAync: Executing control command: {0}",setTableLifetimeCommand);
+
                     using var res = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, setTableLifetimeCommand);
                 }
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryCreateTableAync: Failed to create table {0}", tableName);
+
                 return (false, $"Failed to create table '{tableName}': {ex.Message}");
             }
 
@@ -208,6 +229,8 @@ namespace Klipboard.Utils
                 ///////////////////////////////////////
                 if (!m_localhost)
                 {
+                    Logger.Log.Information("KustoDatabaseHelper.TryDirectIngestStorageToTable: Direct ingest from storage: {0}", Logger.ObfuscateHiddentStrings(blobUriOrFile));
+
                     var res = await m_directIngestClient.Value.IngestFromStorageAsync(blobUriOrFile, ingestionProperties, sourceOptions);
                     var ingestStatus = res.GetIngestionStatusBySourceId(sourceOptions.SourceId);
 
@@ -232,6 +255,8 @@ namespace Klipboard.Utils
                             isAsync: false,
                             extensions: ingestionProperties.GetIngestionProperties());
 
+                    Logger.Log.Information("KustoDatabaseHelper.TryDirectIngestStorageToTable: Executing control command: {0}", command);
+
                     using var resultReader = await m_engineAdminClient.Value.ExecuteControlCommandAsync(m_databaseName, command).ConfigureAwait(false);
 
                     resultReader.Read();
@@ -244,6 +269,8 @@ namespace Klipboard.Utils
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryDirectIngestStorageToTable: Failed to ingest stream to Kusto");
+
                 return (false, $"Failed to ingest stream to Kusto: {ex.Message}");
             }
         }
@@ -265,6 +292,8 @@ namespace Klipboard.Utils
         private static async Task<(bool Success, string? BlobUri, string? Error)> TryUploadStreamAync(string blobContainerUriStr, Stream dataStream, string upstreamFileName, FileFormatDefiniton formatDefiniton)
         {
             var disposeOfStream = false;
+
+            Logger.Log.Information("KustoDatabaseHelper.TryUploadStreamAsync");
 
             if (!formatDefiniton.DoNotCompress)
             {
@@ -289,6 +318,7 @@ namespace Klipboard.Utils
 
                 if (blobResp.IsError)
                 {
+                    Logger.Log.Error("KustoDatabaseHelper.TryUploadStreamAsync: Failed to upload blob: {0}", blobResp.ReasonPhrase);
                     return (false, null, "Failed to upload blob: " + blobResp.ReasonPhrase);
                 }
 
@@ -306,6 +336,8 @@ namespace Klipboard.Utils
 
         private static async Task<(bool Success, MemoryStream? MemoryStream, string? Error)> TryCreateZipStreamAsync(Stream dataStream, string upsteramFileName)
         {
+            Logger.Log.Information("KustoDatabaseHelper.TryUploadStreamAsync");
+
             try
             {
                 var memoryStream = new MemoryStream();
@@ -330,6 +362,8 @@ namespace Klipboard.Utils
             }
             catch (Exception ex)
             {
+                Logger.Log.Error(ex, "KustoDatabaseHelper.TryUploadStreamAsync: Failed to compress memory stream");
+
                 return (false, null, "Failed to compress memory stream: " + ex.Message);
             }
         }
