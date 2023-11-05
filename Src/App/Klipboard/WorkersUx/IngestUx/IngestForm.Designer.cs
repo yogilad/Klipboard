@@ -50,6 +50,8 @@
             IngestButton = new Button();
             ParallelismTrackBar = new TrackBar();
             ParallelismLabel = new Label();
+            FormatComboBox = new ComboBox();
+            label6 = new Label();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)ParallelismTrackBar).BeginInit();
@@ -125,7 +127,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(33, 164);
+            label4.Location = new Point(33, 194);
             label4.Name = "label4";
             label4.Size = new Size(55, 15);
             label4.TabIndex = 8;
@@ -134,7 +136,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(13, 138);
+            label5.Location = new Point(13, 168);
             label5.Name = "label5";
             label5.Size = new Size(79, 15);
             label5.TabIndex = 9;
@@ -149,14 +151,14 @@
             // 
             // TableSchemaTextBox
             // 
-            TableSchemaTextBox.Location = new Point(98, 135);
+            TableSchemaTextBox.Location = new Point(98, 165);
             TableSchemaTextBox.Name = "TableSchemaTextBox";
             TableSchemaTextBox.Size = new Size(609, 23);
             TableSchemaTextBox.TabIndex = 11;
             // 
             // MappingTextBox
             // 
-            MappingTextBox.Location = new Point(98, 245);
+            MappingTextBox.Location = new Point(98, 275);
             MappingTextBox.Name = "MappingTextBox";
             MappingTextBox.Size = new Size(609, 23);
             MappingTextBox.TabIndex = 12;
@@ -208,7 +210,7 @@
             panel2.Controls.Add(NoMappingRadio);
             panel2.Controls.Add(InlineMappingRadio);
             panel2.Controls.Add(ReferenceMappingRadio);
-            panel2.Location = new Point(98, 164);
+            panel2.Location = new Point(98, 194);
             panel2.Name = "panel2";
             panel2.Size = new Size(200, 75);
             panel2.TabIndex = 17;
@@ -225,7 +227,7 @@
             // CancelButton
             // 
             CancelButton.DialogResult = DialogResult.Cancel;
-            CancelButton.Location = new Point(642, 286);
+            CancelButton.Location = new Point(643, 327);
             CancelButton.Name = "CancelButton";
             CancelButton.Size = new Size(75, 23);
             CancelButton.TabIndex = 19;
@@ -235,7 +237,7 @@
             // IngestButton
             // 
             IngestButton.DialogResult = DialogResult.OK;
-            IngestButton.Location = new Point(556, 286);
+            IngestButton.Location = new Point(557, 327);
             IngestButton.Name = "IngestButton";
             IngestButton.Size = new Size(75, 23);
             IngestButton.TabIndex = 20;
@@ -244,7 +246,7 @@
             // 
             // ParallelismTrackBar
             // 
-            ParallelismTrackBar.Location = new Point(98, 274);
+            ParallelismTrackBar.Location = new Point(98, 304);
             ParallelismTrackBar.Minimum = 1;
             ParallelismTrackBar.Name = "ParallelismTrackBar";
             ParallelismTrackBar.Size = new Size(250, 45);
@@ -255,17 +257,36 @@
             // ParallelismLabel
             // 
             ParallelismLabel.AutoSize = true;
-            ParallelismLabel.Location = new Point(24, 274);
+            ParallelismLabel.Location = new Point(24, 304);
             ParallelismLabel.Name = "ParallelismLabel";
             ParallelismLabel.Size = new Size(64, 15);
             ParallelismLabel.TabIndex = 22;
             ParallelismLabel.Text = "Parallelism";
             // 
+            // FormatComboBox
+            // 
+            FormatComboBox.FormattingEnabled = true;
+            FormatComboBox.Location = new Point(98, 136);
+            FormatComboBox.Name = "FormatComboBox";
+            FormatComboBox.Size = new Size(250, 23);
+            FormatComboBox.TabIndex = 23;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(47, 136);
+            label6.Name = "label6";
+            label6.Size = new Size(45, 15);
+            label6.TabIndex = 24;
+            label6.Text = "Format";
+            // 
             // IngestForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(729, 321);
+            ClientSize = new Size(730, 362);
+            Controls.Add(label6);
+            Controls.Add(FormatComboBox);
             Controls.Add(ParallelismLabel);
             Controls.Add(ParallelismTrackBar);
             Controls.Add(IngestButton);
@@ -318,5 +339,7 @@
         private Button IngestButton;
         private TrackBar ParallelismTrackBar;
         private Label ParallelismLabel;
+        private ComboBox FormatComboBox;
+        private Label label6;
     }
 }

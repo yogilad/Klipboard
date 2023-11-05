@@ -378,6 +378,7 @@ namespace Klipboard.Utils
             };
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
+            queryBuilder.AppendLine("//");
             queryBuilder.Append("let Klipboard = datatable");
             queryBuilder.AppendLine(tableScheme.ToSchemaString(detectionMode));
             queryBuilder.AppendLine("[");
@@ -424,6 +425,7 @@ namespace Klipboard.Utils
             var queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
+            queryBuilder.AppendLine("//");
             queryBuilder.AppendLine("let Klipboard = datatable(['Line']:string)");
             queryBuilder.AppendLine("[");
 

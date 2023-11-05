@@ -12,7 +12,7 @@ namespace Klipboard.Workers
         private const string AutoDetection = "Auto Detect Header Row";
 
         public StructuredDataInlineQueryWorker(ISettings settings, INotificationHelper notificationHelper)
-        : base  (ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper, new List<string> { FirstRowIsHeader, NoHeaderRow, AutoDetection })
+        : base  (ClipboardContent.CSV | ClipboardContent.Text | ClipboardContent.Files, settings, notificationHelper, new List<string> { AutoDetection, FirstRowIsHeader, NoHeaderRow })
         {
         }
 

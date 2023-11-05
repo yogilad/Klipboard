@@ -148,6 +148,7 @@ namespace Klipboard.Workers
             var queryBuilder = new StringBuilder();
 
             queryBuilder.AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)");
+            queryBuilder.AppendLine("//");
             queryBuilder.AppendLine("let Klipboard =");
             queryBuilder.Append("externaldata");
             queryBuilder.AppendLine(schemaStr);

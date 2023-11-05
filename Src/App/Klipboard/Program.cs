@@ -56,9 +56,9 @@ namespace Klipboard
             // Actions
             workers.Add(new WorkerUxConfig(new QueueIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions));
             workers.Add(new WorkerUxConfig(new StreamIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions));
-            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
-            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings, notificationHelper), WorkerCategory.Actions));
+            workers.Add(new WorkerUxConfig(new DirectIngestWorkerUx(settings, notificationHelper), WorkerCategory.Actions));
             workers.Add(new WorkerUxConfig(new InspectSchemaWorker(settings, notificationHelper), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
+            workers.Add(new WorkerUxConfig(new InspectDataUxWorker(settings, notificationHelper), WorkerCategory.Actions, Icon: ResourceLoader.DevModeIcon));
 
             // Management
             workers.Add(new WorkerUxConfig(new NewVersionWorker(settings, notificationHelper), WorkerCategory.Management, Icon: ResourceLoader.DownloadIcon));

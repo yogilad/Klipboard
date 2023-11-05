@@ -1,5 +1,6 @@
 ﻿using Klipboard.Utils;
-
+using Kusto.Data;
+using Kusto.Ingest;
 
 namespace Klipboard.Workers
 {
@@ -14,8 +15,17 @@ namespace Klipboard.Workers
 
         public override string GetToolTipText() => "Stream clipboard tabular data or any number of files to a table";
 
-        public override bool IsMenuVisible() => AppConstants.DevMode;
+        public override IKustoIngestClient CreateIngestClient(KustoConnectionStringBuilder ClusterUri)
+        {
+            var policy = new ManagedStreamingIngestPolicy() 
+                { 
+                    ContinueWhenStreamingIngestionUnavailable = true, 
+                    TimeUntilResumingStreamingIngest = TimeSpan.FromMinutes(1)
+                };
 
-        public override bool IsMenuEnabled(ClipboardContent content) => false;
+            var client = KustoIngestFactory.CreateManagedStreamingIngestClient(ClusterUri, ingestPolicy: policy);
+
+            return client;
+        }
     }
 }

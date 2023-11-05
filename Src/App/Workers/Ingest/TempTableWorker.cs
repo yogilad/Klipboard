@@ -139,7 +139,7 @@ namespace Klipboard.Workers
                     IgnoreFirstRecord = firstRowIsHeader,
                 };
 
-                await m_ingestionRunner.QueueWorkItemAsync(new IngestFileWorkItem(path, ingestionProperties, storageOptions));
+                await m_ingestionRunner.QueueWorkItemAsync(new KustoIngestRunner.IngestFileWorkItem(path, ingestionProperties, storageOptions));
             }
 
             await m_ingestionRunner.CloseAndWaitForCompletionAsync();
@@ -280,6 +280,7 @@ namespace Klipboard.Workers
             var target = GetQuickActionTarget();
             var query = new StringBuilder()
                 .AppendLine("// Query Created With Klipboard (https://github.com/yogilad/Klipboard/wiki)")
+                .AppendLine("//")
                 .Append("['")
                 .Append(tempTableName)
                 .AppendLine("']")

@@ -1,8 +1,8 @@
-﻿using Kusto.Cloud.Platform.Utils;
+﻿using System.Text.RegularExpressions;
+using Kusto.Cloud.Platform.Utils;
 using Serilog;
 using Serilog.Context;
 using Serilog.Formatting.Json;
-
 
 namespace Klipboard.Utils
 {
@@ -11,6 +11,8 @@ namespace Klipboard.Utils
         public static Serilog.ILogger Log => s_log;
         private static readonly Serilog.Core.Logger s_log;
         private static readonly SerilogTraceListener.SerilogTraceListener s_traceListener;
+        private static readonly Regex s_hstringMatcher = new Regex("(^| ){1}h['\"](\\\\|\\'|\\\"|[^\"'])*[\"']", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex s_sigMatcher = new Regex("&sig=[a-zA-Z0-9%]*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         static Logger()
         {
@@ -62,6 +64,14 @@ namespace Klipboard.Utils
             {
                 s_log.Dispose();
             }
+        }
+
+        public static string ObfuscateHiddentStrings(string input)
+        {
+            input = s_hstringMatcher.Replace(input, "h'*****'");
+            input = s_sigMatcher.Replace(input, "&sig=*****");
+
+            return input;
         }
     }
 }
