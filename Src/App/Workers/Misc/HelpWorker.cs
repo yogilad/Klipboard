@@ -8,7 +8,7 @@ namespace Klipboard.Workers
     {
         private const string Help           = "Help";
         private const string Share          = "Share Klipboard";
-        private const string FreeCluster    = "Try Kusto For Free";
+        private const string FreeKusto      = "Try Kusto For Free";
         private const string Report         = "Report an Issue";
         private const string Updates        = "Check For Updates";
         private const string SignOut        = "Sign Out of AAD";
@@ -17,7 +17,7 @@ namespace Klipboard.Workers
 
 
         public HelpWorker(ISettings settings, INotificationHelper notificationHelper)
-            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, About, WhatsNew, Share, Report, Updates, SignOut, FreeCluster })
+            : base(ClipboardContent.None, settings, notificationHelper, new List<string> { Help, About, WhatsNew, Share, Report, Updates, SignOut, FreeKusto })
         {
         }
 
@@ -62,8 +62,8 @@ namespace Klipboard.Workers
                     ShareViaEmail();
                     break;
 
-                case FreeCluster:
-                    OpSysHelper.InvokeLink("https://dataexplorer.azure.com/freecluster");
+                case FreeKusto:
+                    OpSysHelper.InvokeLink("https://github.com/yogilad/Klipboard/wiki/Quick-Start-Guide#get-kusto");
                     break;
 
                 case WhatsNew:
