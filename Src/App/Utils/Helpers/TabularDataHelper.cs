@@ -170,15 +170,15 @@ namespace Klipboard.Utils
             return schemaBuilder.ToString();
         }
 
-        public IngestionMapping ToJsonMapping()
+        public IngestionMapping ToJsonMapping(KqlTypeDetectionMode detectionMode)
         {
             var mappingList = new List<ColumnMapping>();
 
             for (int i = 0; i < Columns.Count; i++)
             {
                 var col = Columns[i];
-                var colMapping = new ColumnMapping(StrippedColumnName(NormalizeColumnName(col.Name, i)), 
-                    col.Type.Name, 
+                var colMapping = new ColumnMapping(StrippedColumnName(NormalizeColumnName(col.Name, i)),
+                    NormalizeTypeName(col.Type, detectionMode), 
                     new Dictionary<string, string>() { {"Path", $"$.{StrippedColumnName(col.Name)}"} });
 
                 mappingList.Add(colMapping);
@@ -187,6 +187,29 @@ namespace Klipboard.Utils
             var mapping = new IngestionMapping()
             {
                 IngestionMappingKind = Kusto.Data.Ingestion.IngestionMappingKind.Json,
+                IngestionMappings = mappingList,
+            };
+
+            return mapping;
+        }
+
+        public IngestionMapping ToCsvMapping(KqlTypeDetectionMode detectionMode)
+        {
+            var mappingList = new List<ColumnMapping>();
+
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                var col = Columns[i];
+                var colMapping = new ColumnMapping(StrippedColumnName(NormalizeColumnName(col.Name, i)),
+                    NormalizeTypeName(col.Type, detectionMode),
+                    new Dictionary<string, string>() { { "Ordinal", i.ToString() } });
+
+                mappingList.Add(colMapping);
+            }
+
+            var mapping = new IngestionMapping()
+            {
+                IngestionMappingKind = Kusto.Data.Ingestion.IngestionMappingKind.Csv,
                 IngestionMappings = mappingList,
             };
 

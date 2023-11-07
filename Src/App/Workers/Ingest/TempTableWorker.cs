@@ -194,7 +194,17 @@ namespace Klipboard.Workers
                         case DataSourceFormat.json:
                         case DataSourceFormat.singlejson:
                         case DataSourceFormat.multijson:
-                            mapping = autoDetectRes.Schema.ToJsonMapping();
+                            mapping = autoDetectRes.Schema.ToJsonMapping(detectionMode);
+                            break;
+
+                        case DataSourceFormat.csv:
+                        case DataSourceFormat.psv:
+                        case DataSourceFormat.scsv:
+                        case DataSourceFormat.sohsv:
+                        case DataSourceFormat.tsv:
+                        case DataSourceFormat.tsve:
+                        case DataSourceFormat.w3clogfile:
+                            mapping = autoDetectRes.Schema.ToCsvMapping(detectionMode);
                             break;
                     }
                 }
@@ -217,7 +227,16 @@ namespace Klipboard.Workers
                         case DataSourceFormat.json:
                         case DataSourceFormat.singlejson:
                         case DataSourceFormat.multijson:
-                            mapping = schemaRes.TableScheme.ToJsonMapping();
+                            mapping = schemaRes.TableScheme.ToJsonMapping(detectionMode);
+                            break;
+
+                        case DataSourceFormat.csv:
+                        case DataSourceFormat.psv:
+                        case DataSourceFormat.scsv:
+                        case DataSourceFormat.sohsv:
+                        case DataSourceFormat.tsv:
+                        case DataSourceFormat.tsve:
+                            mapping = schemaRes.TableScheme.ToCsvMapping(detectionMode);
                             break;
                     }
                 }
