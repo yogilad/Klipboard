@@ -25,7 +25,7 @@
 1. Create a new PR named _v[Major].[Minor].\[Build\]_
 1. Edit `ReleaseNotes.md`
 1. In `Src\App\Utils\Common\AppConstants.cs` update the value of `ApplicationVersion` to _[Major].[Minor].\[Build\]_
-1. in `Src\directory.build.targets` update the values of `<Version>`, `<AssemblyVersion>`, and `<FileVersion>` to to _[Major].[Minor].\[Build\]_
+1. in `Src\directory.build.props` update the values of `<Version>`, `<AssemblyVersion>`, and `<FileVersion>` to to _[Major].[Minor].\[Build\]_
 1. In Visual Studio, 
 	1. Select the _Setup_ project 
 	1. Set the `version` in the properties pane to _v[Major].[Minor].\[Build\]_
