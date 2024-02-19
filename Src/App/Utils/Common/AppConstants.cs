@@ -24,7 +24,7 @@
 
         // App Name and Version
         public const string ApplicationName = "Klipboard";
-        public static readonly Version ApplicationVersion = new Version(0, 1, 3);
+        public static readonly Version ApplicationVersion = new Version(0, 1, 4);
 
         // Notifcation Constants
         public const int PersistNotificationTime = 0;

@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version v0.1.4
+### Features
+* New Command - Detect and list the schemas of up to 100 files
+* New Setting - KQL Type detection modes allows reducing false detection of special KQL types like GUIDs, Timespans and so on
+* New Query Target - Invoked queries can be sent back to the clipboard instead of auto launching
+* Structured Query allows choosing between _Has Row Header_, _Has No Row Header_ and _Auto Detect_ 
+* Text View can show up to 1MB (previously 32KB)
+* Improved notification experience
+
 ## Version v0.1.3
 ### Features
 * Add support for working with a local instance of Kusto (Kusto Personal or a debug version of Kusto).
